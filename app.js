@@ -1,635 +1,624 @@
-/* ============================================================
-   Bridges Park – app.js
-   - Generator with constraints + unique throws
-   - Holes 9 and 18 must be to GREEN
-   - Start is tee -> random target but NOT green
-   - No consecutive same goal
-   - Remove pink<->green (both directions)
-   - Par rules (incl Tee->White par 3, Blue<->Pink par 3)
-   - Dropdown scoring: "-" (empty) counts as 0 until changed
-   - Colors: under/even/over per hole + totals
-   - Share link preserves generated course
-   - Clear scores
-   - Haptics (vibrate where supported)
-   - No auto scroll on "Generate New Course"
-   - Auto scroll when selecting a hole row or changing a score
-   ============================================================ */
+(() => {
+  // ---------- CONFIG ----------
+  const GOALS = ["White","Orange","Blue","Pink","Red","Green","Yellow"];
 
-const GOALS = ["white","orange","blue","pink","red","green","yellow"];
-const START = "tee";
-const FIXED_GREEN_HOLES = new Set([9,18]); // 1-based
+  // Directed movement rules (from -> to allowed)
+  const BLOCKED = new Set([
+    "Orange->Pink", "Orange->Blue",
+    "Blue->Orange", "Blue->Red",
+    "Pink->Orange", "Pink->Red",
+    "Red->Blue", "Red->Pink",
+    "Green->Yellow",
+    "Yellow->Green",
+    // Removed as valid options:
+    "Green->Pink","Pink->Green"
+  ]);
 
-// ---------- DOM ----------
-const mainBody = document.getElementById("mainBody");
-const parFrontTop = document.getElementById("parFrontTop");
-const parBackTop  = document.getElementById("parBackTop");
-const parTotalTop = document.getElementById("parTotalTop");
-const parBackCell = document.getElementById("parBackCell");
-const parTotalCell= document.getElementById("parTotalCell");
+  // start cannot be Green
+  const START_BLOCKED_TO = new Set(["Green"]);
 
-const p1HeadSticky = document.getElementById("p1HeadSticky");
-const p2HeadSticky = document.getElementById("p2HeadSticky");
+  // holes 9 and 18 must end at Green
+  const FIXED_TO = new Map([[9,"Green"],[18,"Green"]]);
 
-const progressFill = document.getElementById("progressFill");
-const progressText = document.getElementById("progressText");
+  // each directed throw must be unique (including Tee->X)
+  const REQUIRE_UNIQUE_THROWS = true;
 
-const btnGen = document.getElementById("btnGen");
-const btnClear = document.getElementById("btnClear");
-const btnCopyLink = document.getElementById("btnCopyLink");
+  // at least 2 visits to each goal (counting "to" targets over 18 holes)
+  const MIN_VISITS = 2;
 
-const n1 = document.getElementById("n1");
-const n2 = document.getElementById("n2");
+  // Score input = diff from par
+  const SCORE_OPTIONS = [
+    {label:"-", value:""},  // display dash, counts as 0
+    {label:"-2", value:"-2"},
+    {label:"-1", value:"-1"},
+    {label:"0", value:"0"},
+    {label:"+1", value:"1"},
+    {label:"+2", value:"2"},
+    {label:"+3", value:"3"},
+  ];
 
-const toastEl = document.getElementById("toast");
+  // Pars: default 4 unless special
+  // Par 3 pairs (and vice versa):
+  const PAR3 = new Set([
+    "White->Yellow","Yellow->White",
+    "White->Green","Green->White",
+    "Yellow->Red","Red->Yellow",
+    "Yellow->Pink","Pink->Yellow",
+    "Red->Orange","Orange->Red",
+    "Red->Blue","Blue->Red",
+    "Blue->Pink","Pink->Blue",
+    // Tee special:
+    "Tee->White"
+  ]);
 
-const themeToggle = document.getElementById("themeToggle");
-const themeIcon = document.getElementById("themeIcon");
-const logoLight = document.getElementById("logoLight");
-const logoDark = document.getElementById("logoDark");
+  // Par 5 pairs (and vice versa)
+  const PAR5 = new Set([
+    "White->Blue","Blue->White",
+    "White->Orange","Orange->White",
+  ]);
 
-// ---------- State ----------
-let courseTargets = null;     // array of 18 "to" goals
-let activeHoleIndex = 0;      // 0..17
+  // ---------- STATE ----------
+  let course = null; // array of {from, to, par} length 18
+  let scores = { p1: Array(18).fill(null), p2: Array(18).fill(null) }; // diff values or null
+  let selectedHole = 1;
 
-// Each element is "" (means "-") or one of "-2","-1","0","1","2","3"
-let p1Diffs = Array(18).fill("");
-let p2Diffs = Array(18).fill("");
+  // ---------- DOM ----------
+  const $ = (id) => document.getElementById(id);
+  const mainBody = $("mainBody");
 
-// ---------- Helpers ----------
-function haptic(){
-  try { if (navigator.vibrate) navigator.vibrate(10); } catch(_) {}
-}
-function toast(msg){
-  toastEl.textContent = msg;
-  toastEl.classList.add("show");
-  setTimeout(()=>toastEl.classList.remove("show"), 950);
-}
-function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
-function shuffleInPlace(arr){
-  for (let i=arr.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
+  const parFrontTop = $("parFrontTop");
+  const parBackTop  = $("parBackTop");
+  const parTotalTop = $("parTotalTop");
+  const parBackCell = $("parBackCell");
+  const parTotalCell= $("parTotalCell");
+
+  const bd1 = $("bd1"), bd2 = $("bd2");
+  const b1  = $("b1"),  b2  = $("b2");
+  const d1  = $("d1"),  d2  = $("d2");
+  const t1  = $("t1"),  t2  = $("t2");
+
+  const n1 = $("n1"), n2 = $("n2");
+  const p1HeadSticky = $("p1HeadSticky");
+  const p2HeadSticky = $("p2HeadSticky");
+
+  const progressFill = $("progressFill");
+  const progressText = $("progressText");
+
+  const toast = $("toast");
+
+  // Theme
+  const themeToggle = $("themeToggle");
+  const themeIcon = $("themeIcon");
+  const logoLight = $("logoLight");
+  const logoDark = $("logoDark");
+
+  // Buttons
+  const btnGen = $("btnGen");
+  const btnClear = $("btnClear");
+  const btnCopyLink = $("btnCopyLink");
+
+  // ---------- HELPERS ----------
+  function toastMsg(msg){
+    toast.textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 1100);
   }
-}
-function goalClass(goal){
-  return `goalTag goal-${goal}`;
-}
 
-// ---------- Theme + logo swap ----------
-(function themeInit(){
-  function prefersDark(){
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  function canVibrate(){
+    return "vibrate" in navigator;
   }
-  function getSaved(){
-    const t = localStorage.getItem("bp_theme");
-    return (t === "dark" || t === "light") ? t : null;
-  }
-  function apply(theme){
-    document.documentElement.setAttribute("data-theme", theme);
-    const isDark = theme === "dark";
-    themeIcon.src = isDark ? "sun.png" : "moon.png"; // icon shows what you'll switch to
-    if (logoLight && logoDark){
-      logoLight.style.display = isDark ? "none" : "block";
-      logoDark.style.display  = isDark ? "block" : "none";
-    }
+  function haptic(type="light"){
+    // "type" kept for future; iOS Safari mostly ignores patterns but Android uses it.
+    if(!canVibrate()) return;
+    navigator.vibrate(10);
   }
 
-  apply(getSaved() || (prefersDark() ? "dark" : "light"));
+  function keyFor(from,to){ return `${from}->${to}`; }
 
-  if (window.matchMedia){
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => { if (!getSaved()) apply(prefersDark() ? "dark" : "light"); };
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else if (mq.addListener) mq.addListener(handler);
-  }
-
-  themeToggle.addEventListener("click", (e) => {
-    e.preventDefault();
-    const cur = document.documentElement.getAttribute("data-theme") || (prefersDark() ? "dark" : "light");
-    const next = cur === "dark" ? "light" : "dark";
-    localStorage.setItem("bp_theme", next);
-    apply(next);
-    haptic();
-  }, true);
-})();
-
-// ---------- Player names -> headers ----------
-function syncPlayerHeaders(){
-  const a = (n1.value || "").trim();
-  const b = (n2.value || "").trim();
-  p1HeadSticky.textContent = a ? a : "P1";
-  p2HeadSticky.textContent = b ? b : "P2";
-}
-n1.addEventListener("input", syncPlayerHeaders);
-n2.addEventListener("input", syncPlayerHeaders);
-
-// ---------- Course constraints ----------
-function allowedNext(from){
-  const all = new Set(GOALS);
-  all.delete(from); // no consecutive same
-
-  if (from === START){
-    all.delete("green"); // start cannot be green
-    return [...all];
-  }
-  if (from === "white"){
-    return [...all];
-  }
-  if (from === "orange"){
-    all.delete("pink");
-    all.delete("blue");
-    return [...all];
-  }
-  if (from === "blue"){
-    all.delete("orange");
-    all.delete("red");
-    return [...all];
-  }
-  if (from === "pink"){
-    all.delete("orange");
-    all.delete("red");
-    all.delete("green"); // removed
-    return [...all];
-  }
-  if (from === "red"){
-    all.delete("blue");
-    all.delete("pink");
-    return [...all];
-  }
-  if (from === "green"){
-    all.delete("yellow");
-    all.delete("pink"); // removed
-    return [...all];
-  }
-  if (from === "yellow"){
-    all.delete("green");
-    return [...all];
-  }
-  return [...all];
-}
-
-// ---------- Par rules ----------
-function keyPair(a,b){ return a < b ? `${a}|${b}` : `${b}|${a}`; }
-
-const par3Pairs = new Set([
-  keyPair("white","yellow"),
-  keyPair("white","green"),
-  keyPair("yellow","red"),
-  keyPair("yellow","pink"),
-  keyPair("green","red"),
-  keyPair("red","orange"),
-  keyPair("red","blue"),
-  keyPair("blue","pink"), // requested par 3
-]);
-
-const par5Pairs = new Set([
-  keyPair("white","blue"),
-  keyPair("white","orange"),
-]);
-
-function holePar(from,to){
-  // Tee -> white is par 3
-  if (from === START && to === "white") return 3;
-
-  const k = keyPair(from,to);
-  if (par3Pairs.has(k)) return 3;
-  if (par5Pairs.has(k)) return 5;
-  return 4;
-}
-
-// ---------- Generator (backtracking) ----------
-function goalsMissingToReach2(counts){
-  let missing = 0;
-  for (const g of GOALS){
-    const c = counts[g] || 0;
-    if (c < 2) missing += (2 - c);
-  }
-  return missing;
-}
-
-function generateCourse(maxAttempts=2500){
-  for (let attempt=0; attempt<maxAttempts; attempt++){
-    const counts = Object.fromEntries(GOALS.map(g=>[g,0]));
-    const usedEdges = new Set(); // "from>to" must be unique
-    const targets = [];
-
-    if (backtrack(1, START, counts, usedEdges, targets)) return targets;
-  }
-  return null;
-}
-
-function backtrack(holeNum, from, counts, usedEdges, targets){
-  if (holeNum === 19){
-    for (const g of GOALS){
-      if ((counts[g]||0) < 2) return false;
-    }
+  function isAllowed(from,to){
+    if(from === to) return false; // no consecutive same goal
+    const k = keyFor(from,to);
+    if (BLOCKED.has(k)) return false;
+    // also block start -> green
+    if(from === "Tee" && START_BLOCKED_TO.has(to)) return false;
     return true;
   }
 
-  const mustGreen = FIXED_GREEN_HOLES.has(holeNum);
-  let options = mustGreen ? ["green"] : allowedNext(from);
-  shuffleInPlace(options);
+  function parFor(from,to){
+    const k = keyFor(from,to);
+    if (PAR5.has(k)) return 5;
+    if (PAR3.has(k)) return 3;
+    return 4;
+  }
 
-  for (const to of options){
-    if (mustGreen && to !== "green") continue;
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
 
-    const edgeKey = `${from}>${to}`;
-    if (usedEdges.has(edgeKey)) continue;
+  function diffToNumber(v){
+    // v is string like "-2","1", or "" or null
+    if(v === "" || v === null || v === undefined) return 0;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  }
 
-    // Take
-    usedEdges.add(edgeKey);
-    targets.push(to);
-    counts[to] = (counts[to]||0) + 1;
+  function scoreClass(diff){
+    if(diff < 0) return "score-under";
+    if(diff > 0) return "score-over";
+    return "score-even";
+  }
 
-    // Prune
-    const holesLeft = 18 - holeNum;
-    const minNeeded = goalsMissingToReach2(counts);
-    if (minNeeded <= holesLeft){
-      // If next hole is fixed green, ensure reachable with unused edge
-      const nextHole = holeNum + 1;
-      if (nextHole <= 18 && FIXED_GREEN_HOLES.has(nextHole)){
-        const canToGreen = allowedNext(to).includes("green") && !usedEdges.has(`${to}>green`);
-        if (canToGreen){
-          if (backtrack(holeNum+1, to, counts, usedEdges, targets)) return true;
+  function setPlayerHeaders(){
+    const a = (n1.value || "P1").trim();
+    const b = (n2.value || "P2").trim();
+    p1HeadSticky.textContent = a;
+    p2HeadSticky.textContent = b;
+  }
+
+  // Throw cell now shows only → ToColor (and Tee→To for hole1)
+  function throwCellHTML(from, to, holeNum){
+    const toCls = `goal-${to.toLowerCase()}`;
+    if(holeNum === 1){
+      return `
+        <div class="twoPip">
+          <span class="goalTag goal-tee">Tee</span>
+          <span class="arrow">→</span>
+          <span class="goalTag ${toCls}">${to}</span>
+        </div>
+      `;
+    }
+    return `
+      <div class="twoPip">
+        <span class="arrow">→</span>
+        <span class="goalTag ${toCls}">${to}</span>
+      </div>
+    `;
+  }
+
+  // ---------- GENERATOR (backtracking) ----------
+  function generateCourse(){
+    // Reset selected hole + scores on new course (scores cleared)
+    selectedHole = 1;
+    scores.p1 = Array(18).fill(null);
+    scores.p2 = Array(18).fill(null);
+
+    // targets: 18 holes, hole9 to green, hole18 to green
+    const usedEdges = new Set();
+    const toCounts = Object.fromEntries(GOALS.map(g => [g,0]));
+    const result = [];
+
+    const candidatesFrom = (from, holeIdx) => {
+      // if fixed to goal, only that
+      const fixedTo = FIXED_TO.get(holeIdx);
+      const pool = fixedTo ? [fixedTo] : GOALS.slice();
+      return shuffle(pool).filter(to => isAllowed(from,to));
+    };
+
+    function dfs(holeIdx, from){
+      if(holeIdx > 18){
+        // validate min visits
+        for(const g of GOALS){
+          if(toCounts[g] < MIN_VISITS) return false;
         }
-      } else {
-        if (backtrack(holeNum+1, to, counts, usedEdges, targets)) return true;
+        return true;
+      }
+
+      let tos = candidatesFrom(from, holeIdx);
+
+      // additional pruning: if remaining holes can't satisfy min visits
+      // (simple heuristic)
+      const remaining = 18 - holeIdx + 1;
+
+      // Try each possible to
+      for(const to of tos){
+        // unique edge constraint
+        const edge = keyFor(from,to);
+        if(REQUIRE_UNIQUE_THROWS && usedEdges.has(edge)) continue;
+
+        // Apply
+        usedEdges.add(edge);
+        result.push({from, to, par: parFor(from,to)});
+        toCounts[to]++;
+
+        // optimistic check: can we still reach MIN_VISITS?
+        let ok = true;
+        let need = 0;
+        for(const g of GOALS){
+          if(toCounts[g] < MIN_VISITS) need += (MIN_VISITS - toCounts[g]);
+        }
+        if(need > (remaining - 1)) ok = false;
+
+        // continue
+        if(ok){
+          const nextFrom = to;
+          if(dfs(holeIdx+1, nextFrom)) return true;
+        }
+
+        // rollback
+        toCounts[to]--;
+        result.pop();
+        usedEdges.delete(edge);
+      }
+
+      return false;
+    }
+
+    // Start from Tee, hole 1 "from" is Tee
+    // Tee can go to any except Green (plus other constraints)
+    if(!dfs(1, "Tee")){
+      return null;
+    }
+
+    return result;
+  }
+
+  // ---------- RENDER ----------
+  function buildScoreSelect(holeIdx, playerKey){
+    const cur = scores[playerKey][holeIdx] ?? null; // null means "-"
+    const opts = SCORE_OPTIONS.map(o => {
+      const sel = (cur === null && o.value === "") || (String(cur) === o.value && o.value !== "");
+      return `<option value="${o.value}" ${sel ? "selected" : ""}>${o.label}</option>`;
+    }).join("");
+
+    return `
+      <select class="scoreSel" data-hole="${holeIdx}" data-player="${playerKey}">
+        ${opts}
+      </select>
+    `;
+  }
+
+  function computeProgress(){
+    // progress = count of holes with either player having a non-null selection
+    // (still counts as played if either entered)
+    let played = 0;
+    for(let i=0;i<18;i++){
+      const a = scores.p1[i] !== null;
+      const b = scores.p2[i] !== null;
+      if(a || b) played++;
+    }
+    const pct = Math.round((played/18)*100);
+    progressFill.style.width = `${pct}%`;
+    progressText.textContent = `${played} / 18`;
+  }
+
+  function computeSums(){
+    // Pars
+    const parFront = course ? course.slice(0,9).reduce((s,h)=>s+h.par,0) : 0;
+    const parBack  = course ? course.slice(9,18).reduce((s,h)=>s+h.par,0) : 0;
+    const parTotal = parFront + parBack;
+
+    parFrontTop.textContent = course ? parFront : "–";
+    parBackTop.textContent  = course ? parBack  : "–";
+    parTotalTop.textContent = course ? parTotal : "–";
+
+    parBackCell.textContent  = course ? parBack  : "–";
+    parTotalCell.textContent = course ? parTotal : "–";
+
+    // Totals: big number = (throws - par) == sum diffs; small = total throws
+    const sumDiff = (arr, start, end) => {
+      let d=0;
+      for(let i=start;i<end;i++) d += diffToNumber(arr[i]);
+      return d;
+    };
+    const p1DiffFront = sumDiff(scores.p1,0,9);
+    const p1DiffBack  = sumDiff(scores.p1,9,18);
+    const p1DiffTotal = p1DiffFront + p1DiffBack;
+
+    const p2DiffFront = sumDiff(scores.p2,0,9);
+    const p2DiffBack  = sumDiff(scores.p2,9,18);
+    const p2DiffTotal = p2DiffFront + p2DiffBack;
+
+    // Throws totals derived from par + diff
+    const p1ThrowsFront = course ? parFront + p1DiffFront : 0;
+    const p1ThrowsBack  = course ? parBack  + p1DiffBack  : 0;
+    const p1ThrowsTotal = course ? parTotal + p1DiffTotal : 0;
+
+    const p2ThrowsFront = course ? parFront + p2DiffFront : 0;
+    const p2ThrowsBack  = course ? parBack  + p2DiffBack  : 0;
+    const p2ThrowsTotal = course ? parTotal + p2DiffTotal : 0;
+
+    // Front 9 row is rendered inside tbody; update its ids when present
+    const fd1 = document.getElementById("fd1");
+    const fd2 = document.getElementById("fd2");
+    const f1  = document.getElementById("f1");
+    const f2  = document.getElementById("f2");
+    const parFrontCell = document.getElementById("parFrontCell");
+
+    if(fd1){
+      fd1.textContent = `${p1DiffFront}`;
+      fd2.textContent = `${p2DiffFront}`;
+      f1.textContent  = `${p1ThrowsFront}`;
+      f2.textContent  = `${p2ThrowsFront}`;
+      parFrontCell.textContent = `${parFront}`;
+      // color big diff pill
+      fd1.className = `sumDiff ${scoreClass(p1DiffFront)}`;
+      fd2.className = `sumDiff ${scoreClass(p2DiffFront)}`;
+    }
+
+    bd1.textContent = `${p1DiffBack}`;
+    bd2.textContent = `${p2DiffBack}`;
+    b1.textContent  = `${p1ThrowsBack}`;
+    b2.textContent  = `${p2ThrowsBack}`;
+    bd1.className = `sumDiff ${scoreClass(p1DiffBack)}`;
+    bd2.className = `sumDiff ${scoreClass(p2DiffBack)}`;
+
+    d1.textContent = `${p1DiffTotal}`;
+    d2.textContent = `${p2DiffTotal}`;
+    t1.textContent = `${p1ThrowsTotal}`;
+    t2.textContent = `${p2ThrowsTotal}`;
+    d1.className = `sumDiff ${scoreClass(p1DiffTotal)}`;
+    d2.className = `sumDiff ${scoreClass(p2DiffTotal)}`;
+  }
+
+  function render(){
+    setPlayerHeaders();
+
+    mainBody.innerHTML = "";
+
+    if(!course){
+      computeProgress();
+      computeSums();
+      return;
+    }
+
+    // Build 1..18 with Front 9 summary row after hole 9
+    for(let i=0;i<18;i++){
+      const holeNum = i+1;
+      const h = course[i];
+
+      const tr = document.createElement("tr");
+      tr.className = "holeRow";
+      if(holeNum === selectedHole) tr.classList.add("active");
+
+      tr.innerHTML = `
+        <td>${holeNum}</td>
+        <td>${throwCellHTML(h.from, h.to, holeNum)}</td>
+        <td>${h.par}</td>
+        <td>${buildScoreSelect(i,"p1")}</td>
+        <td>${buildScoreSelect(i,"p2")}</td>
+      `;
+      tr.addEventListener("click", (e) => {
+        // don’t change selectedHole if clicking a select
+        if(e.target && e.target.tagName === "SELECT") return;
+        selectedHole = holeNum;
+        haptic("light");
+        render();
+        scrollToHole(holeNum);
+      });
+
+      mainBody.appendChild(tr);
+
+      // Insert Front 9 summary after hole 9
+      if(holeNum === 9){
+        const sum = document.createElement("tr");
+        sum.className = "sumRow";
+        sum.innerHTML = `
+          <th colspan="2" class="left">Front 9</th>
+          <th id="parFrontCell">–</th>
+          <th>
+            <div class="sumCell">
+              <span id="fd1" class="sumDiff">0</span>
+              <span id="f1" class="sumThrows">0</span>
+            </div>
+          </th>
+          <th>
+            <div class="sumCell">
+              <span id="fd2" class="sumDiff">0</span>
+              <span id="f2" class="sumThrows">0</span>
+            </div>
+          </th>
+        `;
+        mainBody.appendChild(sum);
       }
     }
 
-    // Undo
-    counts[to]--;
-    targets.pop();
-    usedEdges.delete(edgeKey);
-  }
+    // Wire selects
+    mainBody.querySelectorAll("select.scoreSel").forEach(sel => {
+      sel.addEventListener("change", (e) => {
+        const holeIdx = Number(sel.dataset.hole);
+        const player  = sel.dataset.player;
+        const v = sel.value;
 
-  return false;
-}
+        // "" means "-" display, counts as 0, but keep as null for UI
+        scores[player][holeIdx] = (v === "") ? null : v;
 
-// ---------- Share link encode/decode ----------
-function encodeCourse(targets){
-  return targets.join(",");
-}
-function decodeCourse(s){
-  const parts = (s||"").split(",").map(x=>x.trim()).filter(Boolean);
-  if (parts.length !== 18) return null;
+        // style select based on diff (null => even)
+        const diff = diffToNumber(scores[player][holeIdx]);
+        sel.classList.remove("score-under","score-even","score-over");
+        sel.classList.add(scoreClass(diff));
 
-  for (const p of parts){
-    if (!GOALS.includes(p)) return null;
-  }
+        haptic("light");
+        computeProgress();
+        computeSums();
 
-  // fixed greens
-  if (parts[8] !== "green" || parts[17] !== "green") return null;
+        // Auto-scroll to next hole on change
+        const nextHole = Math.min(18, holeIdx+2);
+        selectedHole = nextHole;
+        render();
+        scrollToHole(nextHole, true);
+      });
 
-  // validate edges + rules + uniqueness
-  const used = new Set();
-  let from = START;
-  for (let i=0; i<18; i++){
-    const to = parts[i];
-    if (!allowedNext(from).includes(to)) return null;
-    const ek = `${from}>${to}`;
-    if (used.has(ek)) return null;
-    used.add(ek);
-    from = to;
-  }
-
-  // min 2 per goal
-  const counts = Object.fromEntries(GOALS.map(g=>[g,0]));
-  for (const t of parts) counts[t]++;
-  for (const g of GOALS) if (counts[g] < 2) return null;
-
-  return parts;
-}
-
-function currentShareURL(){
-  const url = new URL(window.location.href);
-  url.searchParams.set("course", encodeCourse(courseTargets));
-  url.hash = "";
-  return url.toString();
-}
-
-// ---------- Rendering ----------
-function buildScoreSelect(holeIndex, player){
-  const sel = document.createElement("select");
-  sel.className = "scoreSel score-even";
-
-  // "-" option counts as 0 but visually indicates untouched
-  const optDash = new Option("-", "", true, true);
-  sel.add(optDash);
-
-  // value options: -2..+3, and 0
-  const values = [-2,-1,0,1,2,3];
-  for (const v of values){
-    const label = v > 0 ? `+${v}` : `${v}`;
-    sel.add(new Option(label, String(v), false, false));
-  }
-
-  const current = (player === 1 ? p1Diffs[holeIndex] : p2Diffs[holeIndex]);
-  sel.value = current;
-
-  sel.addEventListener("change", (e) => {
-    const v = sel.value; // "" or "-2".."3"
-    if (player === 1) p1Diffs[holeIndex] = v;
-    else p2Diffs[holeIndex] = v;
-
-    updateHoleColor(holeIndex);
-    updateTotalsAndProgress();
-
-    // Keep "auto scroll when a new hole is selected" (including via input)
-    setActiveHole(holeIndex, true);
-
-    haptic();
-  });
-
-  return sel;
-}
-
-function renderCourse(){
-  if (!courseTargets){
-    mainBody.innerHTML = "";
-    return;
-  }
-
-  syncPlayerHeaders();
-
-  // compute pars
-  const pars = [];
-  let frontPar=0, backPar=0;
-
-  for (let i=0; i<18; i++){
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-    const p = holePar(from,to);
-    pars.push(p);
-    if (i<9) frontPar += p; else backPar += p;
-  }
-  const totalPar = frontPar + backPar;
-
-  parFrontTop.textContent = frontPar;
-  parBackTop.textContent  = backPar;
-  parTotalTop.textContent = totalPar;
-  parBackCell.textContent = backPar;
-  parTotalCell.textContent= totalPar;
-
-  mainBody.innerHTML = "";
-
-  for (let i=0; i<18; i++){
-    const holeNum = i+1;
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-
-    const tr = document.createElement("tr");
-    tr.className = "holeRow" + (i === activeHoleIndex ? " active" : "");
-    tr.dataset.holeIndex = String(i);
-
-    const tdNum = document.createElement("td");
-    tdNum.textContent = String(holeNum);
-
-    const tdThrow = document.createElement("td");
-    tdThrow.innerHTML = `
-      <div class="twoPip">
-        <span class="${goalClass(from)}">${from}</span>
-        <span class="arrow">→</span>
-        <span class="${goalClass(to)}">${to}</span>
-      </div>
-    `;
-
-    const tdPar = document.createElement("td");
-    tdPar.textContent = String(pars[i]);
-
-    const tdP1 = document.createElement("td");
-    const tdP2 = document.createElement("td");
-
-    tdP1.appendChild(buildScoreSelect(i,1));
-    tdP2.appendChild(buildScoreSelect(i,2));
-
-    tr.append(tdNum, tdThrow, tdPar, tdP1, tdP2);
-
-    tr.addEventListener("click", (e) => {
-      if (e.target && e.target.tagName === "SELECT") return;
-      setActiveHole(i, true);
+      // initial coloring
+      const holeIdx = Number(sel.dataset.hole);
+      const player  = sel.dataset.player;
+      const diff = diffToNumber(scores[player][holeIdx]);
+      sel.classList.add(scoreClass(diff));
     });
 
-    mainBody.appendChild(tr);
+    computeProgress();
+    computeSums();
+  }
 
-    // Insert Front 9 summary row immediately after hole 9
-    if (holeNum === 9){
-      const sum = document.createElement("tr");
-      sum.className = "sumRow";
-      sum.innerHTML = `
-        <th colspan="2" class="left">Front 9</th>
-        <td id="parFrontCell">${frontPar}</td>
-        <td>
-          <div class="sumCell">
-            <span id="fd1" class="sumDiff">0</span>
-            <span id="f1" class="sumThrows">0</span>
-          </div>
-        </td>
-        <td>
-          <div class="sumCell">
-            <span id="fd2" class="sumDiff">0</span>
-            <span id="f2" class="sumThrows">0</span>
-          </div>
-        </td>
-      `;
-      mainBody.appendChild(sum);
+  function scrollToHole(holeNum, smooth=true){
+    const row = Array.from(mainBody.querySelectorAll("tr.holeRow"))[holeNum-1];
+    if(!row) return;
+    row.scrollIntoView({behavior: smooth ? "smooth" : "auto", block:"center"});
+  }
+
+  // ---------- SHARE LINK ----------
+  // Encode as: startTo + comma-separated tos for holes 2..18
+  function encodeCourse(){
+    if(!course) return "";
+    const tos = course.map(h => h.to);
+    return encodeURIComponent(tos.join(","));
+  }
+
+  function decodeCourse(str){
+    try{
+      const tos = decodeURIComponent(str).split(",").map(s => s.trim()).filter(Boolean);
+      if(tos.length !== 18) return null;
+
+      // rebuild from = prev to, starting from Tee
+      const rebuilt = [];
+      let from = "Tee";
+      const usedEdges = new Set();
+      const counts = Object.fromEntries(GOALS.map(g => [g,0]));
+
+      for(let i=0;i<18;i++){
+        const holeNum = i+1;
+        const to = tos[i];
+
+        if(!GOALS.includes(to)) return null;
+        // fixed holes
+        const fixed = FIXED_TO.get(holeNum);
+        if(fixed && fixed !== to) return null;
+        if(from === "Tee" && START_BLOCKED_TO.has(to)) return null;
+        if(!isAllowed(from,to)) return null;
+
+        const edge = keyFor(from,to);
+        if(REQUIRE_UNIQUE_THROWS && usedEdges.has(edge)) return null;
+
+        usedEdges.add(edge);
+        counts[to]++;
+        rebuilt.push({from,to,par:parFor(from,to)});
+        from = to;
+      }
+
+      for(const g of GOALS){
+        if(counts[g] < MIN_VISITS) return null;
+      }
+
+      return rebuilt;
+    }catch{
+      return null;
     }
   }
 
-  updateAllHoleColors();
-  updateTotalsAndProgress();
-}
+  // ---------- THEME ----------
+  function applyTheme(mode){
+    // mode: "light" | "dark" | "system"
+    document.documentElement.setAttribute("data-theme", mode);
 
-function setActiveHole(i, scroll){
-  activeHoleIndex = clamp(i, 0, 17);
+    const isDark = (mode === "dark") || (mode === "system" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-  document.querySelectorAll("tbody tr.holeRow").forEach(tr => {
-    const idx = Number(tr.dataset.holeIndex);
-    tr.classList.toggle("active", idx === activeHoleIndex);
+    logoLight.style.display = isDark ? "none" : "";
+    logoDark.style.display  = isDark ? "" : "none";
+
+    // icon shows what you would switch TO
+    themeIcon.src = isDark ? "sun.png" : "moon.png";
+  }
+
+  function nextTheme(current){
+    if(current === "light") return "dark";
+    if(current === "dark") return "light";
+    // system -> dark
+    return "dark";
+  }
+
+  // ---------- EVENTS ----------
+  btnGen.addEventListener("click", () => {
+    haptic("light");
+    course = generateCourse();
+    if(!course){
+      toastMsg("Could not generate — try again");
+      return;
+    }
+    // Do NOT auto-scroll on generate (per your preference)
+    selectedHole = 1;
+    updateURLFromCourse();
+    render();
+    toastMsg("New course");
   });
 
-  updateProgress();
+  btnClear.addEventListener("click", () => {
+    haptic("light");
+    scores.p1 = Array(18).fill(null);
+    scores.p2 = Array(18).fill(null);
+    render();
+    toastMsg("Scores cleared");
+  });
 
-  if (scroll){
-    const tr = document.querySelector(`tbody tr.holeRow[data-hole-index="${activeHoleIndex}"]`);
-    if (tr) tr.scrollIntoView({ behavior:"smooth", block:"center", inline:"nearest" });
-  }
-}
-
-function diffNum(v){
-  // "" (dash) counts as 0
-  if (v === "" || v == null) return 0;
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function setSelClass(sel, diff){
-  sel.classList.remove("score-under","score-even","score-over");
-  if (diff < 0) sel.classList.add("score-under");
-  else if (diff > 0) sel.classList.add("score-over");
-  else sel.classList.add("score-even");
-}
-
-function updateHoleColor(holeIndex){
-  const row = document.querySelector(`tbody tr.holeRow[data-hole-index="${holeIndex}"]`);
-  if (!row) return;
-  const s1 = row.querySelector("td:nth-child(4) select");
-  const s2 = row.querySelector("td:nth-child(5) select");
-  if (!s1 || !s2) return;
-
-  setSelClass(s1, diffNum(p1Diffs[holeIndex]));
-  setSelClass(s2, diffNum(p2Diffs[holeIndex]));
-}
-
-function updateAllHoleColors(){
-  for (let i=0; i<18; i++) updateHoleColor(i);
-}
-
-function formatDiff(d){
-  return d === 0 ? "0" : (d > 0 ? `+${d}` : `${d}`);
-}
-
-function setSum(diffId, strokesId, diff, strokes, colorize){
-  const dEl = document.getElementById(diffId);
-  const tEl = document.getElementById(strokesId);
-  if (!dEl || !tEl) return;
-
-  dEl.textContent = formatDiff(diff);
-  tEl.textContent = String(strokes);
-
-  if (colorize){
-    dEl.style.background = diff < 0 ? "var(--underBg)" : diff > 0 ? "var(--overBg)" : "var(--evenBg)";
-  } else {
-    dEl.style.background = "transparent";
-  }
-}
-
-function updateTotalsAndProgress(){
-  if (!courseTargets) return;
-
-  // pars
-  const pars = [];
-  let frontPar=0, backPar=0;
-  for (let i=0; i<18; i++){
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-    const p = holePar(from,to);
-    pars.push(p);
-    if (i<9) frontPar += p; else backPar += p;
-  }
-  const totalPar = frontPar + backPar;
-
-  // sums
-  let f1d=0,f2d=0,b1d=0,b2d=0;
-  let f1s=0,f2s=0,b1s=0,b2s=0;
-
-  for (let i=0; i<18; i++){
-    const par = pars[i];
-    const d1 = diffNum(p1Diffs[i]);
-    const d2 = diffNum(p2Diffs[i]);
-    const s1 = par + d1;
-    const s2 = par + d2;
-
-    if (i < 9){
-      f1d += d1; f2d += d2;
-      f1s += s1; f2s += s2;
-    } else {
-      b1d += d1; b2d += d2;
-      b1s += s1; b2s += s2;
+  btnCopyLink.addEventListener("click", async () => {
+    haptic("light");
+    const url = location.origin + location.pathname + (course ? `?c=${encodeCourse()}` : "");
+    try{
+      await navigator.clipboard.writeText(url);
+      toastMsg("Link copied");
+    }catch{
+      // fallback prompt
+      window.prompt("Copy this link:", url);
     }
+  });
+
+  n1.addEventListener("input", () => { setPlayerHeaders(); });
+  n2.addEventListener("input", () => { setPlayerHeaders(); });
+
+  themeToggle.addEventListener("click", () => {
+    haptic("light");
+    const cur = document.documentElement.getAttribute("data-theme") || "system";
+    const nxt = nextTheme(cur);
+    localStorage.setItem("bp_theme", nxt);
+    applyTheme(nxt);
+  });
+
+  // ---------- URL handling ----------
+  function updateURLFromCourse(){
+    const params = new URLSearchParams(location.search);
+    if(course){
+      params.set("c", encodeCourse());
+    }else{
+      params.delete("c");
+    }
+    const newUrl = location.pathname + (params.toString() ? `?${params.toString()}` : "");
+    history.replaceState({}, "", newUrl);
   }
 
-  // Front 9 row (in tbody)
-  setSum("fd1","f1", f1d, f1s, false);
-  setSum("fd2","f2", f2d, f2s, false);
-
-  // Back row
-  setSum("bd1","b1", b1d, b1s, false);
-  setSum("bd2","b2", b2d, b2s, false);
-
-  // Total row (colored)
-  setSum("d1","t1", f1d+b1d, f1s+b1s, true);
-  setSum("d2","t2", f2d+b2d, f2s+b2s, true);
-
-  updateProgress();
-}
-
-function updateProgress(){
-  const cur = activeHoleIndex + 1;
-  progressFill.style.width = `${(cur/18)*100}%`;
-  progressText.textContent = `${cur} / 18`;
-}
-
-// ---------- Buttons ----------
-btnGen.addEventListener("click", () => {
-  const targets = generateCourse(3000);
-  if (!targets){
-    toast("Could not generate (try again)");
-    return;
+  function initFromURL(){
+    const params = new URLSearchParams(location.search);
+    const c = params.get("c");
+    if(!c) return false;
+    const decoded = decodeCourse(c);
+    if(!decoded) return false;
+    course = decoded;
+    return true;
   }
 
-  courseTargets = targets;
+  // ---------- INIT ----------
+  (function init(){
+    // Theme init
+    const savedTheme = localStorage.getItem("bp_theme") || "system";
+    applyTheme(savedTheme);
 
-  // Reset scores (default dash which counts as 0)
-  p1Diffs = Array(18).fill("");
-  p2Diffs = Array(18).fill("");
+    // React to system theme if in system mode
+    if(window.matchMedia){
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => {
+        const cur = document.documentElement.getAttribute("data-theme") || "system";
+        if(cur === "system") applyTheme("system");
+      });
+    }
 
-  // Reset active hole to 1, but DO NOT auto-scroll on generate
-  activeHoleIndex = 0;
+    // Load from URL if present else generate once
+    if(!initFromURL()){
+      course = generateCourse();
+      updateURLFromCourse();
+    }
 
-  renderCourse();
-  localStorage.setItem("bp_last_course", encodeCourse(courseTargets));
+    render();
+  })();
 
-  toast("New course generated");
-  haptic();
-});
-
-btnClear.addEventListener("click", () => {
-  p1Diffs = Array(18).fill("");
-  p2Diffs = Array(18).fill("");
-  renderCourse(); // re-render selects to reset to "-"
-  toast("Scores cleared");
-  haptic();
-});
-
-btnCopyLink.addEventListener("click", async () => {
-  if (!courseTargets){
-    toast("Generate a course first");
-    return;
-  }
-  const link = currentShareURL();
-  try{
-    await navigator.clipboard.writeText(link);
-    toast("Share link copied");
-  }catch(_){
-    const ta = document.createElement("textarea");
-    ta.value = link;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    toast("Share link copied");
-  }
-  haptic();
-});
-
-// ---------- Init ----------
-(function init(){
-  syncPlayerHeaders();
-
-  const url = new URL(window.location.href);
-  const param = url.searchParams.get("course");
-  let decoded = param ? decodeCourse(param) : null;
-
-  if (!decoded){
-    const last = localStorage.getItem("bp_last_course");
-    decoded = last ? decodeCourse(last) : null;
-  }
-  if (!decoded){
-    decoded = generateCourse(3000);
-  }
-
-  courseTargets = decoded;
-  renderCourse();
-  setActiveHole(0, false);
 })();
