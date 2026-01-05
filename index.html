@@ -21,7 +21,9 @@
       --scoreEven:#f3f4f6;
       --scoreOver:#fee2e2;
 
-      --totalRow:#f7f7f9;
+      /* stronger total tint */
+      --totalRow:#eef2ff;
+
       --activeRow:#eef2ff;
       --activeBorder:#6366f1;
     }
@@ -42,7 +44,9 @@
         --scoreEven:#202634;
         --scoreOver:#3b1416;
 
-        --totalRow:#151b25;
+        /* stronger total tint (dark) */
+        --totalRow:#1b2341;
+
         --activeRow:#1a2240;
         --activeBorder:#8b93ff;
       }
@@ -51,11 +55,12 @@
     body{
       font-family:-apple-system,system-ui,sans-serif;
       margin:16px;
-      line-height:1.25;
+      line-height:1.3;
       background:var(--bg);
       color:var(--text);
     }
     .muted{color:var(--muted);font-size:12px}
+    .spacer{height:10px}
 
     .header{
       display:flex;
@@ -64,7 +69,7 @@
       flex-wrap:wrap;
     }
     .brand h1{margin:0;font-size:26px}
-    .subtitle{margin-top:2px}
+    .subtitle{margin-top:3px}
 
     .logoImg{
       width:58px;height:58px;border-radius:14px;object-fit:contain;
@@ -76,24 +81,24 @@
     .infoGrid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:8px;
-      margin-top:10px;
+      gap:10px;
+      margin-top:12px;
     }
     .infoCard{
       border:1px solid var(--border);
       border-radius:12px;
-      padding:10px;
+      padding:12px;
       background:var(--card);
       text-align:left;
     }
     .infoLabel{font-size:12px;color:var(--muted);margin:0}
-    .infoValue{font-size:16px;font-weight:800;margin:2px 0 0 0}
+    .infoValue{font-size:16px;font-weight:800;margin:3px 0 0 0}
 
     .legend{
       display:flex;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
-      margin-top:8px;
+      margin-top:10px;
     }
     .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
     .dot{
@@ -118,31 +123,47 @@
       border-radius:12px;
       margin-top:10px;
     }
-    .btnRow{
+
+    /* Buttons layout: Generate full width, then 2-up row */
+    .btnRowTwo{
       display:grid;
-      grid-template-columns:1fr;
-      gap:8px;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
       margin-top:10px;
     }
     .btnSecondary{
       font-size:14px;
-      padding:10px 12px;
+      padding:11px 12px;
       background:transparent;
+      margin-top:0;
     }
 
     .card{
       border:1px solid var(--border);
       border-radius:12px;
       padding:12px;
-      margin-top:12px;
+      margin-top:14px;
       background:var(--card);
     }
 
-    .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    /* Names OUTSIDE the scorecard */
+    .nameBlock{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-top:14px;
+      background:var(--card);
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
     .grow{flex:1 1 160px}
     input[type=text]{
       font-size:16px;
-      padding:8px;
+      padding:10px;
       width:100%;
       box-sizing:border-box;
       background:transparent;
@@ -154,12 +175,12 @@
     table{
       width:100%;
       border-collapse:collapse;
-      margin-top:12px;
+      margin-top:10px;
       table-layout:fixed;
     }
     th,td{
       border-bottom:1px solid var(--tableLine);
-      padding:6px 4px;
+      padding:9px 6px;              /* more vertical breathing room */
       text-align:center;
       vertical-align:middle;
       overflow:hidden;
@@ -198,7 +219,7 @@
     .twoPip{
       display:inline-flex;
       align-items:center;
-      gap:6px;
+      gap:8px;
       max-width:100%;
     }
     .arrow{
@@ -210,12 +231,12 @@
 
     select{
       font-size:15px;
-      padding:5px 6px;
+      padding:7px 8px;
       background:transparent;
       color:var(--text);
       border:1px solid var(--border);
       border-radius:10px;
-      min-width:56px;
+      min-width:58px;
     }
 
     .score-under{background:var(--scoreUnder)}
@@ -231,7 +252,7 @@
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:2px;
+      gap:3px;
       line-height:1.1;
     }
     .sumDiff{
@@ -294,25 +315,29 @@
     <div class="swatch"><span class="dot dot-over"></span> Over par</div>
   </div>
 
-  <div class="btnRow">
-    <button id="btnGen">Generate New Course</button>
+  <button id="btnGen">Generate New Course</button>
+
+  <div class="btnRowTwo">
     <button id="btnClear" class="btnSecondary">Clear Scores</button>
     <button id="btnCopyLink" class="btnSecondary">Copy Share Link</button>
   </div>
 
-  <div class="card">
-    <h2 style="margin:0 0 6px 0;">Course + Scorecard</h2>
-
+  <div class="nameBlock">
+    <div class="muted">Players</div>
     <div class="row">
       <div class="grow">
-        <div class="muted" style="margin-bottom:4px;">Player 1</div>
+        <div class="muted" style="margin-bottom:6px;">Player 1</div>
         <input id="n1" type="text" placeholder="Player 1 name">
       </div>
       <div class="grow">
-        <div class="muted" style="margin-bottom:4px;">Player 2</div>
+        <div class="muted" style="margin-bottom:6px;">Player 2</div>
         <input id="n2" type="text" placeholder="Player 2 name">
       </div>
     </div>
+  </div>
+
+  <div class="card">
+    <h2 style="margin:0 0 6px 0;">Scorecard</h2>
 
     <table>
       <thead>
@@ -385,9 +410,9 @@
     "white":  [],
     "orange": ["pink","blue"],
     "blue":   ["orange","red"],
-    "pink":   ["orange","red","green"], // remove pink->green
+    "pink":   ["orange","red","green"],
     "red":    ["blue","pink"],
-    "green":  ["yellow","pink"],        // remove green->pink
+    "green":  ["yellow","pink"],
     "yellow": ["green"]
   };
 
@@ -591,8 +616,8 @@
       for (var i=0;i<parts.length;i++){
         if (GOALS.indexOf(parts[i]) === -1) return null;
       }
-      if (parts[8] !== "green") return null;   // hole 9
-      if (parts[17] !== "green") return null;  // hole 18
+      if (parts[8] !== "green") return null;
+      if (parts[17] !== "green") return null;
       if (parts[0] === "green") return null;
 
       for (var h=2; h<=HOLES; h++){
@@ -624,8 +649,24 @@
   }
 
   // ---------- Persist (localStorage) ----------
+  var currentSeq = null;
+  var activeHole = 1;
+
   function storageKeyForCourse(courseStr){
-    return "bridgespark:v1:" + courseStr;
+    return "bridgespark:v2:" + courseStr;
+  }
+
+  function getSelectEl(hole, player){
+    return mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+player+'"]');
+  }
+  function getSelectValue(hole, player){
+    var sel = getSelectEl(hole, player);
+    return sel ? sel.value : "";
+  }
+  function setSelectValue(hole, player, value){
+    var sel = getSelectEl(hole, player);
+    if (!sel) return;
+    sel.value = (value === null || value === undefined) ? "" : String(value);
   }
 
   function saveState(){
@@ -655,8 +696,7 @@
 
   function loadState(){
     if (!currentSeq || currentSeq.length !== HOLES) return null;
-    var courseStr = currentSeq.join(",");
-    var key = storageKeyForCourse(courseStr);
+    var key = storageKeyForCourse(currentSeq.join(","));
     try{
       var raw = localStorage.getItem(key);
       if (!raw) return null;
@@ -672,6 +712,49 @@
     try{ localStorage.removeItem(key); }catch(e){}
   }
 
+  function recolorAllSelects(){
+    var sels = mainBody.querySelectorAll("select");
+    for (var i=0;i<sels.length;i++) colorDelta(sels[i]);
+  }
+
+  function bothSelected(hole){
+    return (getSelectValue(hole,1) !== "" && getSelectValue(hole,2) !== "");
+  }
+
+  function setActiveHole(hole, shouldScroll){
+    activeHole = hole;
+    var rows = mainBody.querySelectorAll("tr.holeRow");
+    for (var i=0;i<rows.length;i++) rows[i].classList.remove("active");
+    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
+    if (row){
+      row.classList.add("active");
+      if (shouldScroll){
+        try{ row.scrollIntoView({behavior:"smooth", block:"center"}); }catch(e){ row.scrollIntoView(); }
+      }
+    }
+    saveState();
+  }
+
+  function anyScoreEntered(){
+    for (var h=1; h<=HOLES; h++){
+      if (getSelectValue(h,1) !== "" || getSelectValue(h,2) !== "") return true;
+    }
+    return false;
+  }
+
+  function clearScores(alsoClearStorage){
+    for (var h=1; h<=HOLES; h++){
+      setSelectValue(h, 1, "");
+      setSelectValue(h, 2, "");
+    }
+    recolorAllSelects();
+    recalcTotals();
+    setActiveHole(1, true);
+
+    if (alsoClearStorage) clearSavedStateForCurrentCourse();
+    saveState();
+  }
+
   // ---------- UI ----------
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
@@ -682,9 +765,6 @@
   var p1Head = document.getElementById("p1Head");
   var p2Head = document.getElementById("p2Head");
 
-  var currentSeq = null;
-  var activeHole = 1;
-
   function playerName(idx){
     return (idx===1 ? (n1.value||"P1") : (n2.value||"P2")).trim();
   }
@@ -692,7 +772,6 @@
     p1Head.textContent = playerName(1);
     p2Head.textContent = playerName(2);
   }
-
   n1.addEventListener("input", function(){ syncPlayerHeaders(); saveState(); });
   n2.addEventListener("input", function(){ syncPlayerHeaders(); saveState(); });
 
@@ -730,7 +809,6 @@
       recalcTotals();
       saveState();
 
-      // auto-advance: only when BOTH players have a non-placeholder on this hole
       if (bothSelected(hole)){
         setActiveHole(Math.min(HOLES, hole+1), true);
       } else {
@@ -753,171 +831,6 @@
     if (d < 0) sel.classList.add("score-under");
     else if (d > 0) sel.classList.add("score-over");
     else sel.classList.add("score-even");
-  }
-
-  function setParSummary(front, back, total){
-    document.getElementById("parFrontTop").textContent = front;
-    document.getElementById("parBackTop").textContent  = back;
-    document.getElementById("parTotalTop").textContent = total;
-
-    document.getElementById("parBackCell").textContent = back;
-    document.getElementById("parTotalCell").textContent = total;
-  }
-
-  function buildFront9Row(frontPar){
-    var tr = document.createElement("tr");
-    tr.innerHTML = `
-      <th colspan="2" class="left">Front 9</th>
-      <th>${frontPar}</th>
-      <th>
-        <div class="sumCell">
-          <span id="fd1" class="sumDiff pill pill-even">0</span>
-          <span id="f1" class="sumThrows">0</span>
-        </div>
-      </th>
-      <th>
-        <div class="sumCell">
-          <span id="fd2" class="sumDiff pill pill-even">0</span>
-          <span id="f2" class="sumThrows">0</span>
-        </div>
-      </th>
-    `;
-    return tr;
-  }
-
-  function renderAll(seq){
-    currentSeq = seq.slice();
-    mainBody.innerHTML = "";
-
-    var parFront=0, parBack=0, parTotal=0;
-
-    for (var i=0;i<seq.length;i++){
-      var hole = i+1;
-      var to = seq[i];
-      var from = (i===0) ? "tee" : seq[i-1];
-      var p = parFor(from,to,hole);
-
-      parTotal += p;
-      if (hole<=9) parFront += p; else parBack += p;
-
-      var tr = document.createElement("tr");
-      tr.className = "holeRow";
-      tr.setAttribute("data-hole", ""+hole);
-
-      tr.addEventListener("click", function(e){
-        // avoid click stealing when interacting with selects
-        if (e && (e.target && (e.target.tagName === "SELECT" || e.target.tagName === "OPTION"))) return;
-        var h = parseInt(this.getAttribute("data-hole"),10) || 1;
-        setActiveHole(h, true);
-      });
-
-      // Hole #
-      var tdH = document.createElement("td");
-      tdH.textContent = ""+hole;
-      tr.appendChild(tdH);
-
-      // Throw cell: FROM → TO
-      var tdThrow = document.createElement("td");
-      var wrap = document.createElement("span");
-      wrap.className = "twoPip";
-      wrap.appendChild(goalSpan(from));
-      var arrow = document.createElement("span");
-      arrow.className = "arrow";
-      arrow.textContent = "→";
-      wrap.appendChild(arrow);
-      wrap.appendChild(goalSpan(to));
-      tdThrow.appendChild(wrap);
-      tr.appendChild(tdThrow);
-
-      // Par
-      var tdP = document.createElement("td");
-      tdP.textContent = ""+p;
-      tr.appendChild(tdP);
-
-      // Player selects
-      var td1 = document.createElement("td");
-      td1.appendChild(makeDeltaSelect(hole, 1, p));
-      tr.appendChild(td1);
-
-      var td2 = document.createElement("td");
-      td2.appendChild(makeDeltaSelect(hole, 2, p));
-      tr.appendChild(td2);
-
-      mainBody.appendChild(tr);
-
-      if (hole === 9){
-        mainBody.appendChild(buildFront9Row(parFront));
-      }
-    }
-
-    setParSummary(parFront, parBack, parTotal);
-    recalcTotals();
-
-    // Apply saved state if present
-    var st = loadState();
-    if (st){
-      n1.value = st.n1 || "";
-      n2.value = st.n2 || "";
-      syncPlayerHeaders();
-
-      if (st.scores){
-        for (var h=1; h<=HOLES; h++){
-          if (!st.scores[h]) continue;
-          setSelectValue(h, 1, st.scores[h].p1 || "");
-          setSelectValue(h, 2, st.scores[h].p2 || "");
-        }
-        // recolor + totals after restoring
-        recolorAllSelects();
-        recalcTotals();
-      }
-
-      setActiveHole(Math.max(1, Math.min(HOLES, st.activeHole || 1)), false);
-    } else {
-      syncPlayerHeaders();
-      setActiveHole(1, false);
-    }
-  }
-
-  function getSelectEl(hole, player){
-    return mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+player+'"]');
-  }
-  function getSelectValue(hole, player){
-    var sel = getSelectEl(hole, player);
-    return sel ? sel.value : "";
-  }
-  function setSelectValue(hole, player, value){
-    var sel = getSelectEl(hole, player);
-    if (!sel) return;
-    sel.value = (value === null || value === undefined) ? "" : String(value);
-  }
-
-  function recolorAllSelects(){
-    var sels = mainBody.querySelectorAll("select");
-    for (var i=0;i<sels.length;i++) colorDelta(sels[i]);
-  }
-
-  function bothSelected(hole){
-    var a = getSelectValue(hole, 1);
-    var b = getSelectValue(hole, 2);
-    return (a !== "" && b !== "");
-  }
-
-  function setActiveHole(hole, shouldScroll){
-    activeHole = hole;
-    // clear
-    var rows = mainBody.querySelectorAll("tr.holeRow");
-    for (var i=0;i<rows.length;i++){
-      rows[i].classList.remove("active");
-    }
-    // set
-    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
-    if (row){
-      row.classList.add("active");
-      if (shouldScroll){
-        try{ row.scrollIntoView({behavior:"smooth", block:"center"}); }catch(e){ row.scrollIntoView(); }
-      }
-    }
-    saveState();
   }
 
   function recalcTotals(){
@@ -961,28 +874,165 @@
     }
   }
 
-  function anyScoreEntered(){
-    for (var h=1; h<=HOLES; h++){
-      if (getSelectValue(h,1) !== "" || getSelectValue(h,2) !== "") return true;
-    }
-    return false;
+  function buildFront9Row(frontPar){
+    var tr = document.createElement("tr");
+    tr.innerHTML = `
+      <th colspan="2" class="left">Front 9</th>
+      <th>${frontPar}</th>
+      <th>
+        <div class="sumCell">
+          <span id="fd1" class="sumDiff pill pill-even">0</span>
+          <span id="f1" class="sumThrows">0</span>
+        </div>
+      </th>
+      <th>
+        <div class="sumCell">
+          <span id="fd2" class="sumDiff pill pill-even">0</span>
+          <span id="f2" class="sumThrows">0</span>
+        </div>
+      </th>
+    `;
+    return tr;
   }
 
-  function clearScores(alsoClearStorage){
-    for (var h=1; h<=HOLES; h++){
-      setSelectValue(h, 1, "");
-      setSelectValue(h, 2, "");
-    }
-    recolorAllSelects();
-    recalcTotals();
-    setActiveHole(1, true);
+  function renderAll(seq){
+    currentSeq = seq.slice();
+    mainBody.innerHTML = "";
 
-    if (alsoClearStorage) clearSavedStateForCurrentCourse();
-    saveState();
+    var parFront=0, parBack=0, parTotal=0;
+
+    for (var i=0;i<seq.length;i++){
+      var hole = i+1;
+      var to = seq[i];
+      var from = (i===0) ? "tee" : seq[i-1];
+      var p = parFor(from,to,hole);
+
+      parTotal += p;
+      if (hole<=9) parFront += p; else parBack += p;
+
+      var tr = document.createElement("tr");
+      tr.className = "holeRow";
+      tr.setAttribute("data-hole", ""+hole);
+
+      tr.addEventListener("click", function(e){
+        if (e && e.target && (e.target.tagName === "SELECT" || e.target.tagName === "OPTION")) return;
+        var h = parseInt(this.getAttribute("data-hole"),10) || 1;
+        setActiveHole(h, true);
+      });
+
+      // Hole #
+      var tdH = document.createElement("td");
+      tdH.textContent = ""+hole;
+      tr.appendChild(tdH);
+
+      // Throw cell: FROM → TO
+      var tdThrow = document.createElement("td");
+      var wrap = document.createElement("span");
+      wrap.className = "twoPip";
+      wrap.appendChild(goalSpan(from));
+      var arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = "→";
+      wrap.appendChild(arrow);
+      wrap.appendChild(goalSpan(to));
+      tdThrow.appendChild(wrap);
+      tr.appendChild(tdThrow);
+
+      // Par
+      var tdP = document.createElement("td");
+      tdP.textContent = ""+p;
+      tr.appendChild(tdP);
+
+      // Player selects
+      var td1 = document.createElement("td");
+      td1.appendChild(makeDeltaSelect(hole, 1, p));
+      tr.appendChild(td1);
+
+      var td2 = document.createElement("td");
+      td2.appendChild(makeDeltaSelect(hole, 2, p));
+      tr.appendChild(td2);
+
+      mainBody.appendChild(tr);
+
+      if (hole === 9){
+        mainBody.appendChild(buildFront9Row(parFront));
+      }
+    }
+
+    // top + footer pars
+    document.getElementById("parFrontTop").textContent = parFront;
+    document.getElementById("parBackTop").textContent  = parBack;
+    document.getElementById("parTotalTop").textContent = parTotal;
+    document.getElementById("parBackCell").textContent = parBack;
+    document.getElementById("parTotalCell").textContent = parTotal;
+
+    recalcTotals();
+
+    var st = loadState();
+    if (st){
+      n1.value = st.n1 || "";
+      n2.value = st.n2 || "";
+      syncPlayerHeaders();
+
+      if (st.scores){
+        for (var h=1; h<=HOLES; h++){
+          if (!st.scores[h]) continue;
+          setSelectValue(h, 1, st.scores[h].p1 || "");
+          setSelectValue(h, 2, st.scores[h].p2 || "");
+        }
+        recolorAllSelects();
+        recalcTotals();
+      }
+      setActiveHole(Math.max(1, Math.min(HOLES, st.activeHole || 1)), false);
+    } else {
+      syncPlayerHeaders();
+      setActiveHole(1, false);
+    }
+  }
+
+  function setUrlForCourse(seq){
+    var url = new URL(window.location.href);
+    url.searchParams.set("c", encodeURIComponent(seq.join(",")));
+    history.replaceState(null, "", url.toString());
+  }
+
+  async function copyShareLink(){
+    var link = window.location.href;
+    try{
+      await navigator.clipboard.writeText(link);
+      alert("Share link copied!");
+    }catch(e){
+      prompt("Copy this link:", link);
+    }
+  }
+
+  function decodeCourse(param){
+    try{
+      if (!param) return null;
+      var raw = decodeURIComponent(param);
+      var parts = raw.split(",").map(function(s){ return s.trim().toLowerCase(); }).filter(Boolean);
+      if (parts.length !== HOLES) return null;
+
+      for (var i=0;i<parts.length;i++){
+        if (GOALS.indexOf(parts[i]) === -1) return null;
+      }
+      if (parts[8] !== "green") return null;
+      if (parts[17] !== "green") return null;
+      if (parts[0] === "green") return null;
+
+      for (var h=2; h<=HOLES; h++){
+        var prev = parts[h-2];
+        var next = parts[h-1];
+        if (prev === next) return null;
+        if (!allowed(prev, next)) return null;
+      }
+      return parts;
+    }catch(e){
+      return null;
+    }
   }
 
   function generateAndRender(){
-    // lock: warn if any scores entered
     if (anyScoreEntered()){
       var ok = confirm("Generate a new course? This will reset scores for this round.");
       if (!ok) return;
@@ -995,40 +1045,31 @@
       alert("Could not generate a valid course. Try again.");
       return;
     }
-
-    // new course => new URL & render
     setUrlForCourse(r.seq);
     renderAll(r.seq);
-
-    // after new course, scores should be clean
     clearScores(true);
   }
 
-  // ---------- Wire buttons ----------
-  document.getElementById("btnGen").addEventListener("click", generateAndRender);
-  document.getElementById("btnClear").addEventListener("click", function(){
-    clearScores(true);
-  });
-  document.getElementById("btnCopyLink").addEventListener("click", copyShareLink);
+  // Buttons
+  btnGen.addEventListener("click", generateAndRender);
+  btnClear.addEventListener("click", function(){ clearScores(true); });
+  btnCopy.addEventListener("click", copyShareLink);
 
-  // ---------- Init ----------
+  // init
   function init(){
     syncPlayerHeaders();
-
     var url = new URL(window.location.href);
     var c = url.searchParams.get("c");
     var seq = decodeCourse(c);
-
     if (seq){
       renderAll(seq);
-      // ensure URL is normalized (encoded)
       setUrlForCourse(seq);
     } else {
       generateAndRender();
     }
   }
-
   init();
+
 })();
 </script>
 
