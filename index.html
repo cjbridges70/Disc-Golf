@@ -6,9 +6,6 @@
   <title>Bridges Park</title>
 
   <style>
-    /* ---------------------------
-       THEME VARIABLES (Light)
-    ----------------------------*/
     :root{
       --bg:#ffffff;
       --text:#111111;
@@ -20,12 +17,11 @@
       --btnBg:#efefef;
       --btnText:#111111;
 
-      --scoreUnder:#d1fae5; /* under */
-      --scoreEven:#f3f4f6;  /* even  */
-      --scoreOver:#fee2e2;  /* over  */
+      --scoreUnder:#d1fae5;
+      --scoreEven:#f3f4f6;
+      --scoreOver:#fee2e2;
     }
 
-    /* Auto Dark Mode (system) */
     @media (prefers-color-scheme: dark){
       :root{
         --bg:#0b0d10;
@@ -44,7 +40,6 @@
       }
     }
 
-    /* Manual override via data-theme */
     html[data-theme="light"]{
       --bg:#ffffff; --text:#111111; --muted:#666666; --card:#ffffff;
       --border:#dddddd; --thead:#f5f5f5; --tableLine:#dddddd;
@@ -58,9 +53,6 @@
       --scoreUnder:#0f3b2b; --scoreEven:#202634; --scoreOver:#3b1416;
     }
 
-    /* ---------------------------
-       BASE LAYOUT
-    ----------------------------*/
     body{
       font-family:-apple-system,system-ui,sans-serif;
       margin:16px;
@@ -119,7 +111,6 @@
     .brand h1{margin:0;font-size:28px}
     .subtitle{margin:2px 0 0 0}
 
-    /* Logo (no border) */
     .logoImg{
       width:64px;height:64px;border-radius:14px;object-fit:contain;
       border:none !important; outline:none !important; box-shadow:none !important;
@@ -143,7 +134,6 @@
     .infoLabel{font-size:12px;color:var(--muted);margin:0}
     .infoValue{font-size:16px;font-weight:700;margin:2px 0 0 0}
 
-    /* Theme selector */
     .themeRow{
       max-width:900px;
       margin-top:10px;
@@ -155,7 +145,6 @@
     .themeRow label{font-size:13px;color:var(--muted)}
     .themeRow select{width:auto;min-width:160px}
 
-    /* Goal "flag" colors (keep true colors in both themes) */
     .goal{font-weight:700;text-transform:capitalize}
     .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
     .goal-orange{background:#ff8a00;color:#111}
@@ -167,18 +156,36 @@
     .goal-tee{background:#111;color:#fff;border:1px solid #111}
     .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
 
-    /* Per-hole score coloring */
     .score-under{background:var(--scoreUnder)}
     .score-even{background:var(--scoreEven)}
     .score-over{background:var(--scoreOver)}
 
-    /* Totals pill coloring */
     .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
     .pill-under{background:var(--scoreUnder)}
     .pill-even{background:var(--scoreEven)}
     .pill-over{background:var(--scoreOver)}
 
-    /* Small legend */
+    /* New summary display: BIG diff, small throws */
+    .sumCell{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2px;
+      line-height:1.1;
+    }
+    .sumDiff{
+      font-size:18px;
+      font-weight:800;
+      padding:2px 10px;
+      border-radius:999px;
+      display:inline-block;
+      min-width:44px;
+    }
+    .sumThrows{
+      font-size:12px;
+      color:var(--muted);
+    }
+
     .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
     .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
     .dot{width:12px;height:12px;border-radius:4px;border:1px solid var(--border)}
@@ -200,7 +207,6 @@
 <div class="topWrap">
   <div class="header">
     <div class="brand">
-      <!-- Light/Dark logos (auto swap) -->
       <img id="logoLight" class="logoImg"
            src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png"
            alt="Bridges Park logo">
@@ -215,7 +221,6 @@
     </div>
   </div>
 
-  <!-- Theme control -->
   <div class="themeRow">
     <label for="themeSelect">Theme</label>
     <select id="themeSelect">
@@ -272,22 +277,40 @@
         <th id="p2Head">P2</th>
       </tr>
     </thead>
+
+    <!-- Body will include holes AND the "Front 9" summary row after hole 9 -->
     <tbody id="mainBody"></tbody>
+
     <tfoot>
       <tr>
-        <th colspan="4" class="right">Front 9</th>
-        <th><span id="f1">0</span> <span id="fd1" class="pill pill-even">E</span></th>
-        <th><span id="f2">0</span> <span id="fd2" class="pill pill-even">E</span></th>
-      </tr>
-      <tr>
         <th colspan="4" class="right">Back 9</th>
-        <th><span id="b1">0</span> <span id="bd1" class="pill pill-even">E</span></th>
-        <th><span id="b2">0</span> <span id="bd2" class="pill pill-even">E</span></th>
+        <th>
+          <div class="sumCell">
+            <span id="bd1" class="sumDiff pill pill-even">E</span>
+            <span id="b1" class="sumThrows">0</span>
+          </div>
+        </th>
+        <th>
+          <div class="sumCell">
+            <span id="bd2" class="sumDiff pill pill-even">E</span>
+            <span id="b2" class="sumThrows">0</span>
+          </div>
+        </th>
       </tr>
       <tr>
         <th colspan="4" class="right">Total</th>
-        <th><span id="t1">0</span> <span id="d1" class="pill pill-even">E</span></th>
-        <th><span id="t2">0</span> <span id="d2" class="pill pill-even">E</span></th>
+        <th>
+          <div class="sumCell">
+            <span id="d1" class="sumDiff pill pill-even">E</span>
+            <span id="t1" class="sumThrows">0</span>
+          </div>
+        </th>
+        <th>
+          <div class="sumCell">
+            <span id="d2" class="sumDiff pill pill-even">E</span>
+            <span id="t2" class="sumThrows">0</span>
+          </div>
+        </th>
       </tr>
     </tfoot>
   </table>
@@ -295,14 +318,11 @@
 
 <script>
 (function(){
-  // If anything breaks, show the actual error instead of silently failing
   window.addEventListener("error", function(ev){
     alert("Page error: " + (ev && ev.message ? ev.message : "Unknown error"));
   });
 
-  /* ---------------------------
-     THEME + LOGO SWAP
-  ----------------------------*/
+  /* Theme + logo swap */
   var themeSelect = document.getElementById("themeSelect");
 
   function syncLogo(theme){
@@ -340,7 +360,6 @@
     applyTheme(themeSelect.value);
   });
 
-  // If user is on "auto" and system theme changes while page open
   if (window.matchMedia) {
     try {
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
@@ -350,18 +369,12 @@
     } catch(e){}
   }
 
-  /* ---------------------------
-     COURSE GENERATOR RULES
-  ----------------------------*/
+  /* Course generator */
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
   var HOLES = 18;
   var MINREQ = 2;
-
-  // Hole 9 and 18 must be green
   var FIXED = { 9: "green", 18: "green" };
 
-  // Directional restrictions (prev -> next disallowed)
-  // Pink <-> Green removed both ways (pink blocks green, green blocks pink)
   var DIS = {
     "white":  [],
     "orange": ["pink","blue"],
@@ -372,11 +385,8 @@
     "yellow": ["green"]
   };
 
-  // Start cannot be green (tee -> green disallowed)
-  // Par rules: Hole 1 (tee -> goal) Par 3 to yellow/pink/white; else Par 4
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
-  // Pair-based par rules (both directions)
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
@@ -389,7 +399,7 @@
     ["green","red"],
     ["red","orange"],
     ["red","blue"],
-    ["blue","pink"] // par 3 both directions
+    ["blue","pink"]
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
   [
@@ -405,7 +415,6 @@
     return true;
   }
 
-  // Unique throws are directional: from->to cannot repeat
   function edgeKey(from,to){ return from + "->" + to; }
 
   function shuffle(arr){
@@ -484,7 +493,6 @@
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
 
-    // Apply fixed holes
     for (var h in FIXED) if (FIXED.hasOwnProperty(h)) course[parseInt(h,10)] = FIXED[h];
 
     var used = initCounts();
@@ -500,7 +508,6 @@
 
       var prevGoal = (pos===1) ? "tee" : course[pos-1];
 
-      // If fixed / already assigned
       if (course[pos] !== null){
         var v = course[pos];
         if (pos === 1 && v === "green") return false;
@@ -520,17 +527,17 @@
         return false;
       }
 
-      // Choose candidates
       var prev2 = (pos>1) ? course[pos-1] : null;
       var cands = [];
 
       for (var i2=0;i2<GOALS.length;i2++){
         var g2 = GOALS[i2];
 
-        if (pos === 1 && g2 === "green") continue;         // start can't be green
-        if (pos > 1 && !allowed(prev2, g2)) continue;      // directional rule
-        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue; // lookahead to fixed next
-        if (usedEdges[edgeKey(prevGoal, g2)]) continue;    // unique throw direction
+        if (pos === 1 && g2 === "green") continue;
+        if (pos > 1 && !allowed(prev2, g2)) continue;
+
+        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
+        if (usedEdges[edgeKey(prevGoal, g2)]) continue;
 
         cands.push(g2);
       }
@@ -558,7 +565,6 @@
       return false;
     }
 
-    // Multiple attempts for randomness
     for (var attempt=1; attempt<=20000; attempt++){
       for (var p=1; p<=HOLES; p++) if (!FIXED[p]) course[p] = null;
       used = initCounts();
@@ -574,9 +580,7 @@
     return null;
   }
 
-  /* ---------------------------
-     RENDER + SCOREKEEPING
-  ----------------------------*/
+  /* Render + scoring */
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
   var n1 = document.getElementById("n1");
@@ -588,20 +592,17 @@
     if (idx===1) return (n1.value || "Player 1").trim();
     return (n2.value || "Player 2").trim();
   }
-
   function syncPlayerHeaders(){
     p1Head.textContent = playerName(1);
     p2Head.textContent = playerName(2);
   }
-
   n1.addEventListener("input", syncPlayerHeaders);
   n2.addEventListener("input", syncPlayerHeaders);
 
-  function updatePillColor(el){
+  function setDiffPill(el, diffText){
     el.classList.remove("pill-under","pill-even","pill-over");
-    var txt = el.textContent;
-    if (txt === "E") el.classList.add("pill-even");
-    else if (txt[0] === "+") el.classList.add("pill-over");
+    if (diffText === "E") el.classList.add("pill-even");
+    else if (diffText[0] === "+") el.classList.add("pill-over");
     else el.classList.add("pill-under");
   }
 
@@ -667,6 +668,27 @@
     document.getElementById("parTotalTop").textContent = total;
   }
 
+  function buildFront9Row(){
+    var tr = document.createElement("tr");
+    tr.setAttribute("id", "front9Row");
+    tr.innerHTML = `
+      <th colspan="4" class="right">Front 9</th>
+      <th>
+        <div class="sumCell">
+          <span id="fd1" class="sumDiff pill pill-even">E</span>
+          <span id="f1" class="sumThrows">0</span>
+        </div>
+      </th>
+      <th>
+        <div class="sumCell">
+          <span id="fd2" class="sumDiff pill pill-even">E</span>
+          <span id="f2" class="sumThrows">0</span>
+        </div>
+      </th>
+    `;
+    return tr;
+  }
+
   function renderAll(seq){
     mainBody.innerHTML = "";
 
@@ -696,6 +718,11 @@
       tr.appendChild(td2);
 
       mainBody.appendChild(tr);
+
+      // Insert Front 9 summary AFTER hole 9
+      if (hole === 9){
+        mainBody.appendChild(buildFront9Row());
+      }
     }
 
     setTopParSummary(parFront, parBack, parTotal);
@@ -727,21 +754,31 @@
         }
       }
 
-      document.getElementById("f"+pl).textContent = ""+f;
-      document.getElementById("b"+pl).textContent = ""+b;
-      document.getElementById("t"+pl).textContent = ""+t;
+      // Small numbers = throws
+      var fThrows = document.getElementById("f"+pl);
+      var bThrows = document.getElementById("b"+pl);
+      var tThrows = document.getElementById("t"+pl);
+      if (fThrows) fThrows.textContent = ""+f;
+      if (bThrows) bThrows.textContent = ""+b;
+      if (tThrows) tThrows.textContent = ""+t;
 
+      // Big numbers = diff (throws - par)
       var fd = document.getElementById("fd"+pl);
       var bd = document.getElementById("bd"+pl);
       var d  = document.getElementById("d"+pl);
 
-      fd.textContent = formatDiff(f - parFront);
-      bd.textContent = formatDiff(b - parBack);
-      d.textContent  = formatDiff(t - parTotal);
-
-      updatePillColor(fd);
-      updatePillColor(bd);
-      updatePillColor(d);
+      if (fd){
+        fd.textContent = formatDiff(f - parFront);
+        setDiffPill(fd, fd.textContent);
+      }
+      if (bd){
+        bd.textContent = formatDiff(b - parBack);
+        setDiffPill(bd, bd.textContent);
+      }
+      if (d){
+        d.textContent = formatDiff(t - parTotal);
+        setDiffPill(d, d.textContent);
+      }
     }
   }
 
@@ -767,7 +804,6 @@
 
   btnGen.addEventListener("click", generateAndRender);
 
-  // Init on load
   syncPlayerHeaders();
   generateAndRender();
 })();
