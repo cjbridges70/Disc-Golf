@@ -97,7 +97,7 @@
       color:var(--text);
       border:1px solid var(--border);
       border-radius:10px;
-      min-width:70px;
+      min-width:74px;
     }
 
     table{width:100%;border-collapse:collapse;margin-top:12px}
@@ -146,16 +146,30 @@
     .themeRow label{font-size:13px;color:var(--muted)}
     .themeRow select{width:auto;min-width:160px}
 
+    /* Goal tags: force equal-size "flag pips" */
     .goal{font-weight:700;text-transform:capitalize}
+    .goalTag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height:22px;
+      min-width:72px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:12px;
+      box-sizing:border-box; /* border doesn't change size */
+      line-height:1;
+      white-space:nowrap;
+    }
+
     .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
-    .goal-orange{background:#ff8a00;color:#111}
-    .goal-blue{background:#1f6feb;color:#fff}
-    .goal-pink{background:#ff5aa5;color:#111}
-    .goal-red{background:#e11d48;color:#fff}
-    .goal-green{background:#16a34a;color:#fff}
-    .goal-yellow{background:#ffd400;color:#111}
+    .goal-orange{background:#ff8a00;color:#111;border:1px solid rgba(0,0,0,0.08)}
+    .goal-blue{background:#1f6feb;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-pink{background:#ff5aa5;color:#111;border:1px solid rgba(0,0,0,0.08)}
+    .goal-red{background:#e11d48;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-green{background:#16a34a;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
     .goal-tee{background:#111;color:#fff;border:1px solid #111}
-    .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
 
     /* delta entry coloring */
     .score-under{background:var(--scoreUnder)}
@@ -290,7 +304,8 @@
 
     <tfoot>
       <tr>
-        <th colspan="4" class="left">Back 9</th>
+        <th colspan="3" class="left">Back 9</th>
+        <th id="parBackCell">–</th>
         <th>
           <div class="sumCell">
             <span id="bd1" class="sumDiff pill pill-even">0</span>
@@ -305,7 +320,8 @@
         </th>
       </tr>
       <tr>
-        <th colspan="4" class="left">Total</th>
+        <th colspan="3" class="left">Total</th>
+        <th id="parTotalCell">–</th>
         <th>
           <div class="sumCell">
             <span id="d1" class="sumDiff pill pill-even">0</span>
@@ -581,7 +597,7 @@
     return null;
   }
 
-  /* Render + scoring (delta entry) */
+  /* Render + scoring (delta entry with "–" placeholder) */
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
   var n1 = document.getElementById("n1");
@@ -607,7 +623,6 @@
     else el.classList.add("pill-under");
   }
 
-  // Delta entry: -2, -1, 0, +1, +2, +3
   var DELTAS = [-2,-1,0,1,2,3];
 
   function makeDeltaSelect(hole, player, parVal){
@@ -616,12 +631,18 @@
     sel.setAttribute("data-player", ""+player);
     sel.setAttribute("data-par", ""+parVal);
 
+    // Placeholder "–" BEFORE selection is made, but counts as 0 (we treat "" as 0)
+    var ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = "–";
+    ph.selected = true;
+    sel.appendChild(ph);
+
     for (var i=0;i<DELTAS.length;i++){
       var d = DELTAS[i];
       var opt = document.createElement("option");
       opt.value = ""+d;
       opt.textContent = (d>0 ? ("+"+d) : (""+d));
-      if (d===0) opt.selected = true;
       sel.appendChild(opt);
     }
 
@@ -636,7 +657,15 @@
 
   function colorDelta(sel){
     sel.classList.remove("score-under","score-even","score-over");
-    var d = parseInt(sel.value,10);
+    var raw = sel.value;
+
+    // Blank = still counts as 0, and we color it as even
+    if (raw === ""){
+      sel.classList.add("score-even");
+      return;
+    }
+
+    var d = parseInt(raw,10);
     if (d < 0) sel.classList.add("score-under");
     else if (d > 0) sel.classList.add("score-over");
     else sel.classList.add("score-even");
@@ -665,13 +694,17 @@
     document.getElementById("parFrontTop").textContent = front;
     document.getElementById("parBackTop").textContent  = back;
     document.getElementById("parTotalTop").textContent = total;
+
+    document.getElementById("parBackCell").textContent = back;
+    document.getElementById("parTotalCell").textContent = total;
   }
 
-  function buildFront9Row(){
+  function buildFront9Row(frontPar){
     var tr = document.createElement("tr");
     tr.setAttribute("id", "front9Row");
     tr.innerHTML = `
-      <th colspan="4" class="left">Front 9</th>
+      <th colspan="3" class="left">Front 9</th>
+      <th>${frontPar}</th>
       <th>
         <div class="sumCell">
           <span id="fd1" class="sumDiff pill pill-even">0</span>
@@ -719,7 +752,7 @@
       mainBody.appendChild(tr);
 
       if (hole === 9){
-        mainBody.appendChild(buildFront9Row());
+        mainBody.appendChild(buildFront9Row(parFront));
       }
     }
 
@@ -733,10 +766,6 @@
   }
 
   function recalcTotals(){
-    var parFront = window.__parFront || 0;
-    var parBack  = window.__parBack  || 0;
-    var parTotal = window.__parTotal || 0;
-
     for (var pl=1; pl<=2; pl++){
       var frontDelta=0, backDelta=0, totalDelta=0;
       var frontThrows=0, backThrows=0, totalThrows=0;
@@ -746,28 +775,28 @@
         if (!sel) continue;
 
         var par = parseInt(sel.getAttribute("data-par"),10) || 0;
-        var d = parseInt(sel.value,10) || 0;
 
-        // delta sums
+        // Blank = 0 delta
+        var raw = sel.value;
+        var d = (raw === "") ? 0 : (parseInt(raw,10) || 0);
+
         totalDelta += d;
         if (hole<=9) frontDelta += d; else backDelta += d;
 
-        // throws derived from par + delta
         var throws = par + d;
         totalThrows += throws;
         if (hole<=9) frontThrows += throws; else backThrows += throws;
       }
 
-      // Small numbers = throws total
       document.getElementById("f"+pl).textContent = ""+frontThrows;
       document.getElementById("b"+pl).textContent = ""+backThrows;
       document.getElementById("t"+pl).textContent = ""+totalThrows;
 
-      // Big numbers = delta totals (0 instead of E)
       var fd = document.getElementById("fd"+pl);
       var bd = document.getElementById("bd"+pl);
       var dEl = document.getElementById("d"+pl);
 
+      // 0 instead of E
       fd.textContent = ""+frontDelta;
       bd.textContent = ""+backDelta;
       dEl.textContent = ""+totalDelta;
