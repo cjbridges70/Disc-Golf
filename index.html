@@ -1,738 +1,395 @@
 <!doctype html>
 <html lang="en" data-theme="system">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Bridges Park</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bridges Park</title>
 
-  <style>
-    /* =========================
-       Premium mobile UI baseline
-       (compatible with current app.js)
-       ========================= */
+<style>
+/* ======================================================
+   PREMIUM MOBILE UI – FINAL (app.js compatible)
+   ====================================================== */
 
-    :root{
-      /* Core */
-      --bg:#070a0f;
-      --text:#e5e7eb;
-      --muted:#9aa3b2;
+:root{
+  --bg:#070a0f;
+  --text:#e5e7eb;
+  --muted:#9aa3b2;
 
-      /* Surfaces */
-      --card: rgba(17,21,27,0.78);
-      --border: rgba(255,255,255,0.10);
-      --hair: rgba(255,255,255,0.08);
+  --card:rgba(17,21,27,.78);
+  --border:rgba(255,255,255,.10);
 
-      /* Premium green */
-      --accent:#9ED37A;
-      --accentSoft: rgba(158,211,122,0.18);
-      --activeBorder: rgba(158,211,122,0.95);
+  --accent:#9ED37A;
+  --accentSoft:rgba(158,211,122,.20);
+  --activeBorder:rgba(158,211,122,.95);
 
-      /* Controls */
-      --controlBg: rgba(27,34,48,0.70);
-      --controlBg2: rgba(27,34,48,0.55);
+  --controlBg:rgba(27,34,48,.70);
+  --controlBg2:rgba(27,34,48,.55);
 
-      /* Score colors */
-      --scoreUnder: rgba(16,185,129,0.20);
-      --scoreEven: rgba(148,163,184,0.18);
-      --scoreOver: rgba(244,63,94,0.20);
+  --scoreUnder:rgba(16,185,129,.22);
+  --scoreEven:rgba(148,163,184,.20);
+  --scoreOver:rgba(244,63,94,.22);
 
-      /* Table */
-      --thead: rgba(23,28,36,0.75);
-      --rowBg: rgba(17,21,27,0.70);
-      --rowBorder: rgba(255,255,255,0.10);
-      --totalRow: rgba(27,35,65,0.65);
+  --thead:rgba(23,28,36,.75);
+  --rowBg:rgba(17,21,27,.72);
+  --rowBorder:rgba(255,255,255,.10);
+  --totalRow:rgba(27,35,65,.65);
 
-      /* Progress */
-      --progressTrack: rgba(255,255,255,0.10);
-      --progressFill: var(--accent);
+  --progressTrack:rgba(255,255,255,.12);
+  --progressFill:var(--accent);
 
-      /* Shadow */
-      --shadow: 0 16px 34px rgba(0,0,0,0.28);
-      --shadow2: 0 10px 20px rgba(0,0,0,0.22);
+  --shadow:0 16px 34px rgba(0,0,0,.28);
+  --shadow2:0 10px 20px rgba(0,0,0,.22);
+}
 
-      /* Toast */
-      --toastBg: rgba(10,12,16,0.92);
-      --toastText: #fff;
-    }
+/* Light mode */
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f6f7fb;
+  --text:#0f172a;
+  --muted:#64748b;
+  --card:rgba(255,255,255,.78);
+  --border:rgba(15,23,42,.12);
+  --accent:#8FBC6C;
+  --accentSoft:rgba(143,188,108,.20);
+  --controlBg:rgba(255,255,255,.75);
+  --controlBg2:rgba(255,255,255,.60);
+  --rowBg:rgba(255,255,255,.60);
+  --rowBorder:rgba(15,23,42,.12);
+  --totalRow:rgba(143,188,108,.18);
+  --progressTrack:rgba(15,23,42,.10);
+  --shadow:0 16px 34px rgba(2,6,23,.12);
+  --shadow2:0 10px 20px rgba(2,6,23,.10);
+}
 
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg:#f6f7fb;
-        --text:#0f172a;
-        --muted:#64748b;
+html[data-theme="dark"]{ color-scheme:dark; }
 
-        --card: rgba(255,255,255,0.75);
-        --border: rgba(15,23,42,0.10);
-        --hair: rgba(15,23,42,0.08);
+html,body{height:100%}
 
-        --accent:#8FBC6C;
-        --accentSoft: rgba(143,188,108,0.18);
-        --activeBorder: rgba(143,188,108,0.95);
+/* Full-viewport background (prevents cut-off) */
+html::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  background:
+    radial-gradient(900px 500px at 10% -10%, rgba(158,211,122,.25), transparent 60%),
+    radial-gradient(700px 400px at 95% 10%, rgba(125,186,121,.20), transparent 65%),
+    var(--bg);
+}
 
-        --controlBg: rgba(255,255,255,0.65);
-        --controlBg2: rgba(255,255,255,0.55);
+body{
+  margin:0;
+  padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom)) 16px;
+  font-family:-apple-system,system-ui,sans-serif;
+  color:var(--text);
+}
 
-        --scoreUnder: rgba(16,185,129,0.18);
-        --scoreEven: rgba(148,163,184,0.20);
-        --scoreOver: rgba(244,63,94,0.16);
+.muted{color:var(--muted);font-size:12px}
 
-        --thead: rgba(255,255,255,0.70);
-        --rowBg: rgba(255,255,255,0.55);
-        --rowBorder: rgba(15,23,42,0.10);
-        --totalRow: rgba(143,188,108,0.14);
+/* ================= HEADER ================= */
+.header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.headerLeft{display:flex;align-items:center;gap:12px;flex:1}
 
-        --progressTrack: rgba(15,23,42,0.10);
+.logoImg{width:56px;height:56px;object-fit:contain;border:none}
 
-        --shadow: 0 16px 34px rgba(2,6,23,0.12);
-        --shadow2: 0 10px 20px rgba(2,6,23,0.10);
-      }
-    }
+.brand h1{
+  margin:0;
+  font-size:34px;
+  font-weight:950;
+  letter-spacing:-.6px;
+}
+.subtitle{margin-top:4px;color:var(--muted);font-size:13px}
 
-    html[data-theme="dark"]{ color-scheme: dark; }
-    html[data-theme="light"]{ color-scheme: light; }
+.control{
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:var(--controlBg);
+  box-shadow:var(--shadow2);
+  backdrop-filter:blur(12px);
+}
 
-    html, body { height: 100%; }
+/* Theme toggle */
+.themeToggleBtn{
+  width:52px;height:52px;
+  display:flex;align-items:center;justify-content:center;
+}
+.themeToggleBtn img{width:24px;height:24px}
 
-    /* Full-viewport background (prevents "cut off" above title) */
-    html::before{
-      content:"";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      background:
-        radial-gradient(900px 500px at 10% -10%, rgba(158,211,122,0.22), rgba(158,211,122,0) 60%),
-        radial-gradient(700px 400px at 95% 10%, rgba(125,186,121,0.18), rgba(125,186,121,0) 65%),
-        var(--bg);
-      transform: translateZ(0);
-    }
+/* ================= INFO ================= */
+.infoGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.infoCard{padding:14px}
+.infoValue{font-size:22px;font-weight:950;margin-top:6px}
 
-    body{
-      margin:0;
-      /* safe-area padding so header never gets clipped */
-      padding: max(14px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)) 16px;
-      font-family:-apple-system, system-ui, "SF Pro Display", "SF Pro Text", Segoe UI, Roboto, sans-serif;
-      color: var(--text);
-      line-height: 1.25;
-    }
+/* ================= LEGEND ================= */
+.legend{display:flex;gap:14px;margin-top:12px}
+.dot{width:10px;height:10px;border-radius:999px;border:1px solid var(--border)}
+.dot-under{background:var(--scoreUnder)}
+.dot-even{background:var(--scoreEven)}
+.dot-over{background:var(--scoreOver)}
 
-    .muted{ color:var(--muted); font-size:12px; }
+/* ================= BUTTONS ================= */
+button{
+  width:100%;
+  padding:16px;
+  font-size:17px;
+  font-weight:950;
+  color:var(--text);
+  cursor:pointer;
+}
+button:active{transform:scale(.985)}
 
-    /* =========================
-       Top header
-       ========================= */
-    .header{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .headerLeft{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex:1 1 auto;
-      min-width:0;
-    }
+#btnGen{
+  margin-top:12px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.18),transparent),
+    radial-gradient(1100px 160px at 50% 0%,rgba(158,211,122,.25),transparent),
+    var(--controlBg);
+}
 
-    .brand h1{
-      margin:0;
-      font-size:34px;
-      letter-spacing:-0.6px;
-      font-weight:950;
-      line-height:1.02;
-    }
-    .subtitle{
-      margin-top:4px;
-      font-size:13px;
-      color:var(--muted);
-      letter-spacing:-0.1px;
-    }
+.btnRowTwo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.btnSecondary{background:var(--controlBg2);font-size:15px}
 
-    .logoImg{
-      width:56px;
-      height:56px;
-      object-fit:contain;
-      border:none !important;
-      outline:none !important;
-      box-shadow:none !important;
-      background:transparent;
-      display:block;
-      flex:0 0 auto;
-      border-radius:14px;
-    }
+/* ================= NAMES ================= */
+.nameBlock{margin-top:12px;padding:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.grow{flex:1}
 
-    /* Unified "control" style so buttons + inputs look consistent */
-    .control{
-      border-radius:18px;
-      border:1px solid var(--border);
-      background: var(--controlBg);
-      box-shadow: var(--shadow2);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-    }
+input{
+  width:100%;
+  padding:15px;
+  font-size:16px;
+  font-weight:850;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+}
 
-    .themeToggleBtn{
-      width:52px;
-      height:52px;
-      padding:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .themeToggleBtn img{
-      width:24px;
-      height:24px;
-      display:block;
-      opacity:0.95;
-    }
+/* ================= SCORECARD ================= */
+.card{margin-top:14px;padding:0;overflow:hidden}
 
-    /* =========================
-       Info cards
-       ========================= */
-    .infoGrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:14px;
-    }
-    .infoCard{
-      padding:14px;
-    }
-    .infoLabel{
-      margin:0;
-      font-size:12px;
-      color:var(--muted);
-      letter-spacing:-0.1px;
-    }
-    .infoValue{
-      margin:6px 0 0 0;
-      font-size:22px;
-      font-weight:950;
-      letter-spacing:-0.3px;
-    }
+.scoreSticky{
+  position:sticky;top:8px;z-index:50;
+  padding:12px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  box-shadow:var(--shadow2);
+}
 
-    /* =========================
-       Legend
-       ========================= */
-    .legend{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      flex-wrap:wrap;
-      margin-top:12px;
-      padding-left:2px;
-      user-select:none;
-    }
-    .swatch{
-      display:inline-flex;
-      align-items:center;
-      gap:9px;
-      font-size:13px;
-      color:var(--muted);
-    }
-    .dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset;
-      flex:0 0 10px;
-    }
-    .dot-under{ background: var(--scoreUnder); }
-    .dot-even{ background: var(--scoreEven); }
-    .dot-over{ background: var(--scoreOver); }
+.colHeader{
+  display:grid;
+  grid-template-columns:10% 44% 10% 18% 18%;
+  padding:12px;
+  background:var(--thead);
+  border-radius:18px;
+  font-weight:950;
+}
 
-    /* =========================
-       Buttons
-       ========================= */
-    button{
-      width:100%;
-      padding:16px 14px;
-      font-size:17px;
-      font-weight:950;
-      letter-spacing:-0.2px;
-      color: var(--text);
-      cursor:pointer;
-      transition: transform 0.10s ease, filter 0.15s ease;
-    }
-    button:active{ transform: scale(0.985); }
-    button:focus{ outline:none; }
+.progressWrap{display:flex;gap:10px;margin-top:12px}
+.progressTrack{flex:1;height:10px;border-radius:999px;background:var(--progressTrack)}
+.progressFill{height:100%;width:0%;background:var(--progressFill)}
+.progressText{min-width:86px;text-align:right;font-weight:900;color:var(--muted)}
 
-    #btnGen{
-      margin-top:12px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.02)),
-        radial-gradient(1100px 160px at 50% 0%, rgba(158,211,122,0.22), rgba(158,211,122,0)),
-        var(--controlBg);
-      border-color: rgba(158,211,122,0.28);
-    }
+table{
+  width:100%;
+  border-spacing:0 12px;
+  table-layout:fixed;
+  padding:0 12px 12px;
+}
 
-    .btnRowTwo{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-      margin-top:12px;
-    }
-    .btnSecondary{
-      padding:15px 12px;
-      font-size:15px;
-      font-weight:900;
-      background: var(--controlBg2);
-    }
+colgroup col:nth-child(1){width:10%}
+colgroup col:nth-child(2){width:44%}
+colgroup col:nth-child(3){width:10%}
+colgroup col:nth-child(4){width:18%}
+colgroup col:nth-child(5){width:18%}
 
-    /* =========================
-       Player names (consistent style with buttons)
-       ========================= */
-    .nameBlock{
-      margin-top:12px;
-      padding:12px;
-    }
-    .row{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .grow{ flex:1 1 160px; }
+td,th{padding:14px;text-align:center;overflow:visible}
 
-    input[type=text]{
-      width:100%;
-      padding:15px 14px;
-      font-size:16px;
-      font-weight:850;
-      letter-spacing:-0.2px;
-      color: var(--text);
-      border-radius:16px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
-    }
-    input[type=text]::placeholder{
-      color: rgba(148,163,184,0.85);
-      font-weight:800;
-    }
+tbody tr.holeRow td{
+  background:var(--rowBg);
+  border-top:1px solid var(--rowBorder);
+  border-bottom:1px solid var(--rowBorder);
+}
+tbody tr.holeRow td:first-child{
+  border-left:1px solid var(--rowBorder);
+  border-radius:22px 0 0 22px;
+}
+tbody tr.holeRow td:last-child{
+  border-right:1px solid var(--rowBorder);
+  border-radius:0 22px 22px 0;
+}
 
-    /* =========================
-       Scorecard card
-       - remove title (fixes flare + spacing)
-       ========================= */
-    .card{
-      margin-top:14px;
-      padding:0; /* let sticky header sit flush */
-      overflow:hidden;
-    }
+tr.holeRow.active td{
+  background:
+    linear-gradient(90deg,var(--accentSoft),transparent),
+    var(--rowBg);
+}
+tr.holeRow.active td:first-child{
+  box-shadow:inset 5px 0 0 var(--activeBorder);
+}
 
-    /* Sticky header sits at top of the card */
-    .scoreSticky{
-      position: sticky;
-      top: 8px;
-      z-index: 60;
+/* Throw pills */
+.twoPip{display:inline-flex;align-items:center;gap:10px}
+.goalTag{
+  height:22px;
+  min-width:62px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:950;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.goal-tee{background:#0b0d10;color:#fff}
+.goal-white{background:#fff;color:#111}
+.goal-blue{background:#1f6feb;color:#fff}
+.goal-orange{background:#ff8a00}
+.goal-pink{background:#ff5aa5}
+.goal-red{background:#e11d48;color:#fff}
+.goal-green{background:#16a34a;color:#fff}
+.goal-yellow{background:#ffd400}
 
-      margin: 0;
-      padding: 12px 12px 12px 12px;
+/* Selects */
+select{
+  width:100%;
+  max-width:92px;
+  padding:10px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  font-weight:950;
+}
 
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)),
-        var(--card);
-      border-bottom:1px solid var(--border);
+/* Totals */
+tfoot tr.totalRow td, tfoot tr.totalRow th{
+  background:var(--totalRow);
+}
 
-      box-shadow: 0 14px 22px rgba(0,0,0,0.14);
-      -webkit-backdrop-filter: blur(12px);
-      backdrop-filter: blur(12px);
-    }
-
-    .colHeader{
-      display:grid;
-      grid-template-columns:10% 44% 10% 18% 18%;
-      align-items:center;
-
-      background: var(--thead);
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:12px 10px;
-
-      font-weight:950;
-      letter-spacing:-0.2px;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
-    }
-    .colHeader > div{
-      text-align:center;
-      overflow:hidden;
-      text-overflow:clip;
-      white-space:nowrap;
-    }
-
-    /* Progress bar UNDER headers */
-    .progressWrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin:12px 2px 2px 2px;
-    }
-    .progressTrack{
-      flex:1 1 auto;
-      height:10px;
-      border-radius:999px;
-      background:var(--progressTrack);
-      overflow:hidden;
-      border:1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
-    }
-    .progressFill{
-      height:100%;
-      width:0%;
-      background:
-        linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 55%),
-        var(--progressFill);
-      transition: width 0.25s ease;
-    }
-    .progressText{
-      font-size:13px;
-      color:var(--muted);
-      min-width:86px;
-      text-align:right;
-      font-weight:900;
-      letter-spacing:-0.2px;
-    }
-
-    /* =========================
-       Table
-       ========================= */
-    table{
-      width:100%;
-      margin: 0;
-      border-collapse:separate;
-      border-spacing:0 12px; /* more readable */
-      table-layout:fixed;
-      padding: 0 12px 12px 12px; /* card padding (below sticky) */
-    }
-
-    /* Column lock for perfect alignment */
-    colgroup col:nth-child(1){ width:10%; }
-    colgroup col:nth-child(2){ width:44%; }
-    colgroup col:nth-child(3){ width:10%; }
-    colgroup col:nth-child(4){ width:18%; }
-    colgroup col:nth-child(5){ width:18%; }
-
-    th, td{
-      padding:14px 10px;
-      text-align:center;
-      vertical-align:middle;
-      white-space:nowrap;
-      font-weight:800;
-      letter-spacing:-0.1px;
-
-      /* IMPORTANT: don't clip controls (fixes cut-off selects) */
-      overflow: visible;
-      text-overflow: clip;
-    }
-    .left{ text-align:left; }
-
-    /* Hole rows as "capsules" */
-    tbody tr.holeRow td{
-      background: var(--rowBg);
-      border-top:1px solid var(--rowBorder);
-      border-bottom:1px solid var(--rowBorder);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
-    }
-    tbody tr.holeRow td:first-child{
-      border-left:1px solid var(--rowBorder);
-      border-top-left-radius:22px;
-      border-bottom-left-radius:22px;
-    }
-    tbody tr.holeRow td:last-child{
-      border-right:1px solid var(--rowBorder);
-      border-top-right-radius:22px;
-      border-bottom-right-radius:22px;
-    }
-
-    /* Stronger active row */
-    tr.holeRow.active td{
-      background:
-        linear-gradient(90deg, rgba(158,211,122,0.22), rgba(158,211,122,0.08) 40%, rgba(158,211,122,0.04)),
-        var(--rowBg);
-    }
-    tr.holeRow.active td:first-child{
-      box-shadow:
-        inset 5px 0 0 0 var(--activeBorder),
-        0 1px 0 rgba(255,255,255,0.06) inset;
-    }
-
-    @keyframes pulseDone {
-      0%   { transform: scale(1); }
-      35%  { transform: scale(1.01); }
-      100% { transform: scale(1); }
-    }
-    tr.holeRow.pulse td{ animation: pulseDone 0.22s ease; }
-
-    /* =========================
-       Throw pills (premium + consistent)
-       ========================= */
-    .twoPip{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      max-width:100%;
-    }
-    .arrow{
-      font-size:12px;
-      color: rgba(148,163,184,0.95);
-      font-weight:950;
-      flex:0 0 auto;
-    }
-
-    .goalTag{
-      position:relative;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-
-      height:22px;
-      min-width:62px;
-      padding:0 12px;
-
-      border-radius:999px;
-      font-size:11px;
-      line-height:1;
-      font-weight:950;
-      letter-spacing:0.2px;
-      text-transform:capitalize;
-
-      border:1px solid rgba(255,255,255,0.14);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.10) inset,
-        0 10px 18px rgba(0,0,0,0.14);
-    }
-    .goalTag::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      background: linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0));
-      opacity:0.35;
-      pointer-events:none;
-    }
-
-    .goal-white{ background:#ffffff; color:#0f172a; border:1px solid rgba(15,23,42,0.12); }
-    .goal-orange{ background:#ff8a00; color:#111827; border:1px solid rgba(0,0,0,0.10); }
-    .goal-blue{ background:#1f6feb; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
-    .goal-pink{ background:#ff5aa5; color:#111827; border:1px solid rgba(0,0,0,0.10); }
-    .goal-red{ background:#e11d48; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
-    .goal-green{ background:#16a34a; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
-    .goal-yellow{ background:#ffd400; color:#111827; border:1px solid rgba(0,0,0,0.10); }
-    .goal-tee{ background:#0b0d10; color:#ffffff; border:1px solid rgba(255,255,255,0.14); }
-
-    /* =========================
-       Delta selector (prevent cut-off)
-       ========================= */
-    select{
-      width: 100%;
-      max-width: 92px;  /* keep it tidy on mobile */
-      font-size:15px;
-      padding:10px 10px;
-      background: rgba(255,255,255,0.06);
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:16px;
-      font-weight:950;
-      letter-spacing:-0.2px;
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.10) inset,
-        0 10px 18px rgba(0,0,0,0.10);
-    }
-    .score-under{ background: var(--scoreUnder); }
-    .score-even{ background: var(--scoreEven); }
-    .score-over{ background: var(--scoreOver); }
-
-    /* =========================
-       Summary cells
-       ========================= */
-    .pill{ border-radius:999px; padding:2px 10px; font-size:12px; display:inline-block; }
-    .pill-under{ background:var(--scoreUnder); }
-    .pill-even{ background:var(--scoreEven); }
-    .pill-over{ background:var(--scoreOver); }
-
-    .sumCell{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:5px;
-      line-height:1.05;
-    }
-    .sumDiff{
-      font-size:18px;
-      font-weight:950;
-      padding:4px 12px;
-      border-radius:999px;
-      display:inline-block;
-      min-width:46px;
-      border:1px solid var(--border);
-      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
-    }
-    .sumThrows{
-      font-size:11px;
-      color:var(--muted);
-      font-weight:900;
-    }
-
-    tfoot tr.totalRow th,
-    tfoot tr.totalRow td{
-      background: var(--totalRow);
-      border-top:1px solid var(--rowBorder);
-      border-bottom:1px solid var(--rowBorder);
-    }
-
-    /* Toast */
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform:translateX(-50%);
-      background:var(--toastBg);
-      color:var(--toastText);
-      padding:10px 12px;
-      border-radius:14px;
-      font-size:14px;
-      max-width:92vw;
-      opacity:0;
-      pointer-events:none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index:9999;
-      box-shadow: 0 14px 24px rgba(0,0,0,0.25);
-    }
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(-2px);
-    }
-  </style>
+/* Toast */
+.toast{
+  position:fixed;bottom:18px;left:50%;
+  transform:translateX(-50%);
+  padding:10px 14px;
+  background:rgba(0,0,0,.85);
+  color:#fff;border-radius:14px;
+  opacity:0;pointer-events:none;
+}
+.toast.show{opacity:1}
+</style>
 </head>
 
 <body>
 
-  <div class="header">
-    <div class="headerLeft">
-      <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo">
-      <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" alt="Bridges Park logo (dark)" style="display:none;">
-      <div class="brand">
-        <h1>Bridges Park</h1>
-        <div class="subtitle">Disc Golf • Course Generator + Scorecard</div>
-      </div>
-    </div>
-
-    <button id="themeToggle" class="themeToggleBtn control" aria-label="Toggle dark mode">
-      <img id="themeIcon" src="moon.png" alt="Theme icon">
-    </button>
-  </div>
-
-  <div class="infoGrid">
-    <div class="infoCard control">
-      <p class="infoLabel">Holes</p>
-      <p class="infoValue">18</p>
-    </div>
-    <div class="infoCard control">
-      <p class="infoLabel">Par (Front / Back / Total)</p>
-      <p class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></p>
+<div class="header">
+  <div class="headerLeft">
+    <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png">
+    <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" style="display:none">
+    <div class="brand">
+      <h1>Bridges Park</h1>
+      <div class="subtitle">Disc Golf • Course Generator + Scorecard</div>
     </div>
   </div>
+  <button id="themeToggle" class="themeToggleBtn control">
+    <img id="themeIcon" src="moon.png">
+  </button>
+</div>
 
-  <div class="legend">
-    <div class="swatch"><span class="dot dot-under"></span> Under</div>
-    <div class="swatch"><span class="dot dot-even"></span> Even</div>
-    <div class="swatch"><span class="dot dot-over"></span> Over</div>
+<div class="infoGrid">
+  <div class="infoCard control">
+    <div class="muted">Holes</div>
+    <div class="infoValue">18</div>
   </div>
-
-  <button id="btnGen" class="control">Generate New Course</button>
-
-  <div class="btnRowTwo">
-    <button id="btnClear" class="btnSecondary control">Clear Scores</button>
-    <button id="btnCopyLink" class="btnSecondary control">Copy Share Link</button>
+  <div class="infoCard control">
+    <div class="muted">Par (Front / Back / Total)</div>
+    <div class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></div>
   </div>
+</div>
 
-  <div class="nameBlock control">
-    <div class="row">
-      <div class="grow">
-        <input id="n1" type="text" placeholder="Player 1 name">
-      </div>
-      <div class="grow">
-        <input id="n2" type="text" placeholder="Player 2 name">
-      </div>
+<div class="legend">
+  <div><span class="dot dot-under"></span> Under</div>
+  <div><span class="dot dot-even"></span> Even</div>
+  <div><span class="dot dot-over"></span> Over</div>
+</div>
+
+<button id="btnGen" class="control">Generate New Course</button>
+
+<div class="btnRowTwo">
+  <button id="btnClear" class="btnSecondary control">Clear Scores</button>
+  <button id="btnCopyLink" class="btnSecondary control">Copy Share Link</button>
+</div>
+
+<div class="nameBlock control">
+  <div class="row">
+    <input id="n1" class="grow" placeholder="Player 1 name">
+    <input id="n2" class="grow" placeholder="Player 2 name">
+  </div>
+</div>
+
+<div class="card control">
+  <div class="scoreSticky">
+    <div class="colHeader">
+      <div>#</div><div>Throw</div><div>Par</div><div>P1</div><div>P2</div>
+    </div>
+    <div class="progressWrap">
+      <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+      <div id="progressText" class="progressText">0 / 18</div>
     </div>
   </div>
 
-  <div class="card control">
-    <!-- sticky header flush to top of card -->
-    <div class="scoreSticky">
-      <div class="colHeader" aria-hidden="true">
-        <div>#</div>
-        <div>Throw</div>
-        <div>Par</div>
-        <div id="p1HeadSticky">P1</div>
-        <div id="p2HeadSticky">P2</div>
-      </div>
+  <table>
+    <colgroup><col><col><col><col><col></colgroup>
+    <tbody id="mainBody"></tbody>
+    <tfoot>
+      <tr id="backRow">
+        <th colspan="2">Back 9</th>
+        <th id="parBackCell">–</th>
+        <th><span id="bd1">0</span></th>
+        <th><span id="bd2">0</span></th>
+      </tr>
+      <tr class="totalRow">
+        <th colspan="2">Total</th>
+        <th id="parTotalCell">–</th>
+        <th><span id="d1">0</span></th>
+        <th><span id="d2">0</span></th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
 
-      <div class="progressWrap">
-        <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-        <div id="progressText" class="progressText">0 / 18</div>
-      </div>
-    </div>
+<div id="toast" class="toast">Saved</div>
 
-    <table>
-      <colgroup>
-        <col><col><col><col><col>
-      </colgroup>
+<!-- THEME TOGGLE SCRIPT -->
+<script>
+(function(){
+  const root=document.documentElement;
+  const btn=document.getElementById("themeToggle");
+  const icon=document.getElementById("themeIcon");
+  const logoLight=document.getElementById("logoLight");
+  const logoDark=document.getElementById("logoDark");
 
-      <thead style="display:none;">
-        <tr>
-          <th>#</th>
-          <th>Throw</th>
-          <th>Par</th>
-          <th>P1</th>
-          <th>P2</th>
-        </tr>
-      </thead>
+  function prefersDark(){
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function apply(theme){
+    root.setAttribute("data-theme",theme);
+    const dark=theme==="dark";
+    icon.src=dark?"sun.png":"moon.png";
+    logoLight.style.display=dark?"none":"block";
+    logoDark.style.display=dark?"block":"none";
+  }
 
-      <tbody id="mainBody"></tbody>
+  const saved=localStorage.getItem("bp_theme");
+  apply(saved?saved:(prefersDark()?"dark":"light"));
 
-      <tfoot>
-        <tr id="backRow">
-          <th colspan="2" class="left">Back 9</th>
-          <th id="parBackCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="bd1" class="sumDiff pill pill-even">0</span>
-              <span id="b1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="bd2" class="sumDiff pill pill-even">0</span>
-              <span id="b2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
+  btn.onclick=()=>{
+    const current=root.getAttribute("data-theme");
+    const next=current==="dark"?"light":"dark";
+    localStorage.setItem("bp_theme",next);
+    apply(next);
+  };
+})();
+</script>
 
-        <tr class="totalRow">
-          <th colspan="2" class="left">Total</th>
-          <th id="parTotalCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="d1" class="sumDiff pill pill-even">0</span>
-              <span id="t1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="d2" class="sumDiff pill pill-even">0</span>
-              <span id="t2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <div id="toast" class="toast">Saved</div>
-
-  <!-- cache buster for iOS Safari -->
-  <script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
