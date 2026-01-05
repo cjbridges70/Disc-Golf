@@ -6,6 +6,19 @@
 <title>Bridges Park</title>
 
 <style>
+/* ======================================================
+   STABLE PREMIUM MOBILE UI – iOS SAFARI SAFE
+   FULL COPY/PASTE
+   Includes:
+   - Theme toggle works (sun/moon + logo swap)
+   - Sticky header sticks
+   - Sticky header ALIGNMENT fixed
+   - Throw column alignment fixed (twoPip full-width + centered)
+   - Background not cut off above header + premium background
+   - iOS-safe row capsules (no tr::before)
+   - Selects not clipped
+   ====================================================== */
+
 :root{
   --bg:#070a0f;
   --text:#e5e7eb;
@@ -79,6 +92,7 @@ html, body { background: var(--bg); }
 
 *{ box-sizing:border-box; }
 
+/* Premium background + iOS top overdraw */
 html::before{
   content:"";
   position:fixed;
@@ -112,9 +126,20 @@ body{
   backdrop-filter: blur(12px);
 }
 
-/* HEADER */
-.header{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.headerLeft{ display:flex; gap:12px; align-items:center; flex:1; min-width:0; }
+/* ================= HEADER ================= */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.headerLeft{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex:1;
+  min-width:0;
+}
 
 .logoImg{
   width:56px;height:56px;
@@ -128,27 +153,65 @@ body{
   flex:0 0 auto;
 }
 
-.brand h1{ margin:0; font-size:34px; font-weight:950; letter-spacing:-.6px; line-height:1.02; }
-.subtitle{ margin-top:4px; color:var(--muted); font-size:13px; letter-spacing:-.1px; }
+.brand h1{
+  margin:0;
+  font-size:34px;
+  font-weight:950;
+  letter-spacing:-.6px;
+  line-height:1.02;
+}
+.subtitle{
+  margin-top:4px;
+  color:var(--muted);
+  font-size:13px;
+  letter-spacing:-.1px;
+}
 
-.themeToggleBtn{ width:52px;height:52px; padding:0; display:flex; align-items:center; justify-content:center; }
+.themeToggleBtn{
+  width:52px;height:52px;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 .themeToggleBtn img{ width:24px;height:24px; display:block; }
 
-/* INFO */
-.infoGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+/* ================= INFO ================= */
+.infoGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
 .infoCard{ padding:14px; }
 .infoLabel{ margin:0; font-size:12px; color:var(--muted); }
 .infoValue{ margin:6px 0 0 0; font-size:22px; font-weight:950; letter-spacing:-.3px; }
 
-/* LEGEND */
-.legend{ display:flex; gap:14px; flex-wrap:wrap; margin-top:12px; user-select:none; }
-.swatch{ display:inline-flex; align-items:center; gap:9px; color:var(--muted); font-size:13px; }
-.dot{ width:10px;height:10px; border-radius:999px; border:1px solid var(--border); }
+/* ================= LEGEND ================= */
+.legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  margin-top:12px;
+  user-select:none;
+}
+.swatch{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  color:var(--muted);
+  font-size:13px;
+}
+.dot{
+  width:10px;height:10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+}
 .dot-under{ background:var(--scoreUnder); }
 .dot-even{ background:var(--scoreEven); }
 .dot-over{ background:var(--scoreOver); }
 
-/* BUTTONS */
+/* ================= BUTTONS ================= */
 button{
   width:100%;
   padding:16px;
@@ -176,13 +239,25 @@ button:focus{ outline:none; }
   box-shadow: var(--shadow);
 }
 
-.btnRowTwo{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
-.btnSecondary{ background:var(--controlBg2); font-size:15px; font-weight:900; padding:15px 12px; margin:0; }
+.btnRowTwo{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.btnSecondary{
+  background:var(--controlBg2);
+  font-size:15px;
+  font-weight:900;
+  padding:15px 12px;
+  margin:0;
+}
 
-/* NAMES */
+/* ================= NAMES ================= */
 .nameBlock{ margin-top:12px; padding:12px; }
 .row{ display:flex; gap:12px; flex-wrap:wrap; }
 .grow{ flex:1 1 160px; }
+
 input[type=text]{
   width:100%;
   padding:15px 14px;
@@ -195,9 +270,13 @@ input[type=text]{
   color:var(--text);
 }
 
-/* SCORECARD */
-.cardOuter{ margin-top:14px; overflow:visible; }
+/* ================= SCORECARD ================= */
+.cardOuter{
+  margin-top:14px;
+  overflow:visible; /* sticky-safe */
+}
 
+/* Sticky header wrapper: no padding (alignment) */
 .scoreSticky{
   position:sticky;
   top:8px;
@@ -208,6 +287,7 @@ input[type=text]{
   box-shadow:none;
 }
 
+/* Inner sticky content: same inset as tablePad */
 .scoreStickyInner{
   padding:12px;
   background:var(--card);
@@ -218,12 +298,12 @@ input[type=text]{
   backdrop-filter: blur(12px);
 }
 
-/* HEADER GRID — FIXED ALIGNMENT */
+/* Header grid */
 .colHeader{
   display:grid;
   grid-template-columns:10% 44% 10% 18% 18%;
   align-items:center;
-  padding:14px 10px;              /* match td padding */
+  padding:14px 10px; /* MATCH td padding */
   background:var(--thead);
   border:1px solid var(--border);
   border-radius:18px;
@@ -231,11 +311,16 @@ input[type=text]{
   letter-spacing:-.2px;
 }
 .colHeader > div{
-  text-align:center;              /* match td alignment */
+  text-align:center; /* MATCH td alignment */
 }
 
 /* progress under header */
-.progressWrap{ display:flex; align-items:center; gap:10px; margin-top:12px; }
+.progressWrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+}
 .progressTrack{
   flex:1 1 auto;
   height:10px;
@@ -252,10 +337,23 @@ input[type=text]{
     var(--progressFill);
   transition: width .25s ease;
 }
-.progressText{ min-width:86px; text-align:right; font-weight:900; color:var(--muted); }
+.progressText{
+  min-width:86px;
+  text-align:right;
+  font-weight:900;
+  color:var(--muted);
+}
 
-.cardInner{ overflow:hidden; border-radius:18px; }
-.tablePad{ padding:0 12px 12px; }
+/* Inner clipped card for rounded look */
+.cardInner{
+  overflow:hidden;
+  border-radius:18px;
+}
+
+/* Same inset as sticky inner */
+.tablePad{
+  padding:0 12px 12px;
+}
 
 table{
   width:100%;
@@ -265,6 +363,7 @@ table{
   padding:0;
 }
 
+/* column lock */
 colgroup col:nth-child(1){ width:10%; }
 colgroup col:nth-child(2){ width:44%; }
 colgroup col:nth-child(3){ width:10%; }
@@ -278,31 +377,55 @@ th,td{
   overflow:visible;
 }
 
-/* Row capsule */
+/* === FIX: Force Throw column to behave centered like header === */
+td:nth-child(2){
+  text-align:center;
+}
+
+/* Hole row capsule (iOS-safe) */
 tbody tr.holeRow td{
   background:var(--rowBg);
   border-top:1px solid var(--rowBorder);
   border-bottom:1px solid var(--rowBorder);
 }
+
 tbody tr.holeRow td:first-child{
   border-left:1px solid var(--rowBorder);
   border-top-left-radius:22px;
   border-bottom-left-radius:22px;
 }
+
 tbody tr.holeRow td:last-child{
   border-right:1px solid var(--rowBorder);
   border-top-right-radius:22px;
   border-bottom-right-radius:22px;
 }
 
-/* Active row */
-tbody tr.holeRow.active td{ background: rgba(158,211,122,0.10); }
-html[data-theme="light"] tbody tr.holeRow.active td{ background: rgba(143,188,108,0.14); }
-tbody tr.holeRow.active td:first-child{ box-shadow: inset 6px 0 0 var(--activeBorder); }
+/* Active row: solid tint + left bar */
+tbody tr.holeRow.active td{
+  background: rgba(158,211,122,0.10);
+}
+html[data-theme="light"] tbody tr.holeRow.active td{
+  background: rgba(143,188,108,0.14);
+}
+tbody tr.holeRow.active td:first-child{
+  box-shadow: inset 6px 0 0 var(--activeBorder);
+}
 
 /* throw pills */
-.twoPip{ display:inline-flex; align-items:center; gap:10px; max-width:100%; }
-.arrow{ font-weight:950; color:rgba(148,163,184,.95); font-size:12px; }
+.twoPip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  width:100%;          /* KEY FIX */
+  max-width:100%;
+}
+.arrow{
+  font-weight:950;
+  color:rgba(148,163,184,.95);
+  font-size:12px;
+}
 
 .goalTag{
   position:relative;
@@ -337,6 +460,7 @@ tbody tr.holeRow.active td:first-child{ box-shadow: inset 6px 0 0 var(--activeBo
 .goal-green{ background:#16a34a; color:#fff; }
 .goal-yellow{ background:#ffd400; color:#111; border-color: rgba(0,0,0,.10); }
 
+/* score selects */
 select{
   width:72px;
   max-width:72px;
@@ -348,13 +472,31 @@ select{
   font-weight:950;
 }
 
+/* score color classes (app.js sets these) */
 .score-under{ background:var(--scoreUnder) !important; }
 .score-even{ background:var(--scoreEven) !important; }
 .score-over{ background:var(--scoreOver) !important; }
 
-.sumCell{ display:flex; flex-direction:column; align-items:center; gap:5px; line-height:1.05; }
-.sumDiff{ font-size:18px; font-weight:950; padding:4px 12px; border-radius:999px; border:1px solid var(--border); min-width:46px; }
-.sumThrows{ font-size:11px; color:var(--muted); font-weight:900; }
+.sumCell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  line-height:1.05;
+}
+.sumDiff{
+  font-size:18px;
+  font-weight:950;
+  padding:4px 12px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  min-width:46px;
+}
+.sumThrows{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:900;
+}
 
 .left{ text-align:left; }
 
@@ -389,6 +531,7 @@ tfoot tr.totalRow td{
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
   <div class="headerLeft">
     <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo">
@@ -404,6 +547,7 @@ tfoot tr.totalRow td{
   </button>
 </div>
 
+<!-- INFO -->
 <div class="infoGrid">
   <div class="infoCard control">
     <div class="infoLabel">Holes</div>
@@ -419,12 +563,14 @@ tfoot tr.totalRow td{
   </div>
 </div>
 
+<!-- LEGEND -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
   <div class="swatch"><span class="dot dot-over"></span> Over</div>
 </div>
 
+<!-- BUTTONS -->
 <button id="btnGen" class="control" type="button">Generate New Course</button>
 
 <div class="btnRowTwo">
@@ -432,6 +578,7 @@ tfoot tr.totalRow td{
   <button id="btnCopyLink" class="btnSecondary control" type="button">Copy Share Link</button>
 </div>
 
+<!-- NAMES -->
 <div class="nameBlock control">
   <div class="row">
     <div class="grow"><input id="n1" type="text" placeholder="Player 1 name"></div>
@@ -439,7 +586,9 @@ tfoot tr.totalRow td{
   </div>
 </div>
 
+<!-- SCORECARD OUTER (sticky-safe) -->
 <div class="cardOuter">
+  <!-- Sticky header aligned with table -->
   <div class="scoreSticky">
     <div class="scoreStickyInner">
       <div class="colHeader" aria-hidden="true">
@@ -457,6 +606,7 @@ tfoot tr.totalRow td{
     </div>
   </div>
 
+  <!-- Inner clipped card -->
   <div class="cardInner control" style="margin-top:12px;">
     <div class="tablePad">
       <table>
@@ -509,6 +659,7 @@ tfoot tr.totalRow td{
 
 <div id="toast" class="toast">Saved</div>
 
+<!-- THEME TOGGLE -->
 <script>
 (function(){
   const root = document.documentElement;
@@ -558,6 +709,7 @@ tfoot tr.totalRow td{
 })();
 </script>
 
-<script src="app.js?v=10"></script>
+<!-- Keep your existing generator logic -->
+<script src="app.js?v=11"></script>
 </body>
 </html>
