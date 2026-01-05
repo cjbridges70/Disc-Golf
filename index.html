@@ -1,196 +1,594 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bridges Park Disc Golf</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bridges Park</title>
+  <style>
+    body{font-family:-apple-system,system-ui,sans-serif;margin:16px;line-height:1.35}
+    button{font-size:16px;padding:12px 14px;width:100%;}
+    input[type=text]{font-size:16px;padding:8px;width:100%;box-sizing:border-box}
+    select{font-size:16px;padding:6px 8px}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center;vertical-align:middle}
+    th{background:#f5f5f5}
+    .right{text-align:right}
+    .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px;max-width:900px}
+    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
+    .muted{color:#666;font-size:13px}
+    .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .grow{flex:1 1 180px}
+    .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:900px}
+    .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:28px}
+    .subtitle{margin:2px 0 0 0}
+    .topWrap{max-width:900px}
 
-<style>
-body{font-family:-apple-system,system-ui,sans-serif;margin:16px}
-button{width:100%;font-size:16px;padding:12px}
-input,select{font-size:16px;padding:6px;width:100%}
-table{width:100%;border-collapse:collapse;margin-top:12px}
-th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center}
-th{background:#f5f5f5}
-.card,.topWrap{max-width:900px}
-.card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}
-.header{display:flex;align-items:center;gap:12px}
-.logo{
-  width:64px;height:64px;border-radius:14px;
-  object-fit:contain;border:1px solid #ddd;background:#fff
-}
-.goalTag{padding:2px 8px;border-radius:999px;font-weight:700;font-size:12px}
-.goal-white{background:#fff;border:1px solid #ddd}
-.goal-orange{background:#ff8a00}
-.goal-blue{background:#1f6feb;color:#fff}
-.goal-pink{background:#ff5aa5}
-.goal-red{background:#e11d48;color:#fff}
-.goal-green{background:#16a34a;color:#fff}
-.goal-yellow{background:#ffd400}
-.goal-tee{background:#111;color:#fff}
-.score-under{background:#d1fae5}
-.score-even{background:#f3f4f6}
-.score-over{background:#fee2e2}
-.pill{padding:2px 8px;border-radius:999px;font-size:12px}
-.pill-under{background:#d1fae5}
-.pill-even{background:#f3f4f6}
-.pill-over{background:#fee2e2}
-.right{text-align:right}
-</style>
+    /* LOGO (border removed) */
+    .logoImg{
+      width:64px;height:64px;border-radius:14px;object-fit:contain;
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
+      background:transparent;
+      display:block;
+    }
+
+    .infoGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(140px,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .infoCard{
+      border:1px solid #eee;border-radius:12px;padding:10px;background:#fff;
+      text-align:left;
+    }
+    .infoLabel{font-size:12px;color:#666;margin:0}
+    .infoValue{font-size:16px;font-weight:700;margin:2px 0 0 0}
+
+    /* Goal "flag" colors */
+    .goal{font-weight:700;text-transform:capitalize}
+    .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
+    .goal-orange{background:#ff8a00;color:#111}
+    .goal-blue{background:#1f6feb;color:#fff}
+    .goal-pink{background:#ff5aa5;color:#111}
+    .goal-red{background:#e11d48;color:#fff}
+    .goal-green{background:#16a34a;color:#fff}
+    .goal-yellow{background:#ffd400;color:#111}
+    .goal-tee{background:#111;color:#fff;border:1px solid #111}
+    .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
+
+    /* Per-hole score coloring */
+    .score-under{background:#d1fae5}
+    .score-even{background:#f3f4f6}
+    .score-over{background:#fee2e2}
+
+    /* Pill coloring for totals */
+    .pill-under{background:#d1fae5}
+    .pill-even{background:#f3f4f6}
+    .pill-over{background:#fee2e2}
+
+    /* Small legend */
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#444}
+    .dot{width:12px;height:12px;border-radius:4px;border:1px solid #ddd}
+    .dot-under{background:#d1fae5}
+    .dot-even{background:#f3f4f6}
+    .dot-over{background:#fee2e2}
+
+    @media print{
+      select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
+      input[type=text]{border:none}
+      .goalTag{border:1px solid #ddd}
+      body{margin:10px}
+      button{display:none}
+    }
+  </style>
 </head>
-
 <body>
 
 <div class="topWrap">
   <div class="header">
-    <img class="logo" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png">
-    <div>
-      <h1 style="margin:0">Bridges Park</h1>
-      <div style="color:#666">Disc Golf • Course Generator + Scorecard</div>
-    </div>
-  </div>
-
-  <div style="display:flex;gap:8px;margin-top:10px">
-    <div style="flex:1;border:1px solid #eee;border-radius:10px;padding:8px">
-      <div style="font-size:12px;color:#666">Holes</div>
-      <div style="font-weight:700">18</div>
-    </div>
-    <div style="flex:1;border:1px solid #eee;border-radius:10px;padding:8px">
-      <div style="font-size:12px;color:#666">Par (F/B/T)</div>
-      <div style="font-weight:700">
-        <span id="pf">–</span>/<span id="pb">–</span>/<span id="pt">–</span>
+    <div class="brand">
+      <img class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo">
+      <div>
+        <h1>Bridges Park</h1>
+        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
       </div>
     </div>
   </div>
 
-  <button id="gen" style="margin-top:10px">Generate New Course</button>
+  <div class="infoGrid" aria-label="Course summary">
+    <div class="infoCard">
+      <p class="infoLabel">Holes</p>
+      <p class="infoValue">18</p>
+    </div>
+    <div class="infoCard">
+      <p class="infoLabel">Par (Front / Back / Total)</p>
+      <p class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></p>
+    </div>
+  </div>
+
+  <div class="legend" aria-label="Score color legend">
+    <div class="swatch"><span class="dot dot-under"></span> Under par</div>
+    <div class="swatch"><span class="dot dot-even"></span> Even par</div>
+    <div class="swatch"><span class="dot dot-over"></span> Over par</div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <button id="btnGen">Generate New Course</button>
+  </div>
 </div>
 
 <div class="card">
+  <h2 style="margin:0 0 6px 0;">Course + Scorecard</h2>
+
+  <div class="row" style="margin-top:8px;">
+    <div class="grow">
+      <div class="muted" style="margin-bottom:4px;">Player 1</div>
+      <input id="n1" type="text" placeholder="Player 1 name">
+    </div>
+    <div class="grow">
+      <div class="muted" style="margin-bottom:4px;">Player 2</div>
+      <input id="n2" type="text" placeholder="Player 2 name">
+    </div>
+  </div>
+
   <table>
     <thead>
       <tr>
-        <th>Hole</th><th>From</th><th>To</th><th>Par</th>
-        <th>P1</th><th>P2</th>
+        <th>Hole</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Par</th>
+        <th id="p1Head">P1</th>
+        <th id="p2Head">P2</th>
       </tr>
     </thead>
-    <tbody id="rows"></tbody>
+    <tbody id="mainBody"></tbody>
     <tfoot>
       <tr>
         <th colspan="4" class="right">Front 9</th>
-        <th><span id="f1">0</span> <span id="fd1" class="pill">E</span></th>
-        <th><span id="f2">0</span> <span id="fd2" class="pill">E</span></th>
+        <th><span id="f1">0</span> <span id="fd1" class="pill pill-even">E</span></th>
+        <th><span id="f2">0</span> <span id="fd2" class="pill pill-even">E</span></th>
       </tr>
       <tr>
         <th colspan="4" class="right">Back 9</th>
-        <th><span id="b1">0</span> <span id="bd1" class="pill">E</span></th>
-        <th><span id="b2">0</span> <span id="bd2" class="pill">E</span></th>
+        <th><span id="b1">0</span> <span id="bd1" class="pill pill-even">E</span></th>
+        <th><span id="b2">0</span> <span id="bd2" class="pill pill-even">E</span></th>
       </tr>
       <tr>
         <th colspan="4" class="right">Total</th>
-        <th><span id="t1">0</span> <span id="d1" class="pill">E</span></th>
-        <th><span id="t2">0</span> <span id="d2" class="pill">E</span></th>
+        <th><span id="t1">0</span> <span id="d1" class="pill pill-even">E</span></th>
+        <th><span id="t2">0</span> <span id="d2" class="pill pill-even">E</span></th>
       </tr>
     </tfoot>
   </table>
 </div>
 
 <script>
-const goals=["white","orange","blue","pink","red","green","yellow"];
-const fixed={9:"green",18:"green"};
-const dis={
- white:[], orange:["pink","blue"], blue:["orange","red"],
- pink:["orange","red","green"], red:["blue","pink"],
- green:["yellow","pink"], yellow:["green"]
-};
-const par3=new Set(["white|yellow","white|green","yellow|red","yellow|pink","green|red","red|orange","red|blue","blue|pink"]);
-const par5=new Set(["white|blue","white|orange"]);
+(function(){
+  // If anything breaks, show the actual error instead of silently failing
+  window.addEventListener("error", function(ev){
+    alert("Page error: " + (ev && ev.message ? ev.message : "Unknown error"));
+  });
 
-function pair(a,b){return [a,b].sort().join("|")}
-function par(from,to,h){
- if(h===1)return ["yellow","pink","white"].includes(to)?3:4;
- if(par5.has(pair(from,to)))return 5;
- if(par3.has(pair(from,to)))return 3;
- return 4;
-}
+  var GOALS = ["white","orange","blue","pink","red","green","yellow"];
+  var HOLES = 18;
+  var MINREQ = 2;
+  var FIXED = { 9: "green", 18: "green" };
 
-function gen(){
- let seq=[null];
- while(seq.length<=18){
-  let h=seq.length;
-  let prev=seq[h-1]||"tee";
-  let opts=goals.filter(g=>{
-    if(h===1 && g==="green")return false;
-    if(prev!=="tee" && dis[prev].includes(g))return false;
+  // Directional restrictions (prev -> next disallowed)
+  // Pink <-> Green removed both ways
+  var DIS = {
+    "white":  [],
+    "orange": ["pink","blue"],
+    "blue":   ["orange","red"],
+    "pink":   ["orange","red","green"],
+    "red":    ["blue","pink"],
+    "green":  ["yellow","pink"],
+    "yellow": ["green"]
+  };
+
+  // Par rules: Hole 1 (tee -> goal) Par 3 to yellow/pink/white; else Par 4.
+  var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
+
+  // Pair-based par rules for holes 2-18 (both directions)
+  function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
+  var PAR3 = {};
+  var PAR5 = {};
+
+  [
+    ["white","yellow"],
+    ["white","green"],
+    ["yellow","red"],
+    ["yellow","pink"],
+    ["green","red"],
+    ["red","orange"],
+    ["red","blue"],
+    ["blue","pink"]
+  ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
+
+  [
+    ["white","blue"],
+    ["white","orange"]
+  ].forEach(function(p){ PAR5[pairKey(p[0],p[1])] = true; });
+
+  function allowed(prev, next){
+    if (!prev) return true;
+    if (prev === next) return false;
+    var bad = DIS[prev] || [];
+    for (var i=0;i<bad.length;i++) if (bad[i]===next) return false;
     return true;
-  });
-  if(fixed[h]){seq[h]=fixed[h];continue}
-  seq[h]=opts[Math.floor(Math.random()*opts.length)];
- }
- return seq.slice(1);
-}
+  }
 
-function pill(el,val){
- el.className="pill "+(val==="E"?"pill-even":val[0]==="+"?"pill-over":"pill-under");
-}
+  function edgeKey(from,to){ return from + "->" + to; } // unique throws are directional
 
-function render(){
- const seq=gen();
- const rows=document.getElementById("rows");
- rows.innerHTML="";
- let pf=0,pb=0,pt=0;
+  function shuffle(arr){
+    for (var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
 
- seq.forEach((to,i)=>{
-  let from=i===0?"tee":seq[i-1];
-  let p=par(from,to,i+1);
-  pt+=p;i<9?pf+=p:pb+=p;
+  function initCounts(){
+    var c = {};
+    for (var i=0;i<GOALS.length;i++) c[GOALS[i]] = 0;
+    return c;
+  }
 
-  let tr=document.createElement("tr");
-  tr.innerHTML=`
-   <td>${i+1}</td>
-   <td><span class="goalTag goal-${from}">${from}</span></td>
-   <td><span class="goalTag goal-${to}">${to}</span></td>
-   <td>${p}</td>
-   <td><select data-par="${p}" data-i="${i}" data-p="1">${[...Array(11)].map((_,n)=>`<option>${n||""}</option>`)}</select></td>
-   <td><select data-par="${p}" data-i="${i}" data-p="2">${[...Array(11)].map((_,n)=>`<option>${n||""}</option>`)}</select></td>
-  `;
-  rows.appendChild(tr);
- });
+  function futureFixedCount(goal, fromPos){
+    var f=0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (FIXED[h] === goal) f++;
+    }
+    return f;
+  }
 
- pfEl.textContent=pf;pbEl.textContent=pb;ptEl.textContent=pt;
- update();
-}
+  function remainingUnfixedSlots(fromPos, course){
+    var s=0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (!FIXED[h] && course[h] === null) s++;
+    }
+    return s;
+  }
 
-function update(){
- let pf=+pfEl.textContent,pb=+pbEl.textContent,pt=+ptEl.textContent;
- [1,2].forEach(p=>{
-  let f=0,b=0,t=0;
-  document.querySelectorAll(`select[data-p="${p}"]`).forEach(s=>{
-   let v=+s.value||0;
-   let par=+s.dataset.par;
-   s.className=v? v<par?"score-under":v>par?"score-over":"score-even":"";
-   t+=v; s.dataset.i<9?f+=v:b+=v;
-  });
-  document.getElementById("f"+p).textContent=f;
-  document.getElementById("b"+p).textContent=b;
-  document.getElementById("t"+p).textContent=t;
-  let fd=document.getElementById("fd"+p);
-  let bd=document.getElementById("bd"+p);
-  let d=document.getElementById("d"+p);
-  fd.textContent=f-pf;bd.textContent=b-pb;d.textContent=t-pt;
-  pill(fd,fd.textContent);pill(bd,bd.textContent);pill(d,d.textContent);
- });
-}
+  function minNeeded(fromPos, course, used){
+    var need=0;
+    for (var i=0;i<GOALS.length;i++){
+      var g = GOALS[i];
+      var future = futureFixedCount(g, fromPos);
+      var missing = MINREQ - (used[g] + future);
+      if (missing > 0) need += missing;
+    }
+    return need;
+  }
 
-genBtn.onclick=render;
-document.addEventListener("change",update);
+  function feasible(fromPos, course, used){
+    return minNeeded(fromPos, course, used) <= remainingUnfixedSlots(fromPos, course);
+  }
 
-const genBtn=document.getElementById("gen");
-const pfEl=document.getElementById("pf");
-const pbEl=document.getElementById("pb");
-const ptEl=document.getElementById("pt");
+  function candidateScore(goal, used, fromPos){
+    var future = futureFixedCount(goal, fromPos);
+    var willHave = used[goal] + future;
+    if (willHave < MINREQ) return -100 + used[goal];
+    return used[goal];
+  }
 
-render();
+  function parFor(from,to,hole){
+    if (hole === 1){
+      return HOLE1_PAR3_TO[to] ? 3 : 4;
+    }
+    var k = pairKey(from,to);
+    if (PAR5[k]) return 5;
+    if (PAR3[k]) return 3;
+    return 4;
+  }
+
+  function formatDiff(d){
+    if (d===0) return "E";
+    if (d>0) return "+"+d;
+    return ""+d;
+  }
+
+  function goalClass(goal){
+    return "goalTag goal goal-" + goal;
+  }
+
+  function generateCourse(){
+    var course = [];
+    for (var i=0;i<=HOLES;i++) course[i]=null;
+
+    // Apply fixed holes
+    for (var h in FIXED) if (FIXED.hasOwnProperty(h)) course[parseInt(h,10)] = FIXED[h];
+
+    var used = initCounts();
+    var usedEdges = {};
+
+    function bt(pos){
+      if (pos > HOLES){
+        for (var i=0;i<GOALS.length;i++){
+          if (used[GOALS[i]] < MINREQ) return false;
+        }
+        return true;
+      }
+
+      var prevGoal = (pos===1) ? "tee" : course[pos-1];
+
+      // If fixed or already assigned
+      if (course[pos] !== null){
+        var v = course[pos];
+        if (pos === 1 && v === "green") return false;
+        if (pos > 1 && !allowed(course[pos-1], v)) return false;
+
+        var ek = edgeKey(prevGoal, v);
+        if (usedEdges[ek]) return false;
+
+        usedEdges[ek] = true;
+        used[v] += 1;
+
+        if (!feasible(pos+1, course, used)) { used[v]-=1; delete usedEdges[ek]; return false; }
+        if (bt(pos+1)) return true;
+
+        used[v] -= 1;
+        delete usedEdges[ek];
+        return false;
+      }
+
+      // Otherwise choose a candidate
+      var prev2 = (pos>1) ? course[pos-1] : null;
+      var cands = [];
+
+      for (var i2=0;i2<GOALS.length;i2++){
+        var g2 = GOALS[i2];
+
+        if (pos === 1 && g2 === "green") continue;
+        if (pos > 1 && !allowed(prev2, g2)) continue;
+
+        // Lookahead: must be compatible with fixed next hole (if any)
+        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
+
+        // Unique directional throw
+        if (usedEdges[edgeKey(prevGoal, g2)]) continue;
+
+        cands.push(g2);
+      }
+
+      shuffle(cands);
+      cands.sort(function(a,b){
+        return candidateScore(a, used, pos+1) - candidateScore(b, used, pos+1);
+      });
+
+      for (var ci=0; ci<cands.length; ci++){
+        var pick = cands[ci];
+        var ek2 = edgeKey(prevGoal, pick);
+
+        course[pos] = pick;
+        used[pick] += 1;
+        usedEdges[ek2] = true;
+
+        if (feasible(pos+1, course, used) && bt(pos+1)) return true;
+
+        delete usedEdges[ek2];
+        used[pick] -= 1;
+        course[pos] = null;
+      }
+
+      return false;
+    }
+
+    // Multiple attempts for randomness
+    for (var attempt=1; attempt<=20000; attempt++){
+      for (var p=1; p<=HOLES; p++) if (!FIXED[p]) course[p] = null;
+      used = initCounts();
+      usedEdges = {};
+
+      if (bt(1)){
+        var seq = [];
+        for (var k=1;k<=HOLES;k++) seq.push(course[k]);
+        return { seq: seq };
+      }
+    }
+
+    return null;
+  }
+
+  var mainBody = document.getElementById("mainBody");
+  var btnGen = document.getElementById("btnGen");
+  var n1 = document.getElementById("n1");
+  var n2 = document.getElementById("n2");
+  var p1Head = document.getElementById("p1Head");
+  var p2Head = document.getElementById("p2Head");
+
+  function playerName(idx){
+    if (idx===1) return (n1.value || "Player 1").trim();
+    return (n2.value || "Player 2").trim();
+  }
+
+  function syncPlayerHeaders(){
+    p1Head.textContent = playerName(1);
+    p2Head.textContent = playerName(2);
+  }
+
+  n1.addEventListener("input", syncPlayerHeaders);
+  n2.addEventListener("input", syncPlayerHeaders);
+
+  function updatePillColor(el){
+    el.classList.remove("pill-under","pill-even","pill-over");
+    var txt = el.textContent;
+    if (txt === "E") el.classList.add("pill-even");
+    else if (txt[0] === "+") el.classList.add("pill-over");
+    else el.classList.add("pill-under");
+  }
+
+  function makeSelect(hole, player, parVal){
+    var sel = document.createElement("select");
+    sel.setAttribute("data-hole", ""+hole);
+    sel.setAttribute("data-player", ""+player);
+    sel.setAttribute("data-par", ""+parVal);
+
+    var opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = "–";
+    sel.appendChild(opt0);
+
+    for (var i=1;i<=10;i++){
+      var opt = document.createElement("option");
+      opt.value = ""+i;
+      opt.textContent = ""+i;
+      sel.appendChild(opt);
+    }
+
+    sel.addEventListener("change", function(){
+      colorSelect(sel);
+      recalcTotals();
+    });
+    return sel;
+  }
+
+  function colorSelect(sel){
+    sel.classList.remove("score-under","score-even","score-over");
+    var v = sel.value;
+    if (v === "") return;
+    var n = parseInt(v,10);
+    var p = parseInt(sel.getAttribute("data-par"),10);
+    if (isNaN(n) || isNaN(p)) return;
+    if (n < p) sel.classList.add("score-under");
+    else if (n > p) sel.classList.add("score-over");
+    else sel.classList.add("score-even");
+  }
+
+  function tdText(txt){
+    var td = document.createElement("td");
+    td.textContent = txt;
+    return td;
+  }
+
+  function tdGoal(goal){
+    var td = document.createElement("td");
+    var span = document.createElement("span");
+    span.className = goalClass(goal);
+    span.textContent = goal;
+    td.appendChild(span);
+    return td;
+  }
+
+  function tdFrom(from){
+    return tdGoal(from === "tee" ? "tee" : from);
+  }
+
+  function setTopParSummary(front, back, total){
+    document.getElementById("parFrontTop").textContent = front;
+    document.getElementById("parBackTop").textContent  = back;
+    document.getElementById("parTotalTop").textContent = total;
+  }
+
+  function renderAll(seq){
+    mainBody.innerHTML = "";
+
+    var parFront = 0, parBack = 0, parTotal = 0;
+
+    for (var i=0;i<seq.length;i++){
+      var hole = i+1;
+      var to = seq[i];
+      var from = (i===0) ? "tee" : seq[i-1];
+      var p = parFor(from,to,hole);
+
+      parTotal += p;
+      if (hole<=9) parFront += p; else parBack += p;
+
+      var tr = document.createElement("tr");
+      tr.appendChild(tdText(""+hole));
+      tr.appendChild(tdFrom(from));
+      tr.appendChild(tdGoal(to));
+      tr.appendChild(tdText(""+p));
+
+      var td1 = document.createElement("td");
+      td1.appendChild(makeSelect(hole, 1, p));
+      tr.appendChild(td1);
+
+      var td2 = document.createElement("td");
+      td2.appendChild(makeSelect(hole, 2, p));
+      tr.appendChild(td2);
+
+      mainBody.appendChild(tr);
+    }
+
+    setTopParSummary(parFront, parBack, parTotal);
+
+    window.__parFront = parFront;
+    window.__parBack = parBack;
+    window.__parTotal = parTotal;
+
+    recalcTotals();
+  }
+
+  function recalcTotals(){
+    var parFront = window.__parFront || 0;
+    var parBack  = window.__parBack  || 0;
+    var parTotal = window.__parTotal || 0;
+
+    for (var pl=1; pl<=2; pl++){
+      var f=0,b=0,t=0;
+      for (var hole=1; hole<=HOLES; hole++){
+        var sel = mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
+        if (!sel) continue;
+        var v = sel.value;
+        if (v !== ""){
+          var n = parseInt(v,10);
+          if (!isNaN(n)){
+            t += n;
+            if (hole<=9) f += n; else b += n;
+          }
+        }
+      }
+
+      document.getElementById("f"+pl).textContent = ""+f;
+      document.getElementById("b"+pl).textContent = ""+b;
+      document.getElementById("t"+pl).textContent = ""+t;
+
+      var fd = document.getElementById("fd"+pl);
+      var bd = document.getElementById("bd"+pl);
+      var d  = document.getElementById("d"+pl);
+
+      fd.textContent = formatDiff(f - parFront);
+      bd.textContent = formatDiff(b - parBack);
+      d.textContent  = formatDiff(t - parTotal);
+
+      updatePillColor(fd);
+      updatePillColor(bd);
+      updatePillColor(d);
+    }
+  }
+
+  function clearScores(){
+    var sels = mainBody.querySelectorAll("select");
+    for (var i=0;i<sels.length;i++){
+      sels[i].value = "";
+      sels[i].classList.remove("score-under","score-even","score-over");
+    }
+    recalcTotals();
+  }
+
+  function generateAndRender(){
+    syncPlayerHeaders();
+    var r = generateCourse();
+    if (!r){
+      alert("Could not generate a valid course. Try again.");
+      return;
+    }
+    renderAll(r.seq);
+    clearScores();
+  }
+
+  btnGen.addEventListener("click", generateAndRender);
+
+  // Init on load
+  syncPlayerHeaders();
+  generateAndRender();
+})();
 </script>
 
 </body>
