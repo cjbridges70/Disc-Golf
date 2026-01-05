@@ -2,119 +2,124 @@
 <html lang="en" data-theme="system">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Bridges Park</title>
 
   <style>
+    /* =========================
+       Premium mobile UI baseline
+       ========================= */
     :root{
-      --bg:#ffffff;
-      --text:#111111;
-      --muted:#666666;
-      --card:#ffffff;
-      --border:#dddddd;
-      --thead:#f5f5f5;
-      --tableLine:#dddddd;
-      --btnBg:#efefef;
-      --btnText:#111111;
+      /* Surfaces */
+      --bg:#f6f7fb;
+      --text:#0f172a;
+      --muted:#64748b;
 
-      --scoreUnder:#d1fae5;
-      --scoreEven:#f3f4f6;
-      --scoreOver:#fee2e2;
+      --card:rgba(255,255,255,0.72);
+      --cardSolid:#ffffff;
+      --border:rgba(15,23,42,0.10);
+      --hairline:rgba(15,23,42,0.08);
 
-      --totalRow:#eef2ff;
+      /* Premium green accent (logo-friendly) */
+      --accent:#8FBC6C;
+      --accent2:#7DBA79; /* secondary green */
+      --accentSoft:rgba(143,188,108,0.18);
+      --activeRow:rgba(143,188,108,0.18);
+      --activeBorder:rgba(143,188,108,0.95);
 
-      --accent:#9db775;
-      --accentSoft:#eaf2de;
+      /* Buttons */
+      --btnBg:rgba(255,255,255,0.55);
+      --btnText:#0f172a;
 
-      --activeRow: var(--accentSoft);
-      --activeBorder: var(--accent);
+      /* Score colors */
+      --scoreUnder:rgba(16,185,129,0.18);
+      --scoreEven:rgba(148,163,184,0.18);
+      --scoreOver:rgba(244,63,94,0.18);
 
-      --rowBg:#ffffff;
-      --rowBorder:#e7e7e7;
+      /* Table / header */
+      --thead:rgba(255,255,255,0.55);
+      --rowBg:rgba(255,255,255,0.45);
+      --rowBorder:rgba(15,23,42,0.10);
+      --totalRow:rgba(125,186,121,0.18);
 
-      --progressTrack:#e9e9ef;
-      --progressFill: var(--accent);
+      /* Progress */
+      --progressTrack:rgba(15,23,42,0.10);
+      --progressFill:var(--accent);
 
-      --toastBg: rgba(20,20,22,0.92);
+      /* Shadows */
+      --shadow: 0 10px 30px rgba(2,6,23,0.10);
+      --shadow2: 0 8px 18px rgba(2,6,23,0.10);
+
+      /* Toast */
+      --toastBg: rgba(10,12,16,0.92);
       --toastText: #fff;
     }
 
     @media (prefers-color-scheme: dark){
       :root{
-        --bg:#0b0d10;
-        --text:#e8e8e8;
-        --muted:#a7a7a7;
-        --card:#11151b;
-        --border:#2a2f38;
-        --thead:#171c24;
-        --tableLine:#2a2f38;
-        --btnBg:#1b2230;
-        --btnText:#e8e8e8;
+        --bg:#070a0f;
+        --text:#e5e7eb;
+        --muted:#9aa3b2;
 
-        --scoreUnder:#0f3b2b;
-        --scoreEven:#202634;
-        --scoreOver:#3b1416;
+        --card:rgba(17,21,27,0.78);
+        --cardSolid:#11151b;
+        --border:rgba(255,255,255,0.10);
+        --hairline:rgba(255,255,255,0.08);
 
-        --totalRow:#1b2341;
+        --accent:#9ED37A;
+        --accent2:#7DBA79;
+        --accentSoft:rgba(158,211,122,0.16);
+        --activeRow:rgba(158,211,122,0.14);
+        --activeBorder:rgba(158,211,122,0.92);
 
-        --accent:#a8c986;
-        --accentSoft:#172114;
+        --btnBg:rgba(27,34,48,0.70);
+        --btnText:#e5e7eb;
 
-        --activeRow: rgba(168,201,134,0.18);
-        --activeBorder: var(--accent);
+        --scoreUnder:rgba(16,185,129,0.18);
+        --scoreEven:rgba(148,163,184,0.16);
+        --scoreOver:rgba(244,63,94,0.18);
 
-        --rowBg:#11151b;
-        --rowBorder:#2a2f38;
+        --thead:rgba(23,28,36,0.70);
+        --rowBg:rgba(17,21,27,0.68);
+        --rowBorder:rgba(255,255,255,0.10);
+        --totalRow:rgba(27,35,65,0.65);
 
-        --progressTrack:#202634;
-        --progressFill: var(--accent);
+        --progressTrack:rgba(255,255,255,0.10);
       }
     }
 
     html[data-theme="light"]{
-      --bg:#ffffff; --text:#111111; --muted:#666666; --card:#ffffff;
-      --border:#dddddd; --thead:#f5f5f5; --tableLine:#dddddd;
-      --btnBg:#efefef; --btnText:#111111;
-      --scoreUnder:#d1fae5; --scoreEven:#f3f4f6; --scoreOver:#fee2e2;
-      --totalRow:#eef2ff;
-      --accent:#9db775; --accentSoft:#eaf2de;
-      --activeRow: var(--accentSoft);
-      --activeBorder: var(--accent);
-      --rowBg:#ffffff; --rowBorder:#e7e7e7;
-      --progressTrack:#e9e9ef; --progressFill: var(--accent);
+      color-scheme: light;
     }
-
     html[data-theme="dark"]{
-      --bg:#0b0d10; --text:#e8e8e8; --muted:#a7a7a7; --card:#11151b;
-      --border:#2a2f38; --thead:#171c24; --tableLine:#2a2f38;
-      --btnBg:#1b2230; --btnText:#e8e8e8;
-      --scoreUnder:#0f3b2b; --scoreEven:#202634; --scoreOver:#3b1416;
-      --totalRow:#1b2341;
-      --accent:#a8c986; --accentSoft:#172114;
-      --activeRow: rgba(168,201,134,0.18);
-      --activeBorder: var(--accent);
-      --rowBg:#11151b; --rowBorder:#2a2f38;
-      --progressTrack:#202634; --progressFill: var(--accent);
+      color-scheme: dark;
     }
 
+    *{ box-sizing:border-box; }
     body{
-      font-family:-apple-system,system-ui,sans-serif;
-      margin:16px;
-      line-height:1.3;
-      background:var(--bg);
+      margin:0;
+      padding: max(14px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)) 16px;
+      font-family:-apple-system, system-ui, "SF Pro Display", "SF Pro Text", Segoe UI, Roboto, sans-serif;
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(143,188,108,0.22), rgba(143,188,108,0) 60%),
+        radial-gradient(700px 400px at 95% 10%, rgba(125,186,121,0.18), rgba(125,186,121,0) 65%),
+        var(--bg);
       color:var(--text);
+      line-height:1.25;
     }
-    .muted{color:var(--muted);font-size:12px}
 
-    button { transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease; }
-    button:active { transform: scale(0.98); }
+    .muted{ color:var(--muted); font-size:12px; }
 
+    /* =========================
+       Top header
+       ========================= */
     .header{
       display:flex;
       gap:12px;
       align-items:center;
       justify-content:space-between;
     }
+
     .headerLeft{
       display:flex;
       gap:12px;
@@ -122,29 +127,64 @@
       flex:1 1 auto;
       min-width:0;
     }
-    .brand h1{margin:0;font-size:26px}
-    .subtitle{margin-top:3px}
+
+    .brand h1{
+      margin:0;
+      font-size:28px;
+      letter-spacing:-0.4px;
+      font-weight:900;
+      line-height:1.05;
+    }
+    .subtitle{
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+    }
 
     .logoImg{
-      width:58px;height:58px;border-radius:14px;object-fit:contain;
-      border:none !important; outline:none !important; box-shadow:none !important;
+      width:56px;
+      height:56px;
+      object-fit:contain;
+      border:none !important;
+      outline:none !important;
+      box-shadow:none !important;
       background:transparent;
       display:block;
       flex:0 0 auto;
+      border-radius:14px;
     }
 
     .themeToggleBtn{
-      width:44px;height:44px;
-      border-radius:12px;
+      width:46px;
+      height:46px;
+      border-radius:14px;
       border:1px solid var(--border);
       background:var(--card);
+      box-shadow: var(--shadow2);
       display:flex;
       align-items:center;
       justify-content:center;
       padding:0;
       flex:0 0 auto;
+
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
     }
-    .themeToggleBtn img{ width:22px;height:22px; display:block; }
+    .themeToggleBtn img{ width:22px; height:22px; display:block; opacity:0.95; }
+
+    /* =========================
+       Cards
+       ========================= */
+    .card, .infoCard, .nameBlock{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:var(--card);
+
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+
+      box-shadow: var(--shadow);
+    }
 
     .infoGrid{
       display:grid;
@@ -153,44 +193,72 @@
       margin-top:12px;
     }
     .infoCard{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      background:var(--card);
-      text-align:left;
+      padding:12px 12px 11px 12px;
     }
-    .infoLabel{font-size:12px;color:var(--muted);margin:0}
-    .infoValue{font-size:16px;font-weight:800;margin:3px 0 0 0}
+    .infoLabel{ margin:0; font-size:12px; color:var(--muted); }
+    .infoValue{ margin:4px 0 0 0; font-size:18px; font-weight:900; letter-spacing:-0.2px; }
 
-    /* Legend stays outside (not sticky) */
+    /* =========================
+       Legend
+       ========================= */
     .legend{
       display:flex;
+      align-items:center;
       gap:12px;
       flex-wrap:wrap;
       margin-top:10px;
+      padding-left:2px;
     }
-    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+    .swatch{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      user-select:none;
+    }
     .dot{
-      width:12px;height:12px;
-      box-sizing:border-box;
-      border-radius:4px;
+      width:10px;
+      height:10px;
+      border-radius:999px;
       border:1px solid var(--border);
-      display:inline-block;
-      flex:0 0 12px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.10) inset;
+      flex:0 0 10px;
     }
-    .dot-under{background:var(--scoreUnder)}
-    .dot-even{background:var(--scoreEven)}
-    .dot-over{background:var(--scoreOver)}
+    .dot-under{ background: var(--scoreUnder); }
+    .dot-even{ background: var(--scoreEven); }
+    .dot-over{ background: var(--scoreOver); }
 
+    /* =========================
+       Buttons
+       ========================= */
     button{
-      font-size:16px;
-      padding:12px 14px;
       width:100%;
-      background:var(--btnBg);
-      color:var(--btnText);
+      padding:13px 14px;
+      border-radius:16px;
       border:1px solid var(--border);
-      border-radius:12px;
+      background: var(--btnBg);
+      color: var(--btnText);
+      font-size:16px;
+      font-weight:800;
+      letter-spacing:-0.2px;
+      box-shadow: var(--shadow2);
       margin-top:10px;
+
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+
+      transition: transform 0.10s ease, filter 0.15s ease;
+    }
+    button:active{ transform: scale(0.985); }
+    button:focus{ outline: none; }
+
+    #btnGen{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02)),
+        radial-gradient(1200px 120px at 50% 0%, rgba(143,188,108,0.25), rgba(143,188,108,0)),
+        var(--btnBg);
+      border-color: rgba(143,188,108,0.28);
     }
 
     .btnRowTwo{
@@ -200,82 +268,106 @@
       margin-top:10px;
     }
     .btnSecondary{
-      font-size:14px;
-      padding:11px 12px;
-      background:transparent;
       margin-top:0;
+      font-size:14px;
+      padding:12px 12px;
+      font-weight:800;
+      opacity:0.95;
     }
 
-    .card{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      margin-top:14px;
-      background:var(--card);
-    }
-
+    /* =========================
+       Player name inputs
+       ========================= */
     .nameBlock{
-      border:1px solid var(--border);
-      border-radius:12px;
       padding:10px;
       margin-top:12px;
-      background:var(--card);
     }
     .row{
       display:flex;
       gap:10px;
       flex-wrap:wrap;
     }
-    .grow{flex:1 1 160px}
+    .grow{ flex:1 1 160px; }
+
     input[type=text]{
-      font-size:16px;
-      padding:10px;
       width:100%;
-      box-sizing:border-box;
-      background:transparent;
-      color:var(--text);
+      padding:11px 12px;
+      border-radius:14px;
       border:1px solid var(--border);
-      border-radius:10px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size:16px;
+      font-weight:700;
+      letter-spacing:-0.2px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
+    input[type=text]::placeholder{
+      color: rgba(148,163,184,0.92);
     }
 
-    /* Table / Scorecard */
-    table{
-      width:100%;
-      margin-top:10px;
-      border-collapse:separate;
-      border-spacing:0 10px;
-      table-layout:fixed;
+    /* =========================
+       Scorecard container
+       ========================= */
+    .card{
+      padding:12px;
+      margin-top:14px;
+    }
+    h2{
+      margin:0 0 8px 0;
+      font-size:22px;
+      font-weight:900;
+      letter-spacing:-0.3px;
     }
 
-    th,td{
-      padding:10px 8px;
-      text-align:center;
-      vertical-align:middle;
-      overflow:hidden;
-      text-overflow:clip; /* no ellipsis dots */
-      white-space:nowrap;
-    }
-    .left{text-align:left}
-
-    /* Sticky header INSIDE scorecard: progress + column headers */
+    /* Sticky header inside scorecard */
     .scoreSticky{
       position: sticky;
-      top: 0;
+      top: 8px; /* gives a little breathing room under iOS address bar */
       z-index: 60;
-      margin: -12px -12px 10px -12px; /* stretch to card edges */
-      padding: 10px 12px 10px 12px;
-      background: var(--card);
+
+      margin: -12px -12px 10px -12px;
+      padding: 10px 12px 12px 12px;
+
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02)), var(--card);
       border-bottom: 1px solid var(--border);
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+
+      box-shadow: 0 14px 22px rgba(0,0,0,0.14);
+
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
     }
 
+    /* Column header row */
+    .colHeader{
+      display:grid;
+      grid-template-columns:10% 44% 10% 18% 18%;
+      align-items:center;
+
+      background: var(--thead);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:11px 10px;
+
+      font-weight:900;
+      letter-spacing:-0.2px;
+
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+    }
+    .colHeader > div{
+      text-align:center;
+      overflow:hidden;
+      text-overflow:clip; /* remove ellipsis */
+      white-space:nowrap;
+    }
+
+    /* Progress bar UNDER headers */
     .progressWrap{
       display:flex;
       align-items:center;
       gap:10px;
-      margin:0 0 10px 0;
+      margin:10px 2px 0 2px;
     }
     .progressTrack{
       flex:1 1 auto;
@@ -284,11 +376,14 @@
       background:var(--progressTrack);
       overflow:hidden;
       border:1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
     }
     .progressFill{
       height:100%;
       width:0%;
-      background:var(--progressFill);
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 55%),
+        var(--progressFill);
       transition: width 0.25s ease;
     }
     .progressText{
@@ -296,54 +391,61 @@
       color:var(--muted);
       min-width:84px;
       text-align:right;
-    }
-
-    /* Grid header row that matches column widths */
-    .colHeader{
-      display:grid;
-      grid-template-columns:10% 44% 10% 18% 18%;
-      align-items:center;
-      background: var(--thead);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px 8px; /* matches table cell padding */
       font-weight:800;
-    }
-    .colHeader > div{
-      text-align:center;
-      overflow:hidden;
-      text-overflow:clip;
-      white-space:nowrap;
+      letter-spacing:-0.2px;
     }
 
-    /* ✅ Column lock for the actual table (this fixes alignment) */
+    /* =========================
+       Table
+       ========================= */
+    table{
+      width:100%;
+      margin-top:10px;
+      border-collapse:separate;
+      border-spacing:0 10px;
+      table-layout:fixed;
+    }
+
+    /* Column lock (keeps header aligned) */
     colgroup col:nth-child(1){ width:10%; }
     colgroup col:nth-child(2){ width:44%; }
     colgroup col:nth-child(3){ width:10%; }
     colgroup col:nth-child(4){ width:18%; }
     colgroup col:nth-child(5){ width:18%; }
 
-    /* Card-like hole rows */
+    th,td{
+      padding:12px 10px;
+      text-align:center;
+      vertical-align:middle;
+      overflow:hidden;
+      text-overflow:clip; /* no ellipsis */
+      white-space:nowrap;
+      font-weight:700;
+    }
+    .left{ text-align:left; }
+
+    /* Hole rows look like soft cards */
     tbody tr.holeRow td{
-      background:var(--rowBg);
-      border-top:1px solid var(--rowBorder);
-      border-bottom:1px solid var(--rowBorder);
+      background: var(--rowBg);
+      border-top: 1px solid var(--rowBorder);
+      border-bottom: 1px solid var(--rowBorder);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
     }
     tbody tr.holeRow td:first-child{
       border-left:1px solid var(--rowBorder);
-      border-top-left-radius:14px;
-      border-bottom-left-radius:14px;
+      border-top-left-radius:18px;
+      border-bottom-left-radius:18px;
     }
     tbody tr.holeRow td:last-child{
       border-right:1px solid var(--rowBorder);
-      border-top-right-radius:14px;
-      border-bottom-right-radius:14px;
+      border-top-right-radius:18px;
+      border-bottom-right-radius:18px;
     }
 
-    tr.holeRow{ transition: background-color 0.2s ease, box-shadow 0.2s ease; }
-    tr.holeRow.active td{ background:var(--activeRow); }
+    tr.holeRow{ transition: background-color 0.2s ease; }
+    tr.holeRow.active td{ background: var(--activeRow); }
     tr.holeRow.active td:first-child{
-      box-shadow: inset 4px 0 0 0 var(--activeBorder);
+      box-shadow: inset 4px 0 0 0 var(--activeBorder), 0 1px 0 rgba(255,255,255,0.06) inset;
     }
 
     @keyframes pulseDone {
@@ -353,89 +455,129 @@
     }
     tr.holeRow.pulse td{ animation: pulseDone 0.22s ease; }
 
-    .goalTag{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height:16px;
-      min-width:46px;
-      padding:0 6px;
-      border-radius:999px;
-      font-size:10px;
-      box-sizing:border-box;
-      line-height:1;
-      white-space:nowrap;
-      font-weight:800;
-      text-transform:capitalize;
-    }
-    .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
-    .goal-orange{background:#ff8a00;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-blue{background:#1f6feb;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-pink{background:#ff5aa5;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-red{background:#e11d48;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-green{background:#16a34a;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-tee{background:#111;color:#fff;border:1px solid #111}
-
+    /* =========================
+       Throw pills (premium)
+       ========================= */
     .twoPip{
       display:inline-flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
       max-width:100%;
     }
     .arrow{
       font-size:12px;
-      color:var(--muted);
-      font-weight:800;
+      color: rgba(148,163,184,0.95);
+      font-weight:900;
       flex:0 0 auto;
     }
 
+    .goalTag{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      height:22px;
+      min-width:58px;
+      padding:0 12px;
+
+      border-radius:999px;
+      font-size:11px;
+      line-height:1;
+      font-weight:950;
+      letter-spacing:0.2px;
+      text-transform:capitalize;
+
+      border:1px solid rgba(255,255,255,0.14);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.10) inset,
+        0 10px 18px rgba(0,0,0,0.14);
+    }
+
+    .goalTag::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0));
+      opacity:0.35;
+      pointer-events:none;
+    }
+
+    /* Refined flag colors (less harsh in dark mode) */
+    .goal-white{ background:#ffffff; color:#0f172a; border:1px solid rgba(15,23,42,0.12); }
+    .goal-orange{ background:#ff8a00; color:#111827; border:1px solid rgba(0,0,0,0.10); }
+    .goal-blue{ background:#1f6feb; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
+    .goal-pink{ background:#ff5aa5; color:#111827; border:1px solid rgba(0,0,0,0.10); }
+    .goal-red{ background:#e11d48; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
+    .goal-green{ background:#16a34a; color:#ffffff; border:1px solid rgba(255,255,255,0.12); }
+    .goal-yellow{ background:#ffd400; color:#111827; border:1px solid rgba(0,0,0,0.10); }
+    .goal-tee{ background:#0b0d10; color:#ffffff; border:1px solid rgba(255,255,255,0.14); }
+
+    /* =========================
+       Delta selector
+       ========================= */
     select{
       font-size:15px;
-      padding:7px 8px;
-      background:transparent;
+      padding:8px 10px;
+      background: rgba(255,255,255,0.06);
       color:var(--text);
       border:1px solid var(--border);
-      border-radius:10px;
-      min-width:58px;
-      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      border-radius:14px;
+      min-width:64px;
+      font-weight:900;
+      letter-spacing:-0.2px;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.10) inset,
+        0 10px 18px rgba(0,0,0,0.10);
+      transition: filter 0.18s ease, transform 0.10s ease;
     }
-    .score-under{background:var(--scoreUnder)}
-    .score-even{background:var(--scoreEven)}
-    .score-over{background:var(--scoreOver)}
+    select:active{ transform: scale(0.99); }
 
-    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
-    .pill-under{background:var(--scoreUnder)}
-    .pill-even{background:var(--scoreEven)}
-    .pill-over{background:var(--scoreOver)}
+    .score-under{ background: var(--scoreUnder); }
+    .score-even{ background: var(--scoreEven); }
+    .score-over{ background: var(--scoreOver); }
+
+    /* =========================
+       Summary cells
+       ========================= */
+    .pill{ border-radius:999px; padding:2px 10px; font-size:12px; display:inline-block; }
+    .pill-under{ background:var(--scoreUnder); }
+    .pill-even{ background:var(--scoreEven); }
+    .pill-over{ background:var(--scoreOver); }
 
     .sumCell{
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:3px;
-      line-height:1.1;
+      gap:4px;
+      line-height:1.05;
     }
     .sumDiff{
       font-size:18px;
-      font-weight:900;
-      padding:2px 10px;
+      font-weight:950;
+      padding:3px 12px;
       border-radius:999px;
       display:inline-block;
-      min-width:42px;
+      min-width:44px;
+      border:1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
     }
     .sumThrows{
       font-size:11px;
       color:var(--muted);
+      font-weight:800;
     }
 
+    /* Total row style */
     tfoot tr.totalRow th,
     tfoot tr.totalRow td{
-      background:var(--totalRow);
+      background: var(--totalRow);
       border-top:1px solid var(--rowBorder);
       border-bottom:1px solid var(--rowBorder);
     }
 
+    /* Toast */
     .toast{
       position:fixed;
       left:50%;
@@ -444,13 +586,14 @@
       background:var(--toastBg);
       color:var(--toastText);
       padding:10px 12px;
-      border-radius:12px;
+      border-radius:14px;
       font-size:14px;
       max-width:92vw;
       opacity:0;
       pointer-events:none;
       transition: opacity 0.18s ease, transform 0.18s ease;
       z-index:9999;
+      box-shadow: 0 14px 24px rgba(0,0,0,0.25);
     }
     .toast.show{
       opacity:1;
@@ -463,16 +606,11 @@
 
   <div class="header">
     <div class="headerLeft">
-      <img id="logoLight" class="logoImg"
-           src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png"
-           alt="Bridges Park logo">
-      <img id="logoDark" class="logoImg"
-           src="B19327BB-FD35-4A0C-8F34-56CC91793687.png"
-           alt="Bridges Park logo (dark)"
-           style="display:none;">
+      <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo">
+      <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" alt="Bridges Park logo (dark)" style="display:none;">
       <div class="brand">
         <h1>Bridges Park</h1>
-        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
+        <div class="subtitle">Disc Golf • Course Generator + Scorecard</div>
       </div>
     </div>
 
@@ -492,7 +630,6 @@
     </div>
   </div>
 
-  <!-- Legend OUTSIDE -->
   <div class="legend">
     <div class="swatch"><span class="dot dot-under"></span> Under</div>
     <div class="swatch"><span class="dot dot-even"></span> Even</div>
@@ -508,25 +645,15 @@
 
   <div class="nameBlock">
     <div class="row">
-      <div class="grow">
-        <input id="n1" type="text" placeholder="Player 1 name">
-      </div>
-      <div class="grow">
-        <input id="n2" type="text" placeholder="Player 2 name">
-      </div>
+      <div class="grow"><input id="n1" type="text" placeholder="Player 1 name"></div>
+      <div class="grow"><input id="n2" type="text" placeholder="Player 2 name"></div>
     </div>
   </div>
 
   <div class="card">
-    <h2 style="margin:0 0 6px 0;">Scorecard</h2>
+    <h2>Scorecard</h2>
 
-    <!-- Sticky header INSIDE scorecard -->
     <div class="scoreSticky">
-      <div class="progressWrap">
-        <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-        <div id="progressText" class="progressText">0 / 18</div>
-      </div>
-
       <div class="colHeader" aria-hidden="true">
         <div>#</div>
         <div>Throw</div>
@@ -534,22 +661,21 @@
         <div id="p1HeadSticky">P1</div>
         <div id="p2HeadSticky">P2</div>
       </div>
+
+      <div class="progressWrap">
+        <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+        <div id="progressText" class="progressText">0 / 18</div>
+      </div>
     </div>
 
     <table>
-      <!-- ✅ This is the alignment fix -->
       <colgroup>
         <col><col><col><col><col>
       </colgroup>
 
-      <!-- hidden real header (kept for semantics; widths are driven by colgroup) -->
       <thead style="display:none;">
         <tr>
-          <th>#</th>
-          <th>Throw</th>
-          <th>Par</th>
-          <th>P1</th>
-          <th>P2</th>
+          <th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th>
         </tr>
       </thead>
 
@@ -594,7 +720,7 @@
 
   <div id="toast" class="toast">Saved</div>
 
-  <!-- IMPORTANT: bump v to bust Safari cache when you change app.js -->
-  <script src="app.js?v=2"></script>
+  <!-- bump v when app.js changes to avoid iOS caching -->
+  <script src="app.js?v=3"></script>
 </body>
 </html>
