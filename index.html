@@ -102,6 +102,7 @@
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border-bottom:1px solid var(--tableLine);padding:6px;text-align:center;vertical-align:middle}
     th{background:var(--thead)}
+    .left{text-align:left}
     .right{text-align:right}
 
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -165,7 +166,7 @@
     .pill-even{background:var(--scoreEven)}
     .pill-over{background:var(--scoreOver)}
 
-    /* New summary display: BIG diff, small throws */
+    /* Summary display: BIG diff, small throws */
     .sumCell{
       display:flex;
       flex-direction:column;
@@ -186,9 +187,17 @@
       color:var(--muted);
     }
 
+    /* Legend pips - force identical size */
     .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
     .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-    .dot{width:12px;height:12px;border-radius:4px;border:1px solid var(--border)}
+    .dot{
+      width:14px;height:14px;          /* same size */
+      box-sizing:border-box;           /* border doesn't change size */
+      border-radius:4px;
+      border:1px solid var(--border);
+      display:inline-block;
+      flex:0 0 14px;
+    }
     .dot-under{background:var(--scoreUnder)}
     .dot-even{background:var(--scoreEven)}
     .dot-over{background:var(--scoreOver)}
@@ -278,12 +287,11 @@
       </tr>
     </thead>
 
-    <!-- Body will include holes AND the "Front 9" summary row after hole 9 -->
     <tbody id="mainBody"></tbody>
 
     <tfoot>
       <tr>
-        <th colspan="4" class="right">Back 9</th>
+        <th colspan="4" class="left">Back 9</th>
         <th>
           <div class="sumCell">
             <span id="bd1" class="sumDiff pill pill-even">E</span>
@@ -298,7 +306,7 @@
         </th>
       </tr>
       <tr>
-        <th colspan="4" class="right">Total</th>
+        <th colspan="4" class="left">Total</th>
         <th>
           <div class="sumCell">
             <span id="d1" class="sumDiff pill pill-even">E</span>
@@ -308,6 +316,7 @@
         <th>
           <div class="sumCell">
             <span id="d2" class="sumDiff pill pill-even">E</span>
+            <span id="t2" class="sumDiff pill pill-even" style="display:none;"></span>
             <span id="t2" class="sumThrows">0</span>
           </div>
         </th>
@@ -672,7 +681,7 @@
     var tr = document.createElement("tr");
     tr.setAttribute("id", "front9Row");
     tr.innerHTML = `
-      <th colspan="4" class="right">Front 9</th>
+      <th colspan="4" class="left">Front 9</th>
       <th>
         <div class="sumCell">
           <span id="fd1" class="sumDiff pill pill-even">E</span>
@@ -719,7 +728,6 @@
 
       mainBody.appendChild(tr);
 
-      // Insert Front 9 summary AFTER hole 9
       if (hole === 9){
         mainBody.appendChild(buildFront9Row());
       }
@@ -735,48 +743,62 @@
   }
 
   function recalcTotals(){
-    var parFront = window.__parFront || 0;
-    var parBack  = window.__parBack  || 0;
-    var parTotal = window.__parTotal || 0;
+    // NOTE: diff uses "assume par for blanks", throws uses ONLY entered strokes.
+    var parFrontTotal = window.__parFront || 0;
+    var parBackTotal  = window.__parBack  || 0;
+    var parTotalTotal = window.__parTotal || 0;
 
     for (var pl=1; pl<=2; pl++){
-      var f=0,b=0,t=0;
+      var fThrows=0,bThrows=0,tThrows=0;
+      var fParEntered=0,bParEntered=0,tParEntered=0;
+
       for (var hole=1; hole<=HOLES; hole++){
         var sel = mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
         if (!sel) continue;
+
+        var par = parseInt(sel.getAttribute("data-par"),10) || 0;
         var v = sel.value;
+
         if (v !== ""){
           var n = parseInt(v,10);
           if (!isNaN(n)){
-            t += n;
-            if (hole<=9) f += n; else b += n;
+            tThrows += n;
+            tParEntered += par;
+
+            if (hole<=9){
+              fThrows += n;
+              fParEntered += par;
+            } else {
+              bThrows += n;
+              bParEntered += par;
+            }
           }
         }
       }
 
-      // Small numbers = throws
-      var fThrows = document.getElementById("f"+pl);
-      var bThrows = document.getElementById("b"+pl);
-      var tThrows = document.getElementById("t"+pl);
-      if (fThrows) fThrows.textContent = ""+f;
-      if (bThrows) bThrows.textContent = ""+b;
-      if (tThrows) tThrows.textContent = ""+t;
+      // Small numbers = entered throws
+      var fEl = document.getElementById("f"+pl);
+      var bEl = document.getElementById("b"+pl);
+      var tEl = document.getElementById("t"+pl);
+      if (fEl) fEl.textContent = ""+fThrows;
+      if (bEl) bEl.textContent = ""+bThrows;
+      if (tEl) tEl.textContent = ""+tThrows;
 
-      // Big numbers = diff (throws - par)
+      // Big numbers = (entered throws - entered par). Blanks contribute 0 to diff.
       var fd = document.getElementById("fd"+pl);
       var bd = document.getElementById("bd"+pl);
       var d  = document.getElementById("d"+pl);
 
       if (fd){
-        fd.textContent = formatDiff(f - parFront);
+        fd.textContent = formatDiff(fThrows - fParEntered);
         setDiffPill(fd, fd.textContent);
       }
       if (bd){
-        bd.textContent = formatDiff(b - parBack);
+        bd.textContent = formatDiff(bThrows - bParEntered);
         setDiffPill(bd, bd.textContent);
       }
       if (d){
-        d.textContent = formatDiff(t - parTotal);
+        d.textContent = formatDiff(tThrows - tParEntered);
         setDiffPill(d, d.textContent);
       }
     }
