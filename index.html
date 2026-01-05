@@ -30,10 +30,12 @@
     <br>
     Updates: tee→white is Par 3 • pink↔green disallowed.
   </div>
+
   <button id="btnGen">Generate Course</button>
   <button id="btnCopy">Copy Course + Scores</button>
   <button id="btnReset">Reset Scores</button>
   <button onclick="window.print()">Print / PDF</button>
+
   <div id="status" class="muted" style="margin-top:8px;"></div>
 </div>
 
@@ -93,34 +95,33 @@
 
 <script>
 (function(){
-  // ---------- CONFIG ----------
+  // Show JS errors on-screen (so you never get a “blank page” again)
+  window.addEventListener("error", function(ev){
+    var s=document.getElementById("status");
+    if(s) s.innerHTML = "<span class='bad'>Error:</span> " + (ev && ev.message ? ev.message : "Unknown error");
+  });
+
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
   var HOLES = 18;
   var MINREQ = 2;
   var FIXED = { 9: "green", 18: "green" };
 
-  // Directional restrictions (prev -> next disallowed)
-  // Updated: disallow pink<->green both ways
   var DIS = {
     "white":  [],
     "orange": ["pink","blue"],
     "blue":   ["orange","red"],
-    "pink":   ["orange","red","green"], // added green
+    "pink":   ["orange","red","green"], // disallow pink->green
     "red":    ["blue","pink"],
-    "green":  ["yellow","pink"],        // added pink
+    "green":  ["yellow","pink"],        // disallow green->pink
     "yellow": ["green"]
   };
 
-  // Par rules:
-  // Hole 1 (tee -> goal): Par 3 to yellow/pink/white; else Par 4.
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
-  // Pair-based par rules for holes 2-18 (both directions)
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
 
-  // Par 3 pairs (REMOVED green<->pink because that throw is no longer allowed)
   [
     ["white","yellow"],
     ["white","green"],
@@ -131,22 +132,20 @@
     ["red","blue"]
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
-  // Par 5 pairs
   [
     ["white","blue"],
     ["white","orange"]
   ].forEach(function(p){ PAR5[pairKey(p[0],p[1])] = true; });
 
-  // ---------- HELPERS ----------
   function allowed(prev, next){
     if (!prev) return true;
-    if (prev === next) return false; // no consecutive repeats
+    if (prev === next) return false;
     var bad = DIS[prev] || [];
     for (var i=0;i<bad.length;i++) if (bad[i]===next) return false;
     return true;
   }
 
-  function edgeKey(from,to){ return from + "->" + to; } // unique throws are directional
+  function edgeKey(from,to){ return from + "->" + to; }
 
   function shuffle(arr){
     for (var i=arr.length-1;i>0;i--){
@@ -196,14 +195,12 @@
   function candidateScore(goal, used, fromPos){
     var future = futureFixedCount(goal, fromPos);
     var willHave = used[goal] + future;
-    if (willHave < MINREQ) return -100 + used[goal]; // strongly prefer under-min goals
+    if (willHave < MINREQ) return -100 + used[goal];
     return used[goal];
   }
 
   function parFor(from,to,hole){
-    if (hole === 1){
-      return HOLE1_PAR3_TO[to] ? 3 : 4;
-    }
+    if (hole === 1) return HOLE1_PAR3_TO[to] ? 3 : 4;
     var k = pairKey(from,to);
     if (PAR5[k]) return 5;
     if (PAR3[k]) return 3;
@@ -216,16 +213,14 @@
     return ""+d;
   }
 
-  // ---------- GENERATOR ----------
   function generateCourse(){
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
 
-    // set fixed holes
     for (var h in FIXED) if (FIXED.hasOwnProperty(h)) course[parseInt(h,10)] = FIXED[h];
 
     var used = initCounts();
-    var usedEdges = {}; // from->to edge used
+    var usedEdges = {};
 
     function bt(pos){
       if (pos > HOLES){
@@ -237,17 +232,11 @@
 
       var prevGoal = (pos===1) ? "tee" : course[pos-1];
 
-      // fixed hole
       if (course[pos] !== null){
         var v = course[pos];
-
-        // start cannot be green
         if (pos === 1 && v === "green") return false;
-
-        // transition must be allowed for pos>1
         if (pos > 1 && !allowed(course[pos-1], v)) return false;
 
-        // unique throw (from->to)
         var ek = edgeKey(prevGoal, v);
         if (usedEdges[ek]) return false;
 
@@ -262,7 +251,6 @@
         return false;
       }
 
-      // choose candidate next goals
       var prev2 = (pos>1) ? course[pos-1] : null;
       var cands = [];
 
@@ -272,10 +260,7 @@
         if (pos === 1 && g2 === "green") continue;
         if (pos > 1 && !allowed(prev2, g2)) continue;
 
-        // ensure g2 -> next fixed hole transition is allowed
         if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
-
-        // unique throw
         if (usedEdges[edgeKey(prevGoal, g2)]) continue;
 
         cands.push(g2);
@@ -304,12 +289,8 @@
       return false;
     }
 
-    // Try multiple attempts for randomness
     for (var attempt=1; attempt<=20000; attempt++){
-      // reset non-fixed holes
-      for (var p=1; p<=HOLES; p++){
-        if (!FIXED[p]) course[p] = null;
-      }
+      for (var p=1; p<=HOLES; p++) if (!FIXED[p]) course[p] = null;
       used = initCounts();
       usedEdges = {};
 
@@ -319,11 +300,9 @@
         return { seq: seq, attempt: attempt };
       }
     }
-
     return null;
   }
 
-  // ---------- RENDER ----------
   var courseBody = document.getElementById("courseBody");
   var scoreBody  = document.getElementById("scoreBody");
   var statusEl   = document.getElementById("status");
@@ -371,11 +350,8 @@
       tr.innerHTML = "<td>"+hole+"</td><td>"+from+"</td><td>"+to+mark+"</td><td>"+p+"</td>";
       courseBody.appendChild(tr);
 
-      // Score row
       var trS = document.createElement("tr");
-      trS.appendChild(tdText(""+hole));
-      trS.appendChild(tdText(""+p));
-
+      trS.innerHTML = "<td>"+hole+"</td><td>"+p+"</td>";
       for (var pl=1; pl<=4; pl++){
         var td = document.createElement("td");
         td.appendChild(makeSelect(hole, pl));
@@ -397,12 +373,6 @@
     recalcTotals();
   }
 
-  function tdText(txt){
-    var td = document.createElement("td");
-    td.textContent = txt;
-    return td;
-  }
-
   function recalcTotals(){
     var parFront = window.__parFront || 0;
     var parBack  = window.__parBack  || 0;
@@ -410,7 +380,6 @@
 
     for (var pl=1; pl<=4; pl++){
       var f=0,b=0,t=0;
-
       for (var hole=1; hole<=HOLES; hole++){
         var sel = scoreBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
         if (!sel) continue;
@@ -423,7 +392,6 @@
           }
         }
       }
-
       document.getElementById("f"+pl).textContent = ""+f;
       document.getElementById("b"+pl).textContent = ""+b;
       document.getElementById("t"+pl).textContent = ""+t;
@@ -486,7 +454,7 @@
       );
     }
 
-    var txt = lines.join("\n");
+    var txt = lines.join("\\n");
     if (navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(txt).then(function(){
         statusEl.innerHTML = "<span class='ok'>Copied.</span>";
@@ -509,12 +477,16 @@
     statusEl.innerHTML = "<span class='ok'>Generated!</span> (attempt "+r.attempt+")";
   }
 
-  // ---------- WIRE UP ----------
-  document.getElementById("btnGen").addEventListener("click", doGenerate);
-  document.getElementById("btnCopy").addEventListener("click", copyAll);
-  document.getElementById("btnReset").addEventListener("click", resetScores);
+  // Wire up safely (won’t crash if a button is missing)
+  var btnGen = document.getElementById("btnGen");
+  var btnCopy = document.getElementById("btnCopy");
+  var btnReset = document.getElementById("btnReset");
 
-  // initial generate
+  if (btnGen) btnGen.addEventListener("click", doGenerate);
+  if (btnCopy) btnCopy.addEventListener("click", copyAll);
+  if (btnReset) btnReset.addEventListener("click", resetScores);
+
+  // Initial generate
   doGenerate();
 })();
 </script>
