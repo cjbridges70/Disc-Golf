@@ -8,7 +8,14 @@
 <style>
 /* ======================================================
    STABLE PREMIUM MOBILE UI – iOS SAFARI SAFE
-   (No tr::before overlays; preserves all app.js IDs)
+   FULL COPY/PASTE (includes:
+   - Theme toggle works (sun/moon + logo swap), conflict-proof
+   - Sticky header sticks
+   - Sticky header ALIGNMENT fixed (same insets as table)
+   - Background not cut off above header + premium background
+   - Rows render correctly on iOS Safari
+   - Active row highlight clean (no striping)
+   - Selects not clipped / not pushed off-screen
    ====================================================== */
 
 :root{
@@ -84,7 +91,7 @@ html, body { background: var(--bg); }
 
 *{ box-sizing:border-box; }
 
-/* Premium, interesting background + iOS top overdraw */
+/* Premium background + iOS top overdraw */
 html::before{
   content:"";
   position:fixed;
@@ -269,17 +276,19 @@ input[type=text]{
   overflow:visible;
 }
 
-/* We still want rounded clipping for the card visuals, so clip an INNER wrapper */
-.cardInner{
-  overflow:hidden;
-  border-radius:18px;
-}
-
-/* sticky header */
+/* Sticky header wrapper: no padding here (alignment fix) */
 .scoreSticky{
   position:sticky;
   top:8px;
   z-index:60;
+  padding:0;              /* IMPORTANT for alignment */
+  background:transparent; /* IMPORTANT for alignment */
+  border:none;
+  box-shadow:none;
+}
+
+/* Inner sticky content gets the same padding as tablePad */
+.scoreStickyInner{
   padding:12px;
   background:var(--card);
   border:1px solid var(--border);
@@ -289,6 +298,7 @@ input[type=text]{
   backdrop-filter: blur(12px);
 }
 
+/* header row */
 .colHeader{
   display:grid;
   grid-template-columns:10% 44% 10% 18% 18%;
@@ -331,13 +341,23 @@ input[type=text]{
   color:var(--muted);
 }
 
-/* table */
+/* Inner clipped card for rounded look */
+.cardInner{
+  overflow:hidden;
+  border-radius:18px;
+}
+
+/* SAME inset as scoreStickyInner for perfect column alignment */
+.tablePad{
+  padding:0 12px 12px;
+}
+
 table{
   width:100%;
   border-collapse:separate;
   border-spacing:0 12px;
   table-layout:fixed;
-  padding:0 12px 12px; /* restore horizontal padding */
+  padding:0; /* now handled by .tablePad */
 }
 
 /* column lock */
@@ -351,7 +371,7 @@ th,td{
   padding:14px 10px;
   text-align:center;
   white-space:nowrap;
-  overflow:visible; /* don't clip selects */
+  overflow:visible;
 }
 
 /* Hole row capsule (per-cell, iOS-safe) */
@@ -373,7 +393,7 @@ tbody tr.holeRow td:last-child{
   border-bottom-right-radius:22px;
 }
 
-/* Active row: no gradient per-cell (prevents striping). Use soft tint + left bar. */
+/* Active row: solid tint + left bar */
 tbody tr.holeRow.active td{
   background: rgba(158,211,122,0.10);
 }
@@ -558,68 +578,72 @@ tfoot tr.totalRow td{
 
 <!-- SCORECARD OUTER (sticky-safe) -->
 <div class="cardOuter">
-  <!-- Sticky header sits above inner clipped card -->
+  <!-- Sticky header aligned with table -->
   <div class="scoreSticky">
-    <div class="colHeader" aria-hidden="true">
-      <div>#</div>
-      <div>Throw</div>
-      <div>Par</div>
-      <div id="p1HeadSticky">P1</div>
-      <div id="p2HeadSticky">P2</div>
-    </div>
+    <div class="scoreStickyInner">
+      <div class="colHeader" aria-hidden="true">
+        <div>#</div>
+        <div>Throw</div>
+        <div>Par</div>
+        <div id="p1HeadSticky">P1</div>
+        <div id="p2HeadSticky">P2</div>
+      </div>
 
-    <div class="progressWrap">
-      <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-      <div id="progressText" class="progressText">0 / 18</div>
+      <div class="progressWrap">
+        <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+        <div id="progressText" class="progressText">0 / 18</div>
+      </div>
     </div>
   </div>
 
-  <!-- Inner clipped card for rounded look -->
+  <!-- Inner clipped card -->
   <div class="cardInner control" style="margin-top:12px;">
-    <table>
-      <colgroup><col><col><col><col><col></colgroup>
-      <thead style="display:none;">
-        <tr><th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th></tr>
-      </thead>
+    <div class="tablePad">
+      <table>
+        <colgroup><col><col><col><col><col></colgroup>
+        <thead style="display:none;">
+          <tr><th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th></tr>
+        </thead>
 
-      <tbody id="mainBody"></tbody>
+        <tbody id="mainBody"></tbody>
 
-      <tfoot>
-        <tr id="backRow">
-          <th colspan="2" class="left">Back 9</th>
-          <th id="parBackCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="bd1" class="sumDiff">0</span>
-              <span id="b1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="bd2" class="sumDiff">0</span>
-              <span id="b2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
+        <tfoot>
+          <tr id="backRow">
+            <th colspan="2" class="left">Back 9</th>
+            <th id="parBackCell">–</th>
+            <th>
+              <div class="sumCell">
+                <span id="bd1" class="sumDiff">0</span>
+                <span id="b1" class="sumThrows">0</span>
+              </div>
+            </th>
+            <th>
+              <div class="sumCell">
+                <span id="bd2" class="sumDiff">0</span>
+                <span id="b2" class="sumThrows">0</span>
+              </div>
+            </th>
+          </tr>
 
-        <tr class="totalRow">
-          <th colspan="2" class="left">Total</th>
-          <th id="parTotalCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="d1" class="sumDiff">0</span>
-              <span id="t1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="d2" class="sumDiff">0</span>
-              <span id="t2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
-      </tfoot>
-    </table>
+          <tr class="totalRow">
+            <th colspan="2" class="left">Total</th>
+            <th id="parTotalCell">–</th>
+            <th>
+              <div class="sumCell">
+                <span id="d1" class="sumDiff">0</span>
+                <span id="t1" class="sumThrows">0</span>
+              </div>
+            </th>
+            <th>
+              <div class="sumCell">
+                <span id="d2" class="sumDiff">0</span>
+                <span id="t2" class="sumThrows">0</span>
+              </div>
+            </th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -651,10 +675,8 @@ tfoot tr.totalRow td{
     }
   }
 
-  // init
   apply(getSaved() || (prefersDark() ? "dark" : "light"));
 
-  // follow system if user hasn't chosen
   if (window.matchMedia){
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => { if (!getSaved()) apply(prefersDark() ? "dark" : "light"); };
@@ -662,7 +684,6 @@ tfoot tr.totalRow td{
     else if (mq.addListener) mq.addListener(handler);
   }
 
-  // capture click early + stop conflicts
   if (btn){
     btn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -679,6 +700,6 @@ tfoot tr.totalRow td{
 </script>
 
 <!-- iOS cache buster -->
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>
