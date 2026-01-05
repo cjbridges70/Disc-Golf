@@ -6,7 +6,7 @@
   <title>Bridges Park</title>
   <style>
     body{font-family:-apple-system,system-ui,sans-serif;margin:16px;line-height:1.35}
-    button{font-size:16px;padding:10px 14px;margin:6px 6px 0 0}
+    button{font-size:16px;padding:10px 14px;margin:6px 0 0 0}
     input[type=text]{font-size:16px;padding:8px;width:100%;box-sizing:border-box}
     select{font-size:16px;padding:6px 8px}
     table{width:100%;border-collapse:collapse;margin-top:12px}
@@ -16,8 +16,6 @@
     .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}
     .pill{background:#eee;border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
     .muted{color:#666;font-size:13px}
-    .ok{color:#0a7;font-weight:700}
-    .bad{color:#c33;font-weight:800}
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .grow{flex:1 1 180px}
     .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -68,7 +66,6 @@
     .dot-over{background:#fee2e2}
 
     @media print{
-      .no-print{display:none}
       select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
       input[type=text]{border:none}
       .goalTag{border:1px solid #ddd}
@@ -79,7 +76,7 @@
 </head>
 <body>
 
-<div class="no-print">
+<div>
   <div class="header">
     <div class="brand">
       <div class="logoBox" title="Optional: replace this box with your logo (image) later">
@@ -91,14 +88,8 @@
       </div>
     </div>
 
-    <div style="margin-left:auto;min-width:220px;">
-      <div class="row" style="justify-content:flex-end;">
-        <button id="btnGen">Generate Course</button>
-        <button id="btnCopy">Copy Course + Scores</button>
-        <button id="btnReset">Reset Scores</button>
-        <button onclick="window.print()">Print / PDF</button>
-      </div>
-      <div id="status" class="muted" style="margin-top:6px;text-align:right;"></div>
+    <div style="margin-left:auto;min-width:220px;text-align:right;">
+      <button id="btnGen">Generate New Course</button>
     </div>
   </div>
 
@@ -183,9 +174,9 @@
 
 <script>
 (function(){
+  // If generation ever fails, show a simple alert (no status text on page)
   window.addEventListener("error", function(ev){
-    var s=document.getElementById("status");
-    if(s) s.innerHTML = "<span class='bad'>Error:</span> " + (ev && ev.message ? ev.message : "Unknown error");
+    alert("Error: " + (ev && ev.message ? ev.message : "Unknown error"));
   });
 
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
@@ -193,6 +184,8 @@
   var MINREQ = 2;
   var FIXED = { 9: "green", 18: "green" };
 
+  // Directional restrictions (prev -> next disallowed)
+  // Updated: disallow pink<->green both ways
   var DIS = {
     "white":  [],
     "orange": ["pink","blue"],
@@ -203,8 +196,10 @@
     "yellow": ["green"]
   };
 
+  // Par rules: Hole 1 (tee -> goal) Par 3 to yellow/pink/white; else Par 4.
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
+  // Pair-based par rules for holes 2-18 (both directions)
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
@@ -217,7 +212,7 @@
     ["green","red"],
     ["red","orange"],
     ["red","blue"],
-    ["blue","pink"]
+    ["blue","pink"] // Par 3 both directions
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
   [
@@ -233,7 +228,7 @@
     return true;
   }
 
-  function edgeKey(from,to){ return from + "->" + to; }
+  function edgeKey(from,to){ return from + "->" + to; } // unique throws are directional
 
   function shuffle(arr){
     for (var i=arr.length-1;i>0;i--){
@@ -391,7 +386,7 @@
       if (bt(1)){
         var seq = [];
         for (var k=1;k<=HOLES;k++) seq.push(course[k]);
-        return { seq: seq, attempt: attempt };
+        return { seq: seq };
       }
     }
 
@@ -399,7 +394,6 @@
   }
 
   var mainBody = document.getElementById("mainBody");
-  var statusEl = document.getElementById("status");
   var n1 = document.getElementById("n1");
   var n2 = document.getElementById("n2");
   var p1Head = document.getElementById("p1Head");
@@ -495,7 +489,7 @@
       var tr = document.createElement("tr");
       tr.appendChild(tdText(""+hole));
       tr.appendChild(from === "tee" ? tdText("tee") : tdGoal(from));
-      tr.appendChild(tdGoal(to));   // no checkmark
+      tr.appendChild(tdGoal(to)); // no checkmark
       tr.appendChild(tdText(""+p));
 
       var td1 = document.createElement("td");
@@ -514,8 +508,6 @@
     document.getElementById("parTotal").textContent = ""+parTotal;
     setTopParSummary(parFront, parBack, parTotal);
 
-    window.__seq = seq;
-    window.__pars = pars;
     window.__parFront = parFront;
     window.__parBack = parBack;
     window.__parTotal = parTotal;
@@ -553,7 +545,7 @@
     }
   }
 
-  function resetScores(){
+  function clearScores(){
     var sels = mainBody.querySelectorAll("select");
     for (var i=0;i<sels.length;i++){
       sels[i].value = "";
@@ -562,68 +554,22 @@
     recalcTotals();
   }
 
-  function copyAll(){
-    if (!window.__seq) return;
-
-    var name1 = playerName(1);
-    var name2 = playerName(2);
-
-    var lines = [];
-    lines.push("Bridges Park — Disc Golf");
-    lines.push("18-hole course");
-    lines.push("Par (Front/Back/Total): " + window.__parFront + "/" + window.__parBack + "/" + window.__parTotal);
-    lines.push("");
-
-    for (var i=0;i<window.__seq.length;i++){
-      var hole=i+1;
-      var from=(i===0)?"tee":window.__seq[i-1];
-      var to=window.__seq[i];
-      var p=window.__pars[i];
-
-      var s1 = (mainBody.querySelector('select[data-hole="'+hole+'"][data-player="1"]') || {}).value || "";
-      var s2 = (mainBody.querySelector('select[data-hole="'+hole+'"][data-player="2"]') || {}).value || "";
-
-      lines.push("Hole "+hole+": "+from+" -> "+to+" (Par "+p+")"
-        + " | " + name1 + ": " + (s1 || "-")
-        + " | " + name2 + ": " + (s2 || "-")
-      );
-    }
-    lines.push("");
-    lines.push("Totals:");
-    lines.push(name1 + ": Front " + document.getElementById("f1").textContent + " (" + document.getElementById("fd1").textContent + "), Back " + document.getElementById("b1").textContent + " (" + document.getElementById("bd1").textContent + "), Total " + document.getElementById("t1").textContent + " (" + document.getElementById("d1").textContent + ")");
-    lines.push(name2 + ": Front " + document.getElementById("f2").textContent + " (" + document.getElementById("fd2").textContent + "), Back " + document.getElementById("b2").textContent + " (" + document.getElementById("bd2").textContent + "), Total " + document.getElementById("t2").textContent + " (" + document.getElementById("d2").textContent + ")");
-
-    var txt = lines.join("\\n");
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(function(){
-        statusEl.innerHTML = "<span class='ok'>Copied.</span>";
-      }).catch(function(){
-        window.prompt("Copy this:", txt);
-      });
-    } else {
-      window.prompt("Copy this:", txt);
-    }
-  }
-
-  function doGenerate(){
+  function generateAndRender(){
     syncPlayerHeaders();
-    statusEl.textContent = "Generating...";
     var r = generateCourse();
     if (!r){
-      statusEl.innerHTML = "<span class='bad'>Could not generate.</span> Try again (rules are strict).";
+      alert("Could not generate a valid course. Try again.");
       return;
     }
     renderAll(r.seq);
-    resetScores();
-    statusEl.innerHTML = "<span class='ok'>Generated!</span> (attempt "+r.attempt+")";
+    clearScores();
   }
 
-  document.getElementById("btnGen").addEventListener("click", doGenerate);
-  document.getElementById("btnCopy").addEventListener("click", copyAll);
-  document.getElementById("btnReset").addEventListener("click", resetScores);
+  document.getElementById("btnGen").addEventListener("click", generateAndRender);
 
+  // Init on load
   syncPlayerHeaders();
-  doGenerate();
+  generateAndRender();
 })();
 </script>
 
