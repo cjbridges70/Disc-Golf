@@ -22,6 +22,8 @@
       --scoreOver:#fee2e2;
 
       --totalRow:#f7f7f9;
+      --activeRow:#eef2ff;
+      --activeBorder:#6366f1;
     }
 
     @media (prefers-color-scheme: dark){
@@ -41,6 +43,8 @@
         --scoreOver:#3b1416;
 
         --totalRow:#151b25;
+        --activeRow:#1a2240;
+        --activeBorder:#8b93ff;
       }
     }
 
@@ -147,7 +151,6 @@
       border-radius:10px;
     }
 
-    /* Mobile-only table: force fit */
     table{
       width:100%;
       border-collapse:collapse;
@@ -250,11 +253,10 @@
       background:var(--totalRow);
     }
 
-    @media print{
-      button{display:none}
-      select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
-      input[type=text]{border:none}
-      body{margin:10px}
+    /* Active hole highlight */
+    tr.holeRow.active{
+      background:var(--activeRow);
+      box-shadow: inset 3px 0 0 0 var(--activeBorder);
     }
   </style>
 </head>
@@ -294,6 +296,7 @@
 
   <div class="btnRow">
     <button id="btnGen">Generate New Course</button>
+    <button id="btnClear" class="btnSecondary">Clear Scores</button>
     <button id="btnCopyLink" class="btnSecondary">Copy Share Link</button>
   </div>
 
@@ -363,7 +366,7 @@
 
 <script>
 (function(){
-  // Logo auto swap
+  // ---------- Logo auto swap ----------
   function syncLogo(){
     var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.getElementById("logoLight").style.display = systemDark ? "none" : "block";
@@ -372,7 +375,7 @@
   syncLogo();
   try{ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncLogo); }catch(e){}
 
-  // Course constraints
+  // ---------- Course constraints ----------
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
   var HOLES = 18;
   var MINREQ = 2;
@@ -403,7 +406,7 @@
     ["green","red"],
     ["red","orange"],
     ["red","blue"],
-    ["blue","pink"] // par 3
+    ["blue","pink"]
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
   [
@@ -490,6 +493,7 @@
     return s;
   }
 
+  // Generate a valid course with unique throws (edges)
   function generateCourse(){
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
@@ -576,36 +580,27 @@
     return null;
   }
 
-  // --- Share link encoding ---
-  function encodeCourse(seq){
-    // "white,orange,..." -> URL-safe
-    return encodeURIComponent(seq.join(","));
-  }
+  // ---------- Share link encoding ----------
   function decodeCourse(param){
     try{
-      var raw = decodeURIComponent(param || "");
-      if (!raw) return null;
+      if (!param) return null;
+      var raw = decodeURIComponent(param);
       var parts = raw.split(",").map(function(s){ return s.trim().toLowerCase(); }).filter(Boolean);
       if (parts.length !== HOLES) return null;
-      // validate
+
       for (var i=0;i<parts.length;i++){
         if (GOALS.indexOf(parts[i]) === -1) return null;
       }
-      // validate fixed holes
-      if (parts[8] !== "green") return null;   // hole 9 index 8
-      if (parts[17] !== "green") return null;  // hole 18 index 17
-      // validate no consecutive equal
-      for (var j=1;j<parts.length;j++){
-        if (parts[j] === parts[j-1]) return null;
-      }
-      // validate disallowed transitions (including tee -> hole1 not green)
+      if (parts[8] !== "green") return null;   // hole 9
+      if (parts[17] !== "green") return null;  // hole 18
       if (parts[0] === "green") return null;
+
       for (var h=2; h<=HOLES; h++){
         var prev = parts[h-2];
         var next = parts[h-1];
+        if (prev === next) return null;
         if (!allowed(prev, next)) return null;
       }
-      // validate tee->hole1 edge uniqueness/constraints isn't necessary for viewing
       return parts;
     }catch(e){
       return null;
@@ -614,7 +609,7 @@
 
   function setUrlForCourse(seq){
     var url = new URL(window.location.href);
-    url.searchParams.set("c", seq.join(","));
+    url.searchParams.set("c", encodeURIComponent(seq.join(",")));
     history.replaceState(null, "", url.toString());
   }
 
@@ -624,19 +619,71 @@
       await navigator.clipboard.writeText(link);
       alert("Share link copied!");
     }catch(e){
-      // fallback
       prompt("Copy this link:", link);
     }
   }
 
-  // UI
+  // ---------- Persist (localStorage) ----------
+  function storageKeyForCourse(courseStr){
+    return "bridgespark:v1:" + courseStr;
+  }
+
+  function saveState(){
+    if (!currentSeq || currentSeq.length !== HOLES) return;
+    var courseStr = currentSeq.join(",");
+    var key = storageKeyForCourse(courseStr);
+
+    var scores = {};
+    for (var hole=1; hole<=HOLES; hole++){
+      scores[hole] = {
+        p1: getSelectValue(hole,1),
+        p2: getSelectValue(hole,2)
+      };
+    }
+
+    var state = {
+      n1: (n1.value || ""),
+      n2: (n2.value || ""),
+      activeHole: activeHole || 1,
+      scores: scores
+    };
+
+    try{
+      localStorage.setItem(key, JSON.stringify(state));
+    }catch(e){}
+  }
+
+  function loadState(){
+    if (!currentSeq || currentSeq.length !== HOLES) return null;
+    var courseStr = currentSeq.join(",");
+    var key = storageKeyForCourse(courseStr);
+    try{
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){
+      return null;
+    }
+  }
+
+  function clearSavedStateForCurrentCourse(){
+    if (!currentSeq || currentSeq.length !== HOLES) return;
+    var key = storageKeyForCourse(currentSeq.join(","));
+    try{ localStorage.removeItem(key); }catch(e){}
+  }
+
+  // ---------- UI ----------
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
+  var btnClear = document.getElementById("btnClear");
   var btnCopy = document.getElementById("btnCopyLink");
   var n1 = document.getElementById("n1");
   var n2 = document.getElementById("n2");
   var p1Head = document.getElementById("p1Head");
   var p2Head = document.getElementById("p2Head");
+
+  var currentSeq = null;
+  var activeHole = 1;
 
   function playerName(idx){
     return (idx===1 ? (n1.value||"P1") : (n2.value||"P2")).trim();
@@ -645,8 +692,9 @@
     p1Head.textContent = playerName(1);
     p2Head.textContent = playerName(2);
   }
-  n1.addEventListener("input", syncPlayerHeaders);
-  n2.addEventListener("input", syncPlayerHeaders);
+
+  n1.addEventListener("input", function(){ syncPlayerHeaders(); saveState(); });
+  n2.addEventListener("input", function(){ syncPlayerHeaders(); saveState(); });
 
   function setDiffPill(el, diff){
     el.classList.remove("pill-under","pill-even","pill-over");
@@ -680,6 +728,14 @@
     sel.addEventListener("change", function(){
       colorDelta(sel);
       recalcTotals();
+      saveState();
+
+      // auto-advance: only when BOTH players have a non-placeholder on this hole
+      if (bothSelected(hole)){
+        setActiveHole(Math.min(HOLES, hole+1), true);
+      } else {
+        setActiveHole(hole, false);
+      }
     });
 
     colorDelta(sel);
@@ -730,6 +786,7 @@
   }
 
   function renderAll(seq){
+    currentSeq = seq.slice();
     mainBody.innerHTML = "";
 
     var parFront=0, parBack=0, parTotal=0;
@@ -744,6 +801,15 @@
       if (hole<=9) parFront += p; else parBack += p;
 
       var tr = document.createElement("tr");
+      tr.className = "holeRow";
+      tr.setAttribute("data-hole", ""+hole);
+
+      tr.addEventListener("click", function(e){
+        // avoid click stealing when interacting with selects
+        if (e && (e.target && (e.target.tagName === "SELECT" || e.target.tagName === "OPTION"))) return;
+        var h = parseInt(this.getAttribute("data-hole"),10) || 1;
+        setActiveHole(h, true);
+      });
 
       // Hole #
       var tdH = document.createElement("td");
@@ -785,8 +851,73 @@
     }
 
     setParSummary(parFront, parBack, parTotal);
-
     recalcTotals();
+
+    // Apply saved state if present
+    var st = loadState();
+    if (st){
+      n1.value = st.n1 || "";
+      n2.value = st.n2 || "";
+      syncPlayerHeaders();
+
+      if (st.scores){
+        for (var h=1; h<=HOLES; h++){
+          if (!st.scores[h]) continue;
+          setSelectValue(h, 1, st.scores[h].p1 || "");
+          setSelectValue(h, 2, st.scores[h].p2 || "");
+        }
+        // recolor + totals after restoring
+        recolorAllSelects();
+        recalcTotals();
+      }
+
+      setActiveHole(Math.max(1, Math.min(HOLES, st.activeHole || 1)), false);
+    } else {
+      syncPlayerHeaders();
+      setActiveHole(1, false);
+    }
+  }
+
+  function getSelectEl(hole, player){
+    return mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+player+'"]');
+  }
+  function getSelectValue(hole, player){
+    var sel = getSelectEl(hole, player);
+    return sel ? sel.value : "";
+  }
+  function setSelectValue(hole, player, value){
+    var sel = getSelectEl(hole, player);
+    if (!sel) return;
+    sel.value = (value === null || value === undefined) ? "" : String(value);
+  }
+
+  function recolorAllSelects(){
+    var sels = mainBody.querySelectorAll("select");
+    for (var i=0;i<sels.length;i++) colorDelta(sels[i]);
+  }
+
+  function bothSelected(hole){
+    var a = getSelectValue(hole, 1);
+    var b = getSelectValue(hole, 2);
+    return (a !== "" && b !== "");
+  }
+
+  function setActiveHole(hole, shouldScroll){
+    activeHole = hole;
+    // clear
+    var rows = mainBody.querySelectorAll("tr.holeRow");
+    for (var i=0;i<rows.length;i++){
+      rows[i].classList.remove("active");
+    }
+    // set
+    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
+    if (row){
+      row.classList.add("active");
+      if (shouldScroll){
+        try{ row.scrollIntoView({behavior:"smooth", block:"center"}); }catch(e){ row.scrollIntoView(); }
+      }
+    }
+    saveState();
   }
 
   function recalcTotals(){
@@ -795,7 +926,7 @@
       var frontThrows=0, backThrows=0, totalThrows=0;
 
       for (var hole=1; hole<=HOLES; hole++){
-        var sel = mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
+        var sel = getSelectEl(hole, pl);
         if (!sel) continue;
 
         var par = parseInt(sel.getAttribute("data-par"),10) || 0;
@@ -830,32 +961,73 @@
     }
   }
 
+  function anyScoreEntered(){
+    for (var h=1; h<=HOLES; h++){
+      if (getSelectValue(h,1) !== "" || getSelectValue(h,2) !== "") return true;
+    }
+    return false;
+  }
+
+  function clearScores(alsoClearStorage){
+    for (var h=1; h<=HOLES; h++){
+      setSelectValue(h, 1, "");
+      setSelectValue(h, 2, "");
+    }
+    recolorAllSelects();
+    recalcTotals();
+    setActiveHole(1, true);
+
+    if (alsoClearStorage) clearSavedStateForCurrentCourse();
+    saveState();
+  }
+
   function generateAndRender(){
+    // lock: warn if any scores entered
+    if (anyScoreEntered()){
+      var ok = confirm("Generate a new course? This will reset scores for this round.");
+      if (!ok) return;
+    }
+
     syncPlayerHeaders();
+
     var r = generateCourse();
     if (!r){
       alert("Could not generate a valid course. Try again.");
       return;
     }
+
+    // new course => new URL & render
     setUrlForCourse(r.seq);
     renderAll(r.seq);
+
+    // after new course, scores should be clean
+    clearScores(true);
   }
 
-  btnGen.addEventListener("click", generateAndRender);
-  btnCopy.addEventListener("click", copyShareLink);
+  // ---------- Wire buttons ----------
+  document.getElementById("btnGen").addEventListener("click", generateAndRender);
+  document.getElementById("btnClear").addEventListener("click", function(){
+    clearScores(true);
+  });
+  document.getElementById("btnCopyLink").addEventListener("click", copyShareLink);
 
-  // Load from share link if present
+  // ---------- Init ----------
   function init(){
     syncPlayerHeaders();
+
     var url = new URL(window.location.href);
     var c = url.searchParams.get("c");
     var seq = decodeCourse(c);
+
     if (seq){
       renderAll(seq);
+      // ensure URL is normalized (encoded)
+      setUrlForCourse(seq);
     } else {
       generateAndRender();
     }
   }
+
   init();
 })();
 </script>
