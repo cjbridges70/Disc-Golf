@@ -97,13 +97,13 @@
       color:var(--text);
       border:1px solid var(--border);
       border-radius:10px;
+      min-width:70px;
     }
 
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border-bottom:1px solid var(--tableLine);padding:6px;text-align:center;vertical-align:middle}
     th{background:var(--thead)}
     .left{text-align:left}
-    .right{text-align:right}
 
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .grow{flex:1 1 180px}
@@ -157,6 +157,7 @@
     .goal-tee{background:#111;color:#fff;border:1px solid #111}
     .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
 
+    /* delta entry coloring */
     .score-under{background:var(--scoreUnder)}
     .score-even{background:var(--scoreEven)}
     .score-over{background:var(--scoreOver)}
@@ -166,7 +167,6 @@
     .pill-even{background:var(--scoreEven)}
     .pill-over{background:var(--scoreOver)}
 
-    /* Summary display: BIG diff, small throws */
     .sumCell{
       display:flex;
       flex-direction:column;
@@ -187,12 +187,11 @@
       color:var(--muted);
     }
 
-    /* Legend pips - force identical size */
     .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
     .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
     .dot{
-      width:14px;height:14px;          /* same size */
-      box-sizing:border-box;           /* border doesn't change size */
+      width:14px;height:14px;
+      box-sizing:border-box;
       border-radius:4px;
       border:1px solid var(--border);
       display:inline-block;
@@ -294,13 +293,13 @@
         <th colspan="4" class="left">Back 9</th>
         <th>
           <div class="sumCell">
-            <span id="bd1" class="sumDiff pill pill-even">E</span>
+            <span id="bd1" class="sumDiff pill pill-even">0</span>
             <span id="b1" class="sumThrows">0</span>
           </div>
         </th>
         <th>
           <div class="sumCell">
-            <span id="bd2" class="sumDiff pill pill-even">E</span>
+            <span id="bd2" class="sumDiff pill pill-even">0</span>
             <span id="b2" class="sumThrows">0</span>
           </div>
         </th>
@@ -309,14 +308,13 @@
         <th colspan="4" class="left">Total</th>
         <th>
           <div class="sumCell">
-            <span id="d1" class="sumDiff pill pill-even">E</span>
+            <span id="d1" class="sumDiff pill pill-even">0</span>
             <span id="t1" class="sumThrows">0</span>
           </div>
         </th>
         <th>
           <div class="sumCell">
-            <span id="d2" class="sumDiff pill pill-even">E</span>
-            <span id="t2" class="sumDiff pill pill-even" style="display:none;"></span>
+            <span id="d2" class="sumDiff pill pill-even">0</span>
             <span id="t2" class="sumThrows">0</span>
           </div>
         </th>
@@ -488,12 +486,6 @@
     return 4;
   }
 
-  function formatDiff(d){
-    if (d===0) return "E";
-    if (d>0) return "+"+d;
-    return ""+d;
-  }
-
   function goalClass(goal){
     return "goalTag goal goal-" + goal;
   }
@@ -589,7 +581,7 @@
     return null;
   }
 
-  /* Render + scoring */
+  /* Render + scoring (delta entry) */
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
   var n1 = document.getElementById("n1");
@@ -608,47 +600,45 @@
   n1.addEventListener("input", syncPlayerHeaders);
   n2.addEventListener("input", syncPlayerHeaders);
 
-  function setDiffPill(el, diffText){
+  function setDiffPill(el, diff){
     el.classList.remove("pill-under","pill-even","pill-over");
-    if (diffText === "E") el.classList.add("pill-even");
-    else if (diffText[0] === "+") el.classList.add("pill-over");
+    if (diff === 0) el.classList.add("pill-even");
+    else if (diff > 0) el.classList.add("pill-over");
     else el.classList.add("pill-under");
   }
 
-  function makeSelect(hole, player, parVal){
+  // Delta entry: -2, -1, 0, +1, +2, +3
+  var DELTAS = [-2,-1,0,1,2,3];
+
+  function makeDeltaSelect(hole, player, parVal){
     var sel = document.createElement("select");
     sel.setAttribute("data-hole", ""+hole);
     sel.setAttribute("data-player", ""+player);
     sel.setAttribute("data-par", ""+parVal);
 
-    var opt0 = document.createElement("option");
-    opt0.value = "";
-    opt0.textContent = "–";
-    sel.appendChild(opt0);
-
-    for (var i=1;i<=10;i++){
+    for (var i=0;i<DELTAS.length;i++){
+      var d = DELTAS[i];
       var opt = document.createElement("option");
-      opt.value = ""+i;
-      opt.textContent = ""+i;
+      opt.value = ""+d;
+      opt.textContent = (d>0 ? ("+"+d) : (""+d));
+      if (d===0) opt.selected = true;
       sel.appendChild(opt);
     }
 
     sel.addEventListener("change", function(){
-      colorSelect(sel);
+      colorDelta(sel);
       recalcTotals();
     });
+
+    colorDelta(sel);
     return sel;
   }
 
-  function colorSelect(sel){
+  function colorDelta(sel){
     sel.classList.remove("score-under","score-even","score-over");
-    var v = sel.value;
-    if (v === "") return;
-    var n = parseInt(v,10);
-    var p = parseInt(sel.getAttribute("data-par"),10);
-    if (isNaN(n) || isNaN(p)) return;
-    if (n < p) sel.classList.add("score-under");
-    else if (n > p) sel.classList.add("score-over");
+    var d = parseInt(sel.value,10);
+    if (d < 0) sel.classList.add("score-under");
+    else if (d > 0) sel.classList.add("score-over");
     else sel.classList.add("score-even");
   }
 
@@ -684,13 +674,13 @@
       <th colspan="4" class="left">Front 9</th>
       <th>
         <div class="sumCell">
-          <span id="fd1" class="sumDiff pill pill-even">E</span>
+          <span id="fd1" class="sumDiff pill pill-even">0</span>
           <span id="f1" class="sumThrows">0</span>
         </div>
       </th>
       <th>
         <div class="sumCell">
-          <span id="fd2" class="sumDiff pill pill-even">E</span>
+          <span id="fd2" class="sumDiff pill pill-even">0</span>
           <span id="f2" class="sumThrows">0</span>
         </div>
       </th>
@@ -719,11 +709,11 @@
       tr.appendChild(tdText(""+p));
 
       var td1 = document.createElement("td");
-      td1.appendChild(makeSelect(hole, 1, p));
+      td1.appendChild(makeDeltaSelect(hole, 1, p));
       tr.appendChild(td1);
 
       var td2 = document.createElement("td");
-      td2.appendChild(makeSelect(hole, 2, p));
+      td2.appendChild(makeDeltaSelect(hole, 2, p));
       tr.appendChild(td2);
 
       mainBody.appendChild(tr);
@@ -743,74 +733,49 @@
   }
 
   function recalcTotals(){
-    // NOTE: diff uses "assume par for blanks", throws uses ONLY entered strokes.
-    var parFrontTotal = window.__parFront || 0;
-    var parBackTotal  = window.__parBack  || 0;
-    var parTotalTotal = window.__parTotal || 0;
+    var parFront = window.__parFront || 0;
+    var parBack  = window.__parBack  || 0;
+    var parTotal = window.__parTotal || 0;
 
     for (var pl=1; pl<=2; pl++){
-      var fThrows=0,bThrows=0,tThrows=0;
-      var fParEntered=0,bParEntered=0,tParEntered=0;
+      var frontDelta=0, backDelta=0, totalDelta=0;
+      var frontThrows=0, backThrows=0, totalThrows=0;
 
       for (var hole=1; hole<=HOLES; hole++){
         var sel = mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
         if (!sel) continue;
 
         var par = parseInt(sel.getAttribute("data-par"),10) || 0;
-        var v = sel.value;
+        var d = parseInt(sel.value,10) || 0;
 
-        if (v !== ""){
-          var n = parseInt(v,10);
-          if (!isNaN(n)){
-            tThrows += n;
-            tParEntered += par;
+        // delta sums
+        totalDelta += d;
+        if (hole<=9) frontDelta += d; else backDelta += d;
 
-            if (hole<=9){
-              fThrows += n;
-              fParEntered += par;
-            } else {
-              bThrows += n;
-              bParEntered += par;
-            }
-          }
-        }
+        // throws derived from par + delta
+        var throws = par + d;
+        totalThrows += throws;
+        if (hole<=9) frontThrows += throws; else backThrows += throws;
       }
 
-      // Small numbers = entered throws
-      var fEl = document.getElementById("f"+pl);
-      var bEl = document.getElementById("b"+pl);
-      var tEl = document.getElementById("t"+pl);
-      if (fEl) fEl.textContent = ""+fThrows;
-      if (bEl) bEl.textContent = ""+bThrows;
-      if (tEl) tEl.textContent = ""+tThrows;
+      // Small numbers = throws total
+      document.getElementById("f"+pl).textContent = ""+frontThrows;
+      document.getElementById("b"+pl).textContent = ""+backThrows;
+      document.getElementById("t"+pl).textContent = ""+totalThrows;
 
-      // Big numbers = (entered throws - entered par). Blanks contribute 0 to diff.
+      // Big numbers = delta totals (0 instead of E)
       var fd = document.getElementById("fd"+pl);
       var bd = document.getElementById("bd"+pl);
-      var d  = document.getElementById("d"+pl);
+      var dEl = document.getElementById("d"+pl);
 
-      if (fd){
-        fd.textContent = formatDiff(fThrows - fParEntered);
-        setDiffPill(fd, fd.textContent);
-      }
-      if (bd){
-        bd.textContent = formatDiff(bThrows - bParEntered);
-        setDiffPill(bd, bd.textContent);
-      }
-      if (d){
-        d.textContent = formatDiff(tThrows - tParEntered);
-        setDiffPill(d, d.textContent);
-      }
-    }
-  }
+      fd.textContent = ""+frontDelta;
+      bd.textContent = ""+backDelta;
+      dEl.textContent = ""+totalDelta;
 
-  function clearScores(){
-    var sels = mainBody.querySelectorAll("select");
-    for (var i=0;i<sels.length;i++){
-      sels[i].value = "";
-      sels[i].classList.remove("score-under","score-even","score-over");
+      setDiffPill(fd, frontDelta);
+      setDiffPill(bd, backDelta);
+      setDiffPill(dEl, totalDelta);
     }
-    recalcTotals();
   }
 
   function generateAndRender(){
@@ -821,7 +786,6 @@
       return;
     }
     renderAll(r.seq);
-    clearScores();
   }
 
   btnGen.addEventListener("click", generateAndRender);
