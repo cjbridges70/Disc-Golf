@@ -4,34 +4,105 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Bridges Park</title>
+
   <style>
-    body{font-family:-apple-system,system-ui,sans-serif;margin:16px;line-height:1.35}
-    button{font-size:16px;padding:12px 14px;width:100%;}
-    input[type=text]{font-size:16px;padding:8px;width:100%;box-sizing:border-box}
-    select{font-size:16px;padding:6px 8px}
+    :root{
+      --bg:#ffffff;
+      --text:#111111;
+      --muted:#666666;
+      --card:#ffffff;
+      --border:#dddddd;
+      --thead:#f5f5f5;
+      --tableLine:#dddddd;
+      --btnBg:#efefef;
+      --btnText:#111111;
+
+      --scoreUnder:#d1fae5;
+      --scoreEven:#f3f4f6;
+      --scoreOver:#fee2e2;
+    }
+
+    /* Auto dark mode (system) */
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0d10;
+        --text:#e8e8e8;
+        --muted:#a7a7a7;
+        --card:#11151b;
+        --border:#2a2f38;
+        --thead:#171c24;
+        --tableLine:#2a2f38;
+        --btnBg:#1b2230;
+        --btnText:#e8e8e8;
+
+        /* keep these readable but not neon */
+        --scoreUnder:#0f3b2b;
+        --scoreEven:#202634;
+        --scoreOver:#3b1416;
+      }
+    }
+
+    /* Manual override via data-theme */
+    html[data-theme="light"]{
+      --bg:#ffffff; --text:#111111; --muted:#666666; --card:#ffffff;
+      --border:#dddddd; --thead:#f5f5f5; --tableLine:#dddddd;
+      --btnBg:#efefef; --btnText:#111111;
+      --scoreUnder:#d1fae5; --scoreEven:#f3f4f6; --scoreOver:#fee2e2;
+    }
+    html[data-theme="dark"]{
+      --bg:#0b0d10; --text:#e8e8e8; --muted:#a7a7a7; --card:#11151b;
+      --border:#2a2f38; --thead:#171c24; --tableLine:#2a2f38;
+      --btnBg:#1b2230; --btnText:#e8e8e8;
+      --scoreUnder:#0f3b2b; --scoreEven:#202634; --scoreOver:#3b1416;
+    }
+
+    body{
+      font-family:-apple-system,system-ui,sans-serif;
+      margin:16px;
+      line-height:1.35;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .muted{color:var(--muted);font-size:13px}
+    .topWrap{max-width:900px}
+    .card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-top:12px;
+      max-width:900px;
+      background:var(--card);
+    }
+
     table{width:100%;border-collapse:collapse;margin-top:12px}
-    th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center;vertical-align:middle}
-    th{background:#f5f5f5}
+    th,td{border-bottom:1px solid var(--tableLine);padding:6px;text-align:center;vertical-align:middle}
+    th{background:var(--thead)}
     .right{text-align:right}
-    .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px;max-width:900px}
-    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
-    .muted{color:#666;font-size:13px}
+
+    button{
+      font-size:16px;
+      padding:12px 14px;
+      width:100%;
+      background:var(--btnBg);
+      color:var(--btnText);
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+
+    input[type=text]{font-size:16px;padding:8px;width:100%;box-sizing:border-box;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px}
+    select{font-size:16px;padding:6px 8px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:10px}
+
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .grow{flex:1 1 180px}
     .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:900px}
     .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .brand h1{margin:0;font-size:28px}
     .subtitle{margin:2px 0 0 0}
-    .topWrap{max-width:900px}
 
-    /* LOGO (border removed) */
     .logoImg{
       width:64px;height:64px;border-radius:14px;object-fit:contain;
-      border:none !important;
-      outline:none !important;
-      box-shadow:none !important;
-      background:transparent;
-      display:block;
+      border:none !important; background:transparent; display:block;
     }
 
     .infoGrid{
@@ -41,13 +112,21 @@
       margin-top:10px;
     }
     .infoCard{
-      border:1px solid #eee;border-radius:12px;padding:10px;background:#fff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      background:var(--card);
       text-align:left;
     }
-    .infoLabel{font-size:12px;color:#666;margin:0}
+    .infoLabel{font-size:12px;color:var(--muted);margin:0}
     .infoValue{font-size:16px;font-weight:700;margin:2px 0 0 0}
 
-    /* Goal "flag" colors */
+    /* Theme switcher */
+    .themeRow{max-width:900px;margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .themeRow label{font-size:13px;color:var(--muted)}
+    .themeRow select{width:auto;min-width:160px}
+
+    /* Goal "flag" colors (kept bright even in dark mode) */
     .goal{font-weight:700;text-transform:capitalize}
     .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
     .goal-orange{background:#ff8a00;color:#111}
@@ -60,29 +139,28 @@
     .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
 
     /* Per-hole score coloring */
-    .score-under{background:#d1fae5}
-    .score-even{background:#f3f4f6}
-    .score-over{background:#fee2e2}
+    .score-under{background:var(--scoreUnder)}
+    .score-even{background:var(--scoreEven)}
+    .score-over{background:var(--scoreOver)}
 
-    /* Pill coloring for totals */
-    .pill-under{background:#d1fae5}
-    .pill-even{background:#f3f4f6}
-    .pill-over{background:#fee2e2}
+    /* Totals pill coloring */
+    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
+    .pill-under{background:var(--scoreUnder)}
+    .pill-even{background:var(--scoreEven)}
+    .pill-over{background:var(--scoreOver)}
 
-    /* Small legend */
     .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#444}
-    .dot{width:12px;height:12px;border-radius:4px;border:1px solid #ddd}
-    .dot-under{background:#d1fae5}
-    .dot-even{background:#f3f4f6}
-    .dot-over{background:#fee2e2}
+    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+    .dot{width:12px;height:12px;border-radius:4px;border:1px solid var(--border)}
+    .dot-under{background:var(--scoreUnder)}
+    .dot-even{background:var(--scoreEven)}
+    .dot-over{background:var(--scoreOver)}
 
     @media print{
+      button,.themeRow{display:none}
       select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
       input[type=text]{border:none}
-      .goalTag{border:1px solid #ddd}
       body{margin:10px}
-      button{display:none}
     }
   </style>
 </head>
@@ -97,6 +175,15 @@
         <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
       </div>
     </div>
+  </div>
+
+  <div class="themeRow">
+    <label for="themeSelect">Theme</label>
+    <select id="themeSelect">
+      <option value="auto">Auto (System)</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
   </div>
 
   <div class="infoGrid" aria-label="Course summary">
@@ -169,18 +256,27 @@
 
 <script>
 (function(){
-  // If anything breaks, show the actual error instead of silently failing
   window.addEventListener("error", function(ev){
     alert("Page error: " + (ev && ev.message ? ev.message : "Unknown error"));
   });
+
+  // THEME TOGGLE (Auto/Light/Dark)
+  var themeSelect = document.getElementById("themeSelect");
+  function applyTheme(val){
+    if(val==="auto"){ document.documentElement.removeAttribute("data-theme"); }
+    else { document.documentElement.setAttribute("data-theme", val); }
+    localStorage.setItem("bp_theme", val);
+  }
+  var saved = localStorage.getItem("bp_theme") || "auto";
+  themeSelect.value = saved;
+  applyTheme(saved);
+  themeSelect.addEventListener("change", function(){ applyTheme(themeSelect.value); });
 
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
   var HOLES = 18;
   var MINREQ = 2;
   var FIXED = { 9: "green", 18: "green" };
 
-  // Directional restrictions (prev -> next disallowed)
-  // Pink <-> Green removed both ways
   var DIS = {
     "white":  [],
     "orange": ["pink","blue"],
@@ -191,10 +287,8 @@
     "yellow": ["green"]
   };
 
-  // Par rules: Hole 1 (tee -> goal) Par 3 to yellow/pink/white; else Par 4.
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
-  // Pair-based par rules for holes 2-18 (both directions)
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
@@ -223,7 +317,7 @@
     return true;
   }
 
-  function edgeKey(from,to){ return from + "->" + to; } // unique throws are directional
+  function edgeKey(from,to){ return from + "->" + to; }
 
   function shuffle(arr){
     for (var i=arr.length-1;i>0;i--){
@@ -301,7 +395,6 @@
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
 
-    // Apply fixed holes
     for (var h in FIXED) if (FIXED.hasOwnProperty(h)) course[parseInt(h,10)] = FIXED[h];
 
     var used = initCounts();
@@ -317,7 +410,6 @@
 
       var prevGoal = (pos===1) ? "tee" : course[pos-1];
 
-      // If fixed or already assigned
       if (course[pos] !== null){
         var v = course[pos];
         if (pos === 1 && v === "green") return false;
@@ -337,7 +429,6 @@
         return false;
       }
 
-      // Otherwise choose a candidate
       var prev2 = (pos>1) ? course[pos-1] : null;
       var cands = [];
 
@@ -347,10 +438,7 @@
         if (pos === 1 && g2 === "green") continue;
         if (pos > 1 && !allowed(prev2, g2)) continue;
 
-        // Lookahead: must be compatible with fixed next hole (if any)
         if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
-
-        // Unique directional throw
         if (usedEdges[edgeKey(prevGoal, g2)]) continue;
 
         cands.push(g2);
@@ -379,7 +467,6 @@
       return false;
     }
 
-    // Multiple attempts for randomness
     for (var attempt=1; attempt<=20000; attempt++){
       for (var p=1; p<=HOLES; p++) if (!FIXED[p]) course[p] = null;
       used = initCounts();
@@ -585,7 +672,6 @@
 
   btnGen.addEventListener("click", generateAndRender);
 
-  // Init on load
   syncPlayerHeaders();
   generateAndRender();
 })();
