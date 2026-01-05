@@ -7,15 +7,8 @@
 
 <style>
 /* ======================================================
-   PREMIUM MOBILE UI – COMPATIBLE WITH CURRENT app.js
-   FULL COPY/PASTE (includes ALL fixes since last file)
-   Fixes:
-   - Theme toggle works (sun/moon + logo swap)
-   - Sticky header sticks (remove overflow:hidden parent)
-   - Background not cut off above header (html/body bg + overdraw)
-   - More interesting premium background
-   - Active row striping fixed (row capsule via tr::before)
-   - Selects not clipped + fixed width
+   STABLE PREMIUM MOBILE UI – iOS SAFARI SAFE
+   (No tr::before overlays; preserves all app.js IDs)
    ====================================================== */
 
 :root{
@@ -26,19 +19,15 @@
   --card:rgba(17,21,27,.78);
   --border:rgba(255,255,255,.10);
 
-  /* Logo-friendly green */
   --accent:#9ED37A;
-  --accentSoft:rgba(158,211,122,.20);
+  --accentSoft:rgba(158,211,122,.18);
   --activeBorder:rgba(158,211,122,.95);
 
   --controlBg:rgba(27,34,48,.70);
   --controlBg2:rgba(27,34,48,.55);
 
-  --scoreUnder:rgba(16,185,129,.22);
-  --scoreEven:rgba(148,163,184,.20);
-  --scoreOver:rgba(244,63,94,.22);
-
   --thead:rgba(23,28,36,.78);
+
   --rowBg:rgba(17,21,27,.72);
   --rowBorder:rgba(255,255,255,.10);
   --totalRow:rgba(27,35,65,.65);
@@ -49,11 +38,14 @@
   --shadow:0 16px 34px rgba(0,0,0,.28);
   --shadow2:0 10px 20px rgba(0,0,0,.22);
 
+  --scoreUnder:rgba(16,185,129,.22);
+  --scoreEven:rgba(148,163,184,.20);
+  --scoreOver:rgba(244,63,94,.22);
+
   --toastBg: rgba(10,12,16,0.92);
   --toastText:#fff;
 }
 
-/* Light mode overrides when html[data-theme="light"] */
 html[data-theme="light"]{
   color-scheme:light;
 
@@ -65,11 +57,13 @@ html[data-theme="light"]{
   --border:rgba(15,23,42,.12);
 
   --accent:#8FBC6C;
-  --accentSoft:rgba(143,188,108,.20);
+  --accentSoft:rgba(143,188,108,.18);
   --activeBorder:rgba(143,188,108,.95);
 
   --controlBg:rgba(255,255,255,.78);
   --controlBg2:rgba(255,255,255,.62);
+
+  --thead:rgba(255,255,255,.72);
 
   --rowBg:rgba(255,255,255,.62);
   --rowBorder:rgba(15,23,42,.12);
@@ -86,18 +80,16 @@ html[data-theme="light"]{
 html[data-theme="dark"]{ color-scheme:dark; }
 
 html,body{ height:100%; }
-
-/* IMPORTANT: ensures background fills safe-area region */
 html, body { background: var(--bg); }
 
 *{ box-sizing:border-box; }
 
-/* Premium interesting background (overdraws above top to avoid cut-off) */
+/* Premium, interesting background + iOS top overdraw */
 html::before{
   content:"";
   position:fixed;
   left:0; right:0;
-  top:-60px; bottom:0; /* overdraw fixes iOS top cut */
+  top:-60px; bottom:0;
   z-index:-1;
   background:
     radial-gradient(900px 520px at 12% -10%, rgba(158,211,122,.28), transparent 60%),
@@ -117,9 +109,6 @@ body{
   line-height:1.25;
 }
 
-.muted{ color:var(--muted); font-size:12px; }
-
-/* Unified control style */
 .control{
   border-radius:18px;
   border:1px solid var(--border);
@@ -145,8 +134,7 @@ body{
 }
 
 .logoImg{
-  width:56px;
-  height:56px;
+  width:56px;height:56px;
   object-fit:contain;
   border:none !important;
   outline:none !important;
@@ -172,18 +160,13 @@ body{
 }
 
 .themeToggleBtn{
-  width:52px;
-  height:52px;
+  width:52px;height:52px;
   padding:0;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-.themeToggleBtn img{
-  width:24px;
-  height:24px;
-  display:block;
-}
+.themeToggleBtn img{ width:24px;height:24px; display:block; }
 
 /* ================= INFO ================= */
 .infoGrid{
@@ -242,7 +225,7 @@ button:focus{ outline:none; }
   margin-top:12px;
   background:
     linear-gradient(180deg,rgba(255,255,255,.18),transparent),
-    radial-gradient(1100px 160px at 50% 0%,rgba(158,211,122,.25),transparent),
+    radial-gradient(1100px 160px at 50% 0%,rgba(158,211,122,.22),transparent),
     var(--controlBg);
   border-color: rgba(158,211,122,.28);
   box-shadow: var(--shadow);
@@ -263,15 +246,8 @@ button:focus{ outline:none; }
 }
 
 /* ================= NAMES ================= */
-.nameBlock{
-  margin-top:12px;
-  padding:12px;
-}
-.row{
-  display:flex;
-  gap:12px;
-  flex-wrap:wrap;
-}
+.nameBlock{ margin-top:12px; padding:12px; }
+.row{ display:flex; gap:12px; flex-wrap:wrap; }
 .grow{ flex:1 1 160px; }
 
 input[type=text]{
@@ -287,10 +263,16 @@ input[type=text]{
 }
 
 /* ================= SCORECARD ================= */
-.card{
+/* Sticky breaks if any ancestor uses overflow:hidden — so keep visible */
+.cardOuter{
   margin-top:14px;
-  padding:0;
-  overflow:visible; /* CRITICAL: sticky works only if parents don't clip */
+  overflow:visible;
+}
+
+/* We still want rounded clipping for the card visuals, so clip an INNER wrapper */
+.cardInner{
+  overflow:hidden;
+  border-radius:18px;
 }
 
 /* sticky header */
@@ -307,7 +289,6 @@ input[type=text]{
   backdrop-filter: blur(12px);
 }
 
-/* header row */
 .colHeader{
   display:grid;
   grid-template-columns:10% 44% 10% 18% 18%;
@@ -356,10 +337,10 @@ table{
   border-collapse:separate;
   border-spacing:0 12px;
   table-layout:fixed;
-  padding:12px 0 12px; /* keep breathing room under sticky */
+  padding:0 12px 12px; /* restore horizontal padding */
 }
 
-/* column lock (alignment) */
+/* column lock */
 colgroup col:nth-child(1){ width:10%; }
 colgroup col:nth-child(2){ width:44%; }
 colgroup col:nth-child(3){ width:10%; }
@@ -370,53 +351,37 @@ th,td{
   padding:14px 10px;
   text-align:center;
   white-space:nowrap;
-  overflow:visible; /* IMPORTANT: don't clip selects */
+  overflow:visible; /* don't clip selects */
 }
 
-/* ===== Row capsule (fixes striping) ===== */
-tbody tr.holeRow{ position:relative; }
-
-tbody tr.holeRow::before{
-  content:"";
-  position:absolute;
-  left:0; right:0;
-  top:0; bottom:0;
-  background: var(--rowBg);
-  border:1px solid var(--rowBorder);
-  border-radius:22px;
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
-  z-index:0;
-}
-
-/* put cell content above capsule */
+/* Hole row capsule (per-cell, iOS-safe) */
 tbody tr.holeRow td{
-  position:relative;
-  z-index:1;
-  background: transparent;
-  border: none;
+  background:var(--rowBg);
+  border-top:1px solid var(--rowBorder);
+  border-bottom:1px solid var(--rowBorder);
 }
 
-/* Active row highlight clean (no vertical bands) */
-tbody tr.holeRow.active::before{
-  background:
-    linear-gradient(90deg, var(--accentSoft), rgba(255,255,255,0) 60%),
-    var(--rowBg);
-  border-color: rgba(158,211,122,0.25);
-}
-
-/* Strong left accent bar */
-tbody tr.holeRow.active::after{
-  content:"";
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:6px;
+tbody tr.holeRow td:first-child{
+  border-left:1px solid var(--rowBorder);
   border-top-left-radius:22px;
   border-bottom-left-radius:22px;
-  background: var(--activeBorder);
-  z-index:1;
-  opacity:0.95;
+}
+
+tbody tr.holeRow td:last-child{
+  border-right:1px solid var(--rowBorder);
+  border-top-right-radius:22px;
+  border-bottom-right-radius:22px;
+}
+
+/* Active row: no gradient per-cell (prevents striping). Use soft tint + left bar. */
+tbody tr.holeRow.active td{
+  background: rgba(158,211,122,0.10);
+}
+html[data-theme="light"] tbody tr.holeRow.active td{
+  background: rgba(143,188,108,0.14);
+}
+tbody tr.holeRow.active td:first-child{
+  box-shadow: inset 6px 0 0 var(--activeBorder);
 }
 
 /* throw pills */
@@ -465,7 +430,7 @@ tbody tr.holeRow.active::after{
 .goal-green{ background:#16a34a; color:#fff; }
 .goal-yellow{ background:#ffd400; color:#111; border-color: rgba(0,0,0,.10); }
 
-/* score selects (fixed width looks better + avoids clipping) */
+/* score selects */
 select{
   width:72px;
   max-width:72px;
@@ -478,11 +443,10 @@ select{
 }
 
 /* score color classes (app.js sets these) */
-.score-under{ background:var(--scoreUnder); }
-.score-even{ background:var(--scoreEven); }
-.score-over{ background:var(--scoreOver); }
+.score-under{ background:var(--scoreUnder) !important; }
+.score-even{ background:var(--scoreEven) !important; }
+.score-over{ background:var(--scoreOver) !important; }
 
-/* summary cells (app.js expects these ids) */
 .sumCell{
   display:flex;
   flex-direction:column;
@@ -506,16 +470,13 @@ select{
 
 .left{ text-align:left; }
 
-/* total row tint */
 tfoot tr.totalRow th,
 tfoot tr.totalRow td{
   background:var(--totalRow);
   border-top:1px solid var(--rowBorder);
   border-bottom:1px solid var(--rowBorder);
-  border-radius:0; /* keep clean */
 }
 
-/* toast */
 .toast{
   position:fixed;
   left:50%;
@@ -572,7 +533,7 @@ tfoot tr.totalRow td{
   </div>
 </div>
 
-<!-- LEGEND (outside scorecard) -->
+<!-- LEGEND -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
@@ -595,8 +556,9 @@ tfoot tr.totalRow td{
   </div>
 </div>
 
-<!-- SCORECARD -->
-<div class="card">
+<!-- SCORECARD OUTER (sticky-safe) -->
+<div class="cardOuter">
+  <!-- Sticky header sits above inner clipped card -->
   <div class="scoreSticky">
     <div class="colHeader" aria-hidden="true">
       <div>#</div>
@@ -612,50 +574,53 @@ tfoot tr.totalRow td{
     </div>
   </div>
 
-  <table>
-    <colgroup><col><col><col><col><col></colgroup>
-    <thead style="display:none;">
-      <tr><th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th></tr>
-    </thead>
+  <!-- Inner clipped card for rounded look -->
+  <div class="cardInner control" style="margin-top:12px;">
+    <table>
+      <colgroup><col><col><col><col><col></colgroup>
+      <thead style="display:none;">
+        <tr><th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th></tr>
+      </thead>
 
-    <tbody id="mainBody"></tbody>
+      <tbody id="mainBody"></tbody>
 
-    <tfoot>
-      <tr id="backRow">
-        <th colspan="2" class="left">Back 9</th>
-        <th id="parBackCell">–</th>
-        <th>
-          <div class="sumCell">
-            <span id="bd1" class="sumDiff">0</span>
-            <span id="b1" class="sumThrows">0</span>
-          </div>
-        </th>
-        <th>
-          <div class="sumCell">
-            <span id="bd2" class="sumDiff">0</span>
-            <span id="b2" class="sumThrows">0</span>
-          </div>
-        </th>
-      </tr>
+      <tfoot>
+        <tr id="backRow">
+          <th colspan="2" class="left">Back 9</th>
+          <th id="parBackCell">–</th>
+          <th>
+            <div class="sumCell">
+              <span id="bd1" class="sumDiff">0</span>
+              <span id="b1" class="sumThrows">0</span>
+            </div>
+          </th>
+          <th>
+            <div class="sumCell">
+              <span id="bd2" class="sumDiff">0</span>
+              <span id="b2" class="sumThrows">0</span>
+            </div>
+          </th>
+        </tr>
 
-      <tr class="totalRow">
-        <th colspan="2" class="left">Total</th>
-        <th id="parTotalCell">–</th>
-        <th>
-          <div class="sumCell">
-            <span id="d1" class="sumDiff">0</span>
-            <span id="t1" class="sumThrows">0</span>
-          </div>
-        </th>
-        <th>
-          <div class="sumCell">
-            <span id="d2" class="sumDiff">0</span>
-            <span id="t2" class="sumThrows">0</span>
-          </div>
-        </th>
-      </tr>
-    </tfoot>
-  </table>
+        <tr class="totalRow">
+          <th colspan="2" class="left">Total</th>
+          <th id="parTotalCell">–</th>
+          <th>
+            <div class="sumCell">
+              <span id="d1" class="sumDiff">0</span>
+              <span id="t1" class="sumThrows">0</span>
+            </div>
+          </th>
+          <th>
+            <div class="sumCell">
+              <span id="d2" class="sumDiff">0</span>
+              <span id="t2" class="sumThrows">0</span>
+            </div>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
 </div>
 
 <div id="toast" class="toast">Saved</div>
@@ -679,7 +644,7 @@ tfoot tr.totalRow td{
   function apply(theme){
     root.setAttribute("data-theme", theme);
     const isDark = theme === "dark";
-    if (icon) icon.src = isDark ? "sun.png" : "moon.png"; // shows what you'll switch TO
+    if (icon) icon.src = isDark ? "sun.png" : "moon.png";
     if (logoLight && logoDark){
       logoLight.style.display = isDark ? "none" : "block";
       logoDark.style.display  = isDark ? "block" : "none";
@@ -714,6 +679,6 @@ tfoot tr.totalRow td{
 </script>
 
 <!-- iOS cache buster -->
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
