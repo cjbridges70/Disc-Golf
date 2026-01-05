@@ -1,335 +1,790 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bridges Park</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Bridges Park</title>
 
-<style>
-/* ================= THEME ================= */
-:root{
-  --bg:#ffffff; --text:#111; --muted:#666;
-  --card:#ffffff; --border:#dddddd;
-  --thead:#f5f5f5; --line:#dddddd;
-  --btn:#efefef;
+  <style>
+    :root{
+      --bg:#ffffff;
+      --text:#111111;
+      --muted:#666666;
+      --card:#ffffff;
+      --border:#dddddd;
+      --thead:#f5f5f5;
+      --tableLine:#dddddd;
+      --btnBg:#efefef;
+      --btnText:#111111;
 
-  --under:#d1fae5;
-  --even:#f3f4f6;
-  --over:#fee2e2;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0b0d10; --text:#e8e8e8; --muted:#a7a7a7;
-    --card:#11151b; --border:#2a2f38;
-    --thead:#171c24; --line:#2a2f38;
-    --btn:#1b2230;
+      --scoreUnder:#d1fae5;
+      --scoreEven:#f3f4f6;
+      --scoreOver:#fee2e2;
+    }
 
-    --under:#0f3b2b;
-    --even:#202634;
-    --over:#3b1416;
-  }
-}
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0d10;
+        --text:#e8e8e8;
+        --muted:#a7a7a7;
+        --card:#11151b;
+        --border:#2a2f38;
+        --thead:#171c24;
+        --tableLine:#2a2f38;
+        --btnBg:#1b2230;
+        --btnText:#e8e8e8;
 
-/* ================= BASE ================= */
-body{
-  margin:16px;
-  font-family:-apple-system,system-ui,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-.muted{color:var(--muted);font-size:13px}
+        --scoreUnder:#0f3b2b;
+        --scoreEven:#202634;
+        --scoreOver:#3b1416;
+      }
+    }
 
-.card{
-  max-width:900px;
-  margin-top:12px;
-  padding:12px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-}
+    body{
+      font-family:-apple-system,system-ui,sans-serif;
+      margin:16px;
+      line-height:1.35;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .muted{color:var(--muted);font-size:13px}
+    .topWrap{max-width:900px}
+    .card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-top:12px;
+      max-width:900px;
+      background:var(--card);
+    }
 
-button{
-  width:100%;
-  padding:12px;
-  font-size:16px;
-  border-radius:14px;
-  border:1px solid var(--border);
-  background:var(--btn);
-  color:var(--text);
-}
+    button{
+      font-size:16px;
+      padding:12px 14px;
+      width:100%;
+      background:var(--btnBg);
+      color:var(--btnText);
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    input[type=text]{
+      font-size:16px;
+      padding:8px;
+      width:100%;
+      box-sizing:border-box;
+      background:transparent;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+    }
+    select{
+      font-size:16px;
+      padding:6px 8px;
+      background:transparent;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      min-width:74px;
+    }
 
-/* ================= HEADER ================= */
-.header{
-  max-width:900px;
-  display:flex;
-  gap:12px;
-  align-items:center;
-}
-.logoImg{
-  width:64px;height:64px;
-  border-radius:14px;
-  object-fit:contain;
-  border:none;
-  background:transparent;
-}
-h1{margin:0;font-size:28px}
+    .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:900px}
+    .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:28px}
+    .subtitle{margin:2px 0 0 0}
 
-/* ================= INFO ================= */
-.infoGrid{
-  max-width:900px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
-.infoCard{
-  padding:10px;
-  border:1px solid var(--border);
-  border-radius:14px;
-}
+    .logoImg{
+      width:64px;height:64px;border-radius:14px;object-fit:contain;
+      border:none !important; outline:none !important; box-shadow:none !important;
+      background:transparent;
+      display:block;
+    }
 
-/* ================= LEGEND ================= */
-.legend{display:flex;gap:10px;margin-top:8px}
-.dot{
-  width:14px;height:14px;
-  border-radius:4px;
-  border:1px solid var(--border);
-}
-.dot-under{background:var(--under)}
-.dot-even{background:var(--even)}
-.dot-over{background:var(--over)}
+    .infoGrid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(140px,1fr));
+      gap:8px;
+      margin-top:10px;
+      max-width:900px;
+    }
+    .infoCard{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:10px;
+      background:var(--card);
+      text-align:left;
+    }
+    .infoLabel{font-size:12px;color:var(--muted);margin:0}
+    .infoValue{font-size:16px;font-weight:700;margin:2px 0 0 0}
 
-/* ================= TABLE ================= */
-.tableWrap{
-  width:100%;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-}
-.tableWrap table{
-  min-width:760px;
-}
-table{width:100%;border-collapse:collapse}
-th,td{
-  padding:6px;
-  text-align:center;
-  border-bottom:1px solid var(--line);
-}
-th{background:var(--thead)}
-.left{text-align:left}
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;max-width:900px}
+    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+    .dot{
+      width:14px;height:14px;
+      box-sizing:border-box;
+      border-radius:4px;
+      border:1px solid var(--border);
+      display:inline-block;
+      flex:0 0 14px;
+    }
+    .dot-under{background:var(--scoreUnder)}
+    .dot-even{background:var(--scoreEven)}
+    .dot-over{background:var(--scoreOver)}
 
-/* ================= GOAL TAGS ================= */
-.goalTag{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:72px;
-  height:22px;
-  padding:0 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:700;
-  box-sizing:border-box;
-}
-.goal-tee{background:#111;color:#fff}
-.goal-white{background:#fff;color:#111;border:1px solid #ddd}
-.goal-orange{background:#ff8a00}
-.goal-blue{background:#1f6feb;color:#fff}
-.goal-pink{background:#ff5aa5}
-.goal-red{background:#e11d48;color:#fff}
-.goal-green{background:#16a34a;color:#fff}
-.goal-yellow{background:#ffd400}
+    /* --- TABLE WRAP FIX (prevents overflow) --- */
+    .tableWrap{
+      width:100%;
+      overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      border-radius:12px;
+    }
+    .tableWrap table{
+      min-width:860px; /* ensures it scrolls instead of squishing */
+    }
 
-/* ================= SCORING ================= */
-select{
-  min-width:70px;
-  padding:6px;
-  font-size:16px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text);
-}
-.score-under{background:var(--under)}
-.score-even{background:var(--even)}
-.score-over{background:var(--over)}
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{
+      border-bottom:1px solid var(--tableLine);
+      padding:6px;
+      text-align:center;
+      vertical-align:middle;
+      white-space:nowrap; /* prevents weird wrap on iPhone */
+    }
+    th{background:var(--thead)}
+    .left{text-align:left}
 
-.sumCell{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.sumDiff{
-  font-size:18px;
-  font-weight:800;
-}
-.sumThrows{
-  font-size:12px;
-  color:var(--muted);
-}
+    .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .grow{flex:1 1 180px}
 
-/* ================= MOBILE ================= */
-@media (max-width:480px){
-  th,td{padding:5px}
-  .goalTag{min-width:56px;height:20px;font-size:11px}
-  select{min-width:64px;font-size:15px}
-}
-</style>
+    /* Goal tags: equal size */
+    .goalTag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height:22px;
+      min-width:72px;
+      padding:0 10px;
+      border-radius:999px;
+      font-size:12px;
+      box-sizing:border-box;
+      line-height:1;
+      white-space:nowrap;
+      font-weight:700;
+      text-transform:capitalize;
+    }
+    .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
+    .goal-orange{background:#ff8a00;color:#111;border:1px solid rgba(0,0,0,0.08)}
+    .goal-blue{background:#1f6feb;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-pink{background:#ff5aa5;color:#111;border:1px solid rgba(0,0,0,0.08)}
+    .goal-red{background:#e11d48;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-green{background:#16a34a;color:#fff;border:1px solid rgba(255,255,255,0.12)}
+    .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
+    .goal-tee{background:#111;color:#fff;border:1px solid #111}
+
+    /* Delta entry coloring */
+    .score-under{background:var(--scoreUnder)}
+    .score-even{background:var(--scoreEven)}
+    .score-over{background:var(--scoreOver)}
+
+    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
+    .pill-under{background:var(--scoreUnder)}
+    .pill-even{background:var(--scoreEven)}
+    .pill-over{background:var(--scoreOver)}
+
+    .sumCell{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2px;
+      line-height:1.1;
+    }
+    .sumDiff{
+      font-size:18px;
+      font-weight:800;
+      padding:2px 10px;
+      border-radius:999px;
+      display:inline-block;
+      min-width:44px;
+    }
+    .sumThrows{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    @media (max-width:480px){
+      th,td{padding:5px}
+      .goalTag{min-width:56px;height:20px;font-size:11px;padding:0 8px}
+      select{min-width:64px;padding:5px 6px;font-size:15px}
+    }
+
+    @media print{
+      button{display:none}
+      select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
+      input[type=text]{border:none}
+      body{margin:10px}
+      .tableWrap{overflow:visible}
+      .tableWrap table{min-width:auto}
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="header">
-  <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png">
-  <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" style="display:none">
-  <div>
-    <h1>Bridges Park</h1>
-    <div class="muted">Disc Golf • Course Generator + Scorecard</div>
+<div class="topWrap">
+  <div class="header">
+    <div class="brand">
+      <img id="logoLight" class="logoImg"
+           src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png"
+           alt="Bridges Park logo">
+      <img id="logoDark" class="logoImg"
+           src="B19327BB-FD35-4A0C-8F34-56CC91793687.png"
+           alt="Bridges Park logo (dark)"
+           style="display:none;">
+      <div>
+        <h1>Bridges Park</h1>
+        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="infoGrid" aria-label="Course summary">
+    <div class="infoCard">
+      <p class="infoLabel">Holes</p>
+      <p class="infoValue">18</p>
+    </div>
+    <div class="infoCard">
+      <p class="infoLabel">Par (Front / Back / Total)</p>
+      <p class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></p>
+    </div>
+  </div>
+
+  <div class="legend" aria-label="Score color legend">
+    <div class="swatch"><span class="dot dot-under"></span> Under par</div>
+    <div class="swatch"><span class="dot dot-even"></span> Even par</div>
+    <div class="swatch"><span class="dot dot-over"></span> Over par</div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <button id="btnGen">Generate New Course</button>
   </div>
 </div>
-
-<div class="infoGrid">
-  <div class="infoCard"><div class="muted">Holes</div><strong>18</strong></div>
-  <div class="infoCard">
-    <div class="muted">Par (F / B / T)</div>
-    <strong><span id="pf">–</span> / <span id="pb">–</span> / <span id="pt">–</span></strong>
-  </div>
-</div>
-
-<div class="legend">
-  <div><span class="dot dot-under"></span> Under</div>
-  <div><span class="dot dot-even"></span> Even</div>
-  <div><span class="dot dot-over"></span> Over</div>
-</div>
-
-<button id="gen">Generate New Course</button>
 
 <div class="card">
-<h2>Course + Scorecard</h2>
+  <h2 style="margin:0 0 6px 0;">Course + Scorecard</h2>
 
-<div class="tableWrap">
-<table>
-<thead>
-<tr>
-  <th>Hole</th><th>From</th><th>To</th><th>Par</th>
-  <th>Player 1</th><th>Player 2</th>
-</tr>
-</thead>
-<tbody id="body"></tbody>
-</table>
-</div>
+  <div class="row" style="margin-top:8px;">
+    <div class="grow">
+      <div class="muted" style="margin-bottom:4px;">Player 1</div>
+      <input id="n1" type="text" placeholder="Player 1 name">
+    </div>
+    <div class="grow">
+      <div class="muted" style="margin-bottom:4px;">Player 2</div>
+      <input id="n2" type="text" placeholder="Player 2 name">
+    </div>
+  </div>
+
+  <div class="tableWrap" id="tableWrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hole</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Par</th>
+          <th id="p1Head">Player 1</th>
+          <th id="p2Head">Player 2</th>
+        </tr>
+      </thead>
+
+      <tbody id="mainBody"></tbody>
+
+      <tfoot>
+        <tr>
+          <th colspan="3" class="left">Back 9</th>
+          <th id="parBackCell">–</th>
+          <th>
+            <div class="sumCell">
+              <span id="bd1" class="sumDiff pill pill-even">0</span>
+              <span id="b1" class="sumThrows">0</span>
+            </div>
+          </th>
+          <th>
+            <div class="sumCell">
+              <span id="bd2" class="sumDiff pill pill-even">0</span>
+              <span id="b2" class="sumThrows">0</span>
+            </div>
+          </th>
+        </tr>
+        <tr>
+          <th colspan="3" class="left">Total</th>
+          <th id="parTotalCell">–</th>
+          <th>
+            <div class="sumCell">
+              <span id="d1" class="sumDiff pill pill-even">0</span>
+              <span id="t1" class="sumThrows">0</span>
+            </div>
+          </th>
+          <th>
+            <div class="sumCell">
+              <span id="d2" class="sumDiff pill pill-even">0</span>
+              <span id="t2" class="sumThrows">0</span>
+            </div>
+          </th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
 </div>
 
 <script>
-/* ============ LOGO SWAP (AUTO DARK) ============ */
-function syncLogo(){
-  const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  document.getElementById("logoLight").style.display = dark?"none":"block";
-  document.getElementById("logoDark").style.display  = dark?"block":"none";
-}
-syncLogo();
-window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",syncLogo);
-
-/* ============ COURSE DATA ============ */
-const GOALS=["white","orange","blue","pink","red","green","yellow"];
-const FIXED={9:"green",18:"green"};
-
-const DIS={
-  white:[],
-  orange:["pink","blue"],
-  blue:["orange","red"],
-  pink:["orange","red","green"],
-  red:["blue","pink"],
-  green:["yellow","pink"],
-  yellow:["green"]
-};
-
-const PAR3=new Set([
-  "white|yellow","white|green","yellow|red","yellow|pink",
-  "green|red","red|orange","red|blue","blue|pink"
-]);
-const PAR5=new Set(["white|blue","white|orange"]);
-
-function pair(a,b){return a<b?`${a}|${b}`:`${b}|${a}`}
-
-function parFor(f,t,h){
-  if(h===1) return ["yellow","pink","white"].includes(t)?3:4;
-  if(PAR5.has(pair(f,t))) return 5;
-  if(PAR3.has(pair(f,t))) return 3;
-  return 4;
-}
-
-/* ============ GENERATE COURSE ============ */
-function generate(){
-  const seq=[];
-  let prev=null;
-  for(let h=1;h<=18;h++){
-    if(FIXED[h]){ seq.push(FIXED[h]); prev=FIXED[h]; continue; }
-    const opts=GOALS.filter(g=>g!==prev && !DIS[prev]?.includes(g));
-    const pick=opts[Math.floor(Math.random()*opts.length)];
-    seq.push(pick); prev=pick;
+(function(){
+  /* --- Logo auto-swap (system dark mode) --- */
+  function syncLogo(){
+    var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    document.getElementById("logoLight").style.display = systemDark ? "none" : "block";
+    document.getElementById("logoDark").style.display  = systemDark ? "block" : "none";
   }
-  return seq;
-}
+  syncLogo();
+  try{
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncLogo);
+  }catch(e){}
 
-/* ============ RENDER ============ */
-const body=document.getElementById("body");
+  /* --- Course constraints --- */
+  var GOALS = ["white","orange","blue","pink","red","green","yellow"];
+  var HOLES = 18;
+  var MINREQ = 2;
+  var FIXED = { 9: "green", 18: "green" };
 
-function goalTag(g){
-  return `<span class="goalTag goal-${g}">${g}</span>`;
-}
+  var DIS = {
+    "white":  [],
+    "orange": ["pink","blue"],
+    "blue":   ["orange","red"],
+    "pink":   ["orange","red","green"],  // removed green<->pink
+    "red":    ["blue","pink"],
+    "green":  ["yellow","pink"],         // removed green<->pink
+    "yellow": ["green"]
+  };
 
-function deltaSelect(){
-  return `
-    <select class="score-even">
-      <option value="">–</option>
-      <option value="-2">-2</option>
-      <option value="-1">-1</option>
-      <option value="0">0</option>
-      <option value="1">+1</option>
-      <option value="2">+2</option>
-      <option value="3">+3</option>
-    </select>`;
-}
+  // Par rules
+  var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
-function render(){
-  body.innerHTML="";
-  const seq=generate();
-  let pf=0,pb=0,pt=0;
+  function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
+  var PAR3 = {};
+  var PAR5 = {};
 
-  seq.forEach((to,i)=>{
-    const h=i+1;
-    const from=i===0?"tee":seq[i-1];
-    const p=parFor(from,to,h);
-    pt+=p; h<=9?pf+=p:pb+=p;
+  [
+    ["white","yellow"],
+    ["white","green"],
+    ["yellow","red"],
+    ["yellow","pink"],
+    ["green","red"],
+    ["red","orange"],
+    ["red","blue"],
+    ["blue","pink"] // blue<->pink is par 3
+  ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
-    body.innerHTML+=`
-      <tr>
-        <td>${h}</td>
-        <td>${goalTag(from)}</td>
-        <td>${goalTag(to)}</td>
-        <td>${p}</td>
-        <td>${deltaSelect()}</td>
-        <td>${deltaSelect()}</td>
-      </tr>`;
-  });
+  [
+    ["white","blue"],
+    ["white","orange"]
+  ].forEach(function(p){ PAR5[pairKey(p[0],p[1])] = true; });
 
-  document.getElementById("pf").textContent=pf;
-  document.getElementById("pb").textContent=pb;
-  document.getElementById("pt").textContent=pt;
+  function allowed(prev, next){
+    if (!prev) return true;
+    if (prev === next) return false;
+    var bad = DIS[prev] || [];
+    for (var i=0;i<bad.length;i++) if (bad[i]===next) return false;
+    return true;
+  }
 
-  body.querySelectorAll("select").forEach(s=>{
-    s.onchange=()=>{
-      s.classList.remove("score-under","score-even","score-over");
-      if(s.value==="") s.classList.add("score-even");
-      else if(+s.value<0) s.classList.add("score-under");
-      else if(+s.value>0) s.classList.add("score-over");
-      else s.classList.add("score-even");
-    };
-  });
-}
+  function edgeKey(from,to){ return from + "->" + to; }
 
-document.getElementById("gen").onclick=render;
-render();
+  function shuffle(arr){
+    for (var i=arr.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = arr[i]; arr[i]=arr[j]; arr[j]=t;
+    }
+    return arr;
+  }
+
+  function initCounts(){
+    var c = {};
+    for (var i=0;i<GOALS.length;i++) c[GOALS[i]] = 0;
+    return c;
+  }
+
+  function futureFixedCount(goal, fromPos){
+    var f=0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (FIXED[h] === goal) f++;
+    }
+    return f;
+  }
+
+  function remainingUnfixedSlots(fromPos, course){
+    var s=0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (!FIXED[h] && course[h] === null) s++;
+    }
+    return s;
+  }
+
+  function minNeeded(fromPos, course, used){
+    var need=0;
+    for (var i=0;i<GOALS.length;i++){
+      var g = GOALS[i];
+      var future = futureFixedCount(g, fromPos);
+      var missing = MINREQ - (used[g] + future);
+      if (missing > 0) need += missing;
+    }
+    return need;
+  }
+
+  function feasible(fromPos, course, used){
+    return minNeeded(fromPos, course, used) <= remainingUnfixedSlots(fromPos, course);
+  }
+
+  function candidateScore(goal, used, fromPos){
+    var future = futureFixedCount(goal, fromPos);
+    var willHave = used[goal] + future;
+    if (willHave < MINREQ) return -100 + used[goal];
+    return used[goal];
+  }
+
+  function parFor(from,to,hole){
+    if (hole === 1){
+      return HOLE1_PAR3_TO[to] ? 3 : 4;
+    }
+    var k = pairKey(from,to);
+    if (PAR5[k]) return 5;
+    if (PAR3[k]) return 3;
+    return 4;
+  }
+
+  function goalClass(goal){
+    return "goalTag goal-" + goal;
+  }
+
+  /* --- Generate a valid course with unique throws (edges) --- */
+  function generateCourse(){
+    var course = [];
+    for (var i=0;i<=HOLES;i++) course[i]=null;
+
+    for (var h in FIXED) if (FIXED.hasOwnProperty(h)) course[parseInt(h,10)] = FIXED[h];
+
+    var used = initCounts();
+    var usedEdges = {};
+
+    function bt(pos){
+      if (pos > HOLES){
+        for (var i=0;i<GOALS.length;i++){
+          if (used[GOALS[i]] < MINREQ) return false;
+        }
+        return true;
+      }
+
+      var prevGoal = (pos===1) ? "tee" : course[pos-1];
+
+      if (course[pos] !== null){
+        var v = course[pos];
+        if (pos === 1 && v === "green") return false;
+        if (pos > 1 && !allowed(course[pos-1], v)) return false;
+
+        var ek = edgeKey(prevGoal, v);
+        if (usedEdges[ek]) return false;
+
+        usedEdges[ek] = true;
+        used[v] += 1;
+
+        if (!feasible(pos+1, course, used)) { used[v]-=1; delete usedEdges[ek]; return false; }
+        if (bt(pos+1)) return true;
+
+        used[v] -= 1;
+        delete usedEdges[ek];
+        return false;
+      }
+
+      var prev2 = (pos>1) ? course[pos-1] : null;
+      var cands = [];
+
+      for (var i2=0;i2<GOALS.length;i2++){
+        var g2 = GOALS[i2];
+
+        if (pos === 1 && g2 === "green") continue;
+        if (pos > 1 && !allowed(prev2, g2)) continue;
+
+        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
+        if (usedEdges[edgeKey(prevGoal, g2)]) continue;
+
+        cands.push(g2);
+      }
+
+      shuffle(cands);
+      cands.sort(function(a,b){
+        return candidateScore(a, used, pos+1) - candidateScore(b, used, pos+1);
+      });
+
+      for (var ci=0; ci<cands.length; ci++){
+        var pick = cands[ci];
+        var ek2 = edgeKey(prevGoal, pick);
+
+        course[pos] = pick;
+        used[pick] += 1;
+        usedEdges[ek2] = true;
+
+        if (feasible(pos+1, course, used) && bt(pos+1)) return true;
+
+        delete usedEdges[ek2];
+        used[pick] -= 1;
+        course[pos] = null;
+      }
+
+      return false;
+    }
+
+    for (var attempt=1; attempt<=25000; attempt++){
+      for (var p=1; p<=HOLES; p++) if (!FIXED[p]) course[p] = null;
+      used = initCounts();
+      usedEdges = {};
+
+      if (bt(1)){
+        var seq = [];
+        for (var k=1;k<=HOLES;k++) seq.push(course[k]);
+        return { seq: seq };
+      }
+    }
+
+    return null;
+  }
+
+  /* --- UI / scoring --- */
+  var mainBody = document.getElementById("mainBody");
+  var btnGen = document.getElementById("btnGen");
+  var n1 = document.getElementById("n1");
+  var n2 = document.getElementById("n2");
+  var p1Head = document.getElementById("p1Head");
+  var p2Head = document.getElementById("p2Head");
+  var tableWrap = document.getElementById("tableWrap");
+
+  function playerName(idx){
+    if (idx===1) return (n1.value || "Player 1").trim();
+    return (n2.value || "Player 2").trim();
+  }
+  function syncPlayerHeaders(){
+    p1Head.textContent = playerName(1);
+    p2Head.textContent = playerName(2);
+  }
+  n1.addEventListener("input", syncPlayerHeaders);
+  n2.addEventListener("input", syncPlayerHeaders);
+
+  function setDiffPill(el, diff){
+    el.classList.remove("pill-under","pill-even","pill-over");
+    if (diff === 0) el.classList.add("pill-even");
+    else if (diff > 0) el.classList.add("pill-over");
+    else el.classList.add("pill-under");
+  }
+
+  var DELTAS = [-2,-1,0,1,2,3];
+
+  function makeDeltaSelect(hole, player, parVal){
+    var sel = document.createElement("select");
+    sel.setAttribute("data-hole", ""+hole);
+    sel.setAttribute("data-player", ""+player);
+    sel.setAttribute("data-par", ""+parVal);
+
+    // Placeholder "-" counts as 0
+    var ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = "–";
+    ph.selected = true;
+    sel.appendChild(ph);
+
+    for (var i=0;i<DELTAS.length;i++){
+      var d = DELTAS[i];
+      var opt = document.createElement("option");
+      opt.value = ""+d;
+      opt.textContent = (d>0 ? ("+"+d) : (""+d));
+      sel.appendChild(opt);
+    }
+
+    sel.addEventListener("change", function(){
+      colorDelta(sel);
+      recalcTotals();
+    });
+
+    colorDelta(sel);
+    return sel;
+  }
+
+  function colorDelta(sel){
+    sel.classList.remove("score-under","score-even","score-over");
+    var raw = sel.value;
+    if (raw === ""){
+      sel.classList.add("score-even");
+      return;
+    }
+    var d = parseInt(raw,10);
+    if (d < 0) sel.classList.add("score-under");
+    else if (d > 0) sel.classList.add("score-over");
+    else sel.classList.add("score-even");
+  }
+
+  function tdText(txt){
+    var td = document.createElement("td");
+    td.textContent = txt;
+    return td;
+  }
+
+  function tdGoal(goal){
+    var td = document.createElement("td");
+    var span = document.createElement("span");
+    span.className = goalClass(goal);
+    span.textContent = goal;
+    td.appendChild(span);
+    return td;
+  }
+
+  function tdFrom(from){
+    return tdGoal(from === "tee" ? "tee" : from);
+  }
+
+  function setParSummary(front, back, total){
+    document.getElementById("parFrontTop").textContent = front;
+    document.getElementById("parBackTop").textContent  = back;
+    document.getElementById("parTotalTop").textContent = total;
+
+    document.getElementById("parBackCell").textContent = back;
+    document.getElementById("parTotalCell").textContent = total;
+  }
+
+  function buildFront9Row(frontPar){
+    var tr = document.createElement("tr");
+    tr.innerHTML = `
+      <th colspan="3" class="left">Front 9</th>
+      <th>${frontPar}</th>
+      <th>
+        <div class="sumCell">
+          <span id="fd1" class="sumDiff pill pill-even">0</span>
+          <span id="f1" class="sumThrows">0</span>
+        </div>
+      </th>
+      <th>
+        <div class="sumCell">
+          <span id="fd2" class="sumDiff pill pill-even">0</span>
+          <span id="f2" class="sumThrows">0</span>
+        </div>
+      </th>
+    `;
+    return tr;
+  }
+
+  function renderAll(seq){
+    mainBody.innerHTML = "";
+
+    var parFront=0, parBack=0, parTotal=0;
+
+    for (var i=0;i<seq.length;i++){
+      var hole = i+1;
+      var to = seq[i];
+      var from = (i===0) ? "tee" : seq[i-1];
+      var p = parFor(from,to,hole);
+
+      parTotal += p;
+      if (hole<=9) parFront += p; else parBack += p;
+
+      var tr = document.createElement("tr");
+      tr.appendChild(tdText(""+hole));
+      tr.appendChild(tdFrom(from));
+      tr.appendChild(tdGoal(to));
+      tr.appendChild(tdText(""+p));
+
+      var td1 = document.createElement("td");
+      td1.appendChild(makeDeltaSelect(hole, 1, p));
+      tr.appendChild(td1);
+
+      var td2 = document.createElement("td");
+      td2.appendChild(makeDeltaSelect(hole, 2, p));
+      tr.appendChild(td2);
+
+      mainBody.appendChild(tr);
+
+      if (hole === 9){
+        mainBody.appendChild(buildFront9Row(parFront));
+      }
+    }
+
+    setParSummary(parFront, parBack, parTotal);
+
+    window.__parFront = parFront;
+    window.__parBack = parBack;
+    window.__parTotal = parTotal;
+
+    recalcTotals();
+  }
+
+  function recalcTotals(){
+    for (var pl=1; pl<=2; pl++){
+      var frontDelta=0, backDelta=0, totalDelta=0;
+      var frontThrows=0, backThrows=0, totalThrows=0;
+
+      for (var hole=1; hole<=HOLES; hole++){
+        var sel = mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+pl+'"]');
+        if (!sel) continue;
+
+        var par = parseInt(sel.getAttribute("data-par"),10) || 0;
+        var raw = sel.value;
+        var d = (raw === "") ? 0 : (parseInt(raw,10) || 0);
+
+        totalDelta += d;
+        if (hole<=9) frontDelta += d; else backDelta += d;
+
+        var throws = par + d;
+        totalThrows += throws;
+        if (hole<=9) frontThrows += throws; else backThrows += throws;
+      }
+
+      // small numbers = throws
+      document.getElementById("f"+pl).textContent = ""+frontThrows;
+      document.getElementById("b"+pl).textContent = ""+backThrows;
+      document.getElementById("t"+pl).textContent = ""+totalThrows;
+
+      // big numbers = delta totals
+      var fd = document.getElementById("fd"+pl);
+      var bd = document.getElementById("bd"+pl);
+      var dEl = document.getElementById("d"+pl);
+
+      if (fd){
+        fd.textContent = ""+frontDelta;
+        setDiffPill(fd, frontDelta);
+      }
+      bd.textContent = ""+backDelta;
+      dEl.textContent = ""+totalDelta;
+
+      setDiffPill(bd, backDelta);
+      setDiffPill(dEl, totalDelta);
+    }
+  }
+
+  function generateAndRender(){
+    syncPlayerHeaders();
+
+    var r = generateCourse();
+    if (!r){
+      alert("Could not generate a valid course. Try again.");
+      return;
+    }
+
+    renderAll(r.seq);
+
+    // CRITICAL FIX: always reset scroll so it never “looks broken”
+    try{
+      tableWrap.scrollLeft = 0;
+    }catch(e){}
+  }
+
+  btnGen.addEventListener("click", generateAndRender);
+
+  syncPlayerHeaders();
+  generateAndRender();
+})();
 </script>
 
 </body>
