@@ -85,6 +85,7 @@
     line-height:1.25;
   }
 
+  /* Premium fixed background (iOS Safari-safe) */
   body::before{
     content:"";
     position:fixed;
@@ -285,9 +286,10 @@
     backdrop-filter: blur(12px);
   }
 
+  /* Columns tuned for mobile */
   .colHeader{
     display:grid;
-    grid-template-columns:10% 32% 10% 24% 24%;
+    grid-template-columns:11% 35% 10% 22% 22%;
     align-items:center;
     padding:14px 10px;
     background:var(--thead);
@@ -298,6 +300,7 @@
   }
   .colHeader > div{ text-align:center; }
 
+  /* Progress under headers */
   .progressWrap{
     display:flex;
     align-items:center;
@@ -341,11 +344,11 @@
     padding:0;
   }
 
-  colgroup col:nth-child(1){ width:10%; }
-  colgroup col:nth-child(2){ width:32%; }
+  colgroup col:nth-child(1){ width:11%; }
+  colgroup col:nth-child(2){ width:35%; }
   colgroup col:nth-child(3){ width:10%; }
-  colgroup col:nth-child(4){ width:24%; }
-  colgroup col:nth-child(5){ width:24%; }
+  colgroup col:nth-child(4){ width:22%; }
+  colgroup col:nth-child(5){ width:22%; }
 
   th, td{
     padding:14px 10px;
@@ -354,21 +357,20 @@
     overflow:hidden;
   }
 
-  /* ✅ Bold hole numbers */
+  /* ✅ Bold hole numbers + extra space so they don't collide */
   tbody tr.holeRow td:nth-child(1){
     font-weight:950;
+    padding-right:14px;
   }
 
-  /* ✅ more space between Par and flags:
-     give Throw cell a touch more internal breathing room and widen the gap */
+  /* Throw cell */
   tbody tr.holeRow td:nth-child(2){
     overflow:visible;
     padding-left:6px;
-    padding-right:14px;   /* extra right space before Par */
+    padding-right:18px; /* more separation from Par */
   }
-
   tbody tr.holeRow td:nth-child(3){
-    padding-left:12px;    /* extra left space after Throw */
+    padding-left:14px;
   }
 
   tbody tr.holeRow td,
@@ -399,7 +401,7 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:12px;     /* a bit more breathing room between pills + arrow */
+    gap:10px;
     width:100%;
   }
   .arrow{
@@ -408,12 +410,12 @@
     font-size:12px;
   }
 
-  /* Goal pills */
+  /* ✅ Narrower goal pills + Capitalized */
   .goalTag{
     position:relative;
     height:20px;
-    min-width:54px;
-    padding:0 10px;
+    min-width:46px;
+    padding:0 9px;
     border-radius:999px;
     font-size:11px;
     font-weight:950;
@@ -422,7 +424,7 @@
     justify-content:center;
     border:1px solid rgba(255,255,255,.14);
     box-shadow: 0 1px 0 rgba(255,255,255,.10) inset, 0 10px 18px rgba(0,0,0,.10);
-    text-transform:capitalize; /* ✅ Capitalize color names */
+    text-transform:capitalize;
   }
   .goalTag::after{
     content:"";
@@ -434,7 +436,7 @@
     pointer-events:none;
   }
 
-  .goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); text-transform:capitalize; }
+  .goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); }
   .goal-white{ background:#fff; color:#111; border-color: rgba(0,0,0,.10); }
   .goal-blue{ background:#1f6feb; color:#fff; }
   .goal-orange{ background:#ff8a00; color:#111; border-color: rgba(0,0,0,.10); }
@@ -453,8 +455,8 @@
 
   select.scoreSel{
     width:100%;
-    max-width:74px;
-    min-width:64px;
+    max-width:78px;
+    min-width:70px;
     height:40px;
     padding:10px 10px;
     border-radius:16px;
@@ -610,7 +612,7 @@
 
       <div class="progressWrap">
         <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-        <div id="progressText" class="progressText">1 / 18</div>
+        <div id="progressText" class="progressText">0 / 18</div>
       </div>
     </div>
   </div>
