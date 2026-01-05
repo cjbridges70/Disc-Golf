@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Disc Golf Course Randomizer</title>
+  <title>Disc Golf Course Randomizer + Par</title>
   <style>
     body { font-family: -apple-system, system-ui, Segoe UI, Roboto, sans-serif; margin: 16px; line-height: 1.35; }
     button { font-size: 16px; padding: 10px 14px; margin: 6px 6px 0 0; }
@@ -13,296 +13,162 @@
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
     th, td { border-bottom: 1px solid #ddd; padding: 7px 6px; text-align: left; }
     th { background: #f5f5f5; }
-    code { background: #f3f3f3; padding: 2px 6px; border-radius: 8px; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-top: 12px; }
+    .right { text-align: right; }
     @media print { .no-print { display:none; } body { margin: 10mm; } }
   </style>
 </head>
 <body>
 
 <div class="no-print">
-  <h1>Disc Golf Course Randomizer</h1>
+  <h1>Disc Golf Course Randomizer + Par</h1>
   <div class="muted">
-    Enforces: start not green • hole 9 & 18 = green • no consecutive repeats • directional rules • each goal ≥ 2.
+    Enforces all rules including <b>unique throws</b> (same from→to never repeats).
   </div>
 
-  <div>
-    <button id="gen">Generate Course</button>
-    <button id="copy">Copy Course</button>
-    <button id="print">Print / Save as PDF</button>
-    <button id="loadExample">Load Your Example</button>
-  </div>
+  <button id="gen">Generate Course</button>
+  <button id="copy">Copy Course</button>
+  <button onclick="window.print()">Print / Save PDF</button>
 
   <div id="status" class="muted" style="margin-top:8px;"></div>
-
-  <div class="card muted">
-    Tip: If you just updated <code>index.html</code> on GitHub Pages and still see errors,
-    iPhone Safari may be caching. Open in a Private tab or add <code>?v=2</code> to the end of the URL.
-  </div>
 </div>
 
 <table>
-  <thead><tr><th>Hole</th><th>Goal</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Hole</th>
+      <th>From</th>
+      <th>To</th>
+      <th class="right">Par</th>
+    </tr>
+  </thead>
   <tbody id="course"></tbody>
+  <tfoot>
+    <tr>
+      <th colspan="3" class="right">Total Par</th>
+      <th id="totalPar" class="right"></th>
+    </tr>
+  </tfoot>
 </table>
 
 <script>
-(function () {
-  var GOALS = ["white","orange","blue","pink","red","green","yellow"];
-  var MINREQ = 2;
-  var HOLES = 18;
-  var FIXED = { 9: "green", 18: "green" };
+(function(){
+  var GOALS=["white","orange","blue","pink","red","green","yellow"];
+  var FIXED={9:"green",18:"green"};
+  var MINREQ=2;
 
-  // prev -> next disallowed
-  var DIS = {
-    "white":  [],
-    "orange": ["pink","blue"],
-    "blue":   ["orange","red"],
-    "pink":   ["orange","red"],
-    "red":    ["blue","pink"],
-    "green":  ["yellow"],
-    "yellow": ["green"]
+  var DIS={
+    white:[],
+    orange:["pink","blue"],
+    blue:["orange","red"],
+    pink:["orange","red"],
+    red:["blue","pink"],
+    green:["yellow"],
+    yellow:["green"]
   };
 
-  // Your example (already satisfies all constraints)
-  var EXAMPLE = ["red","orange","yellow","blue","white","pink","yellow","orange","green","blue","pink","white","orange","red","yellow","white","blue","green"];
+  var HOLE1_PAR3={yellow:1,pink:1};
 
-  function el(id){ return document.getElementById(id); }
+  function pair(a,b){return a<b?a+"|"+b:b+"|"+a;}
+  var PAR3={},PAR5={};
 
-  function contains(arr, v){
-    for (var i=0;i<arr.length;i++) if (arr[i]===v) return true;
-    return false;
+  [
+    ["white","yellow"],["white","green"],["yellow","red"],["yellow","pink"],
+    ["green","pink"],["green","red"],["red","orange"],["red","blue"]
+  ].forEach(p=>PAR3[pair(p[0],p[1])]=1);
+
+  [["white","blue"],["white","orange"]].forEach(p=>PAR5[pair(p[0],p[1])]=1);
+
+  function allowed(a,b){
+    if(!a) return true;
+    if(a===b) return false;
+    return !(DIS[a]||[]).includes(b);
   }
 
-  function shuffle(arr){
-    for (var i=arr.length-1;i>0;i--){
-      var j=Math.floor(Math.random()*(i+1));
-      var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
-    }
-    return arr;
-  }
+  function gen(){
+    var course=Array(19).fill(null);
+    var used={},edges={};
+    GOALS.forEach(g=>used[g]=0);
+    for(var h in FIXED) course[h]=FIXED[h];
 
-  function allowed(prev, next){
-    if (!prev) return true;
-    if (prev === next) return false; // no consecutive repeats
-    var bad = DIS[prev] || [];
-    return !contains(bad, next);
-  }
-
-  function initCounts(){
-    var c = {};
-    for (var i=0;i<GOALS.length;i++) c[GOALS[i]] = 0;
-    return c;
-  }
-
-  function futureFixedCount(goal, fromPos){
-    var f = 0;
-    for (var h=fromPos; h<=HOLES; h++){
-      if (FIXED[h] === goal) f++;
-    }
-    return f;
-  }
-
-  function remainingUnfixedSlots(fromPos, course){
-    var slots = 0;
-    for (var h=fromPos; h<=HOLES; h++){
-      if (!FIXED[h] && course[h] === null) slots++;
-    }
-    return slots;
-  }
-
-  function minNeeded(fromPos, course, used){
-    var need = 0;
-    for (var i=0;i<GOALS.length;i++){
-      var g = GOALS[i];
-      var futureFixed = futureFixedCount(g, fromPos);
-      var missing = MINREQ - (used[g] + futureFixed);
-      if (missing > 0) need += missing;
-    }
-    return need;
-  }
-
-  function feasible(fromPos, course, used){
-    return minNeeded(fromPos, course, used) <= remainingUnfixedSlots(fromPos, course);
-  }
-
-  function candidateScore(goal, used, fromPos){
-    var futureFixed = futureFixedCount(goal, fromPos);
-    var willHave = used[goal] + futureFixed;
-    if (willHave < MINREQ) return -100 + used[goal];
-    return used[goal];
-  }
-
-  function generate(){
-    var course = [];
-    for (var i=0;i<=HOLES;i++) course[i] = null;
-
-    for (var h in FIXED){
-      if (FIXED.hasOwnProperty(h)){
-        course[parseInt(h,10)] = FIXED[h];
+    function bt(i){
+      if(i>18) return GOALS.every(g=>used[g]>=MINREQ);
+      var from=i===1?"tee":course[i-1];
+      if(course[i]){
+        var to=course[i];
+        if(i===1&&to==="green") return false;
+        if(i>1&&!allowed(course[i-1],to)) return false;
+        var e=from+"->"+to;
+        if(edges[e]) return false;
+        edges[e]=1; used[to]++;
+        if(bt(i+1)) return true;
+        delete edges[e]; used[to]--; return false;
       }
-    }
-
-    var used = initCounts();
-
-    function bt(pos){
-      if (pos > HOLES){
-        for (var i=0;i<GOALS.length;i++){
-          if (used[GOALS[i]] < MINREQ) return false;
-        }
+      var cands=GOALS.filter(g=>{
+        if(i===1&&g==="green") return false;
+        if(i>1&&!allowed(course[i-1],g)) return false;
+        if(edges[from+"->"+g]) return false;
+        if(course[i+1]&&!allowed(g,course[i+1])) return false;
         return true;
-      }
-
-      if (course[pos] !== null){
-        var v = course[pos];
-        if (pos === 1 && v === "green") return false;
-        var prev = (pos>1) ? course[pos-1] : null;
-        if (!allowed(prev, v)) return false;
-
-        used[v] += 1;
-        if (!feasible(pos+1, course, used)) { used[v] -= 1; return false; }
-
-        if (bt(pos+1)) return true;
-
-        used[v] -= 1;
-        return false;
-      }
-
-      var prev2 = (pos>1) ? course[pos-1] : null;
-
-      var cands = [];
-      for (var i2=0;i2<GOALS.length;i2++){
-        var g2 = GOALS[i2];
-        if (pos === 1 && g2 === "green") continue;
-        if (!allowed(prev2, g2)) continue;
-        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
-        cands.push(g2);
-      }
-
-      shuffle(cands);
-      cands.sort(function(a,b){
-        return candidateScore(a, used, pos+1) - candidateScore(b, used, pos+1);
       });
-
-      for (var ci=0; ci<cands.length; ci++){
-        var pick = cands[ci];
-        course[pos] = pick;
-        used[pick] += 1;
-
-        if (feasible(pos+1, course, used) && bt(pos+1)) return true;
-
-        used[pick] -= 1;
-        course[pos] = null;
+      for(var g of cands.sort(()=>Math.random()-0.5)){
+        var e2=from+"->"+g;
+        course[i]=g; used[g]++; edges[e2]=1;
+        if(bt(i+1)) return true;
+        delete edges[e2]; used[g]--; course[i]=null;
       }
       return false;
     }
 
-    for (var attempt=1; attempt<=2000; attempt++){
-      for (var p=1; p<=HOLES; p++){
-        if (!FIXED[p]) course[p] = null;
-      }
-      used = initCounts();
-
-      if (bt(1)){
-        var seq = [];
-        for (var k=1; k<=HOLES; k++) seq.push(course[k]);
-        var counts = initCounts();
-        for (var k2=0; k2<seq.length; k2++) counts[seq[k2]] += 1;
-        return { seq: seq, counts: counts, attempt: attempt };
-      }
+    for(var t=0;t<8000;t++){
+      GOALS.forEach(g=>used[g]=0);
+      course=course.map((v,i)=>FIXED[i]||null);
+      edges={};
+      if(bt(1)) return course.slice(1);
     }
     return null;
   }
 
-  function validateSeq(seq){
-    if (!seq || seq.length !== HOLES) return "Sequence length is not 18.";
-    if (seq[0] === "green") return "Hole 1 cannot be green.";
-    if (seq[8] !== "green") return "Hole 9 must be green.";
-    if (seq[17] !== "green") return "Hole 18 must be green.";
-
-    var c = initCounts();
-    for (var i=0;i<seq.length;i++) c[seq[i]] += 1;
-    for (var g=0; g<GOALS.length; g++){
-      if (c[GOALS[g]] < MINREQ) return "Goal '" + GOALS[g] + "' appears only " + c[GOALS[g]] + " time(s).";
-    }
-
-    for (var i2=0; i2<HOLES-1; i2++){
-      if (!allowed(seq[i2], seq[i2+1])) return "Illegal transition: " + seq[i2] + " → " + seq[i2+1] + " (holes " + (i2+1) + "→" + (i2+2) + ").";
-    }
-    return null;
+  function par(from,to,h){
+    if(h===1) return HOLE1_PAR3[to]?3:4;
+    var k=pair(from,to);
+    if(PAR5[k]) return 5;
+    if(PAR3[k]) return 3;
+    return 4;
   }
 
-  function renderSeq(seq, counts, statusHtml){
-    var tbody = el("course");
-    tbody.innerHTML = "";
-    for (var i=0;i<seq.length;i++){
-      var hole = i+1;
-      var g = seq[i];
-      var mark = (hole===9 || hole===18) ? " ✅" : "";
-      var tr = document.createElement("tr");
-      tr.innerHTML = "<td>"+hole+"</td><td>"+g+mark+"</td>";
-      tbody.appendChild(tr);
-    }
-
-    var parts = [];
-    var sorted = GOALS.slice().sort();
-    for (var k=0;k<sorted.length;k++){
-      parts.push("<code>" + sorted[k] + "</code>:" + counts[sorted[k]]);
-    }
-    el("status").innerHTML = statusHtml + "<br><span class='muted'>Counts: " + parts.join(" &nbsp; ") + "</span>";
-    window.__last = seq;
+  function render(seq){
+    var tb=document.getElementById("course");
+    tb.innerHTML="";
+    var tot=0;
+    seq.forEach((g,i)=>{
+      var f=i?seq[i-1]:"tee";
+      var p=par(f,g,i+1);
+      tot+=p;
+      tb.innerHTML+=`<tr><td>${i+1}</td><td>${f}</td><td>${g}${(i+1===9||i+1===18)?" ✅":""}</td><td class="right">${p}</td></tr>`;
+    });
+    document.getElementById("totalPar").textContent=tot;
+    document.getElementById("status").innerHTML="<span class='ok'>Generated</span>";
+    window.__last=seq;
   }
 
-  function generateAndRender(){
-    try {
-      var r = generate();
-      if (!r){
-        el("status").innerHTML = "<span class='bad'>Could not generate a valid course.</span> (But your example proves at least one exists.)";
-        window.__last = null;
-        return;
-      }
-      renderSeq(r.seq, r.counts, "<span class='ok'>Generated!</span> (attempt " + r.attempt + ")");
-    } catch (e) {
-      el("status").innerHTML = "<span class='bad'>Error:</span> " + (e && e.message ? e.message : String(e));
-    }
-  }
+  document.getElementById("gen").onclick=function(){
+    var s=gen();
+    if(!s) document.getElementById("status").innerHTML="<span class='bad'>Could not generate – try again</span>";
+    else render(s);
+  };
 
-  function loadExample(){
-    var err = validateSeq(EXAMPLE);
-    if (err){
-      el("status").innerHTML = "<span class='bad'>Your example failed validation:</span> " + err;
-      return;
-    }
-    var counts = initCounts();
-    for (var i=0;i<EXAMPLE.length;i++) counts[EXAMPLE[i]] += 1;
-    renderSeq(EXAMPLE, counts, "<span class='ok'>Loaded your example (valid).</span>");
-  }
+  document.getElementById("copy").onclick=function(){
+    if(!window.__last) return;
+    var out=[];
+    window.__last.forEach((g,i)=>{
+      var f=i?window.__last[i-1]:"tee";
+      out.push(`Hole ${i+1}: ${f} -> ${g} (Par ${par(f,g,i+1)})`);
+    });
+    out.push("Total Par: "+document.getElementById("totalPar").textContent);
+    navigator.clipboard?navigator.clipboard.writeText(out.join("\\n")):prompt("Copy:",out.join("\\n"));
+  };
 
-  function copyCourse(){
-    if (!window.__last) return;
-    var lines = [];
-    for (var i=0;i<window.__last.length;i++){
-      lines.push("Hole " + (i+1) + ": " + window.__last[i]);
-    }
-    var txt = lines.join("\\n");
-
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(function(){
-        el("status").innerHTML = "<span class='ok'>Copied.</span>";
-      }).catch(function(){
-        window.prompt("Copy this:", txt);
-      });
-    } else {
-      window.prompt("Copy this:", txt);
-    }
-  }
-
-  el("gen").addEventListener("click", generateAndRender);
-  el("copy").addEventListener("click", copyCourse);
-  el("print").addEventListener("click", function(){ window.print(); });
-  el("loadExample").addEventListener("click", loadExample);
-
-  generateAndRender();
+  document.getElementById("gen").click();
 })();
 </script>
 
