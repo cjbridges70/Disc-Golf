@@ -6,39 +6,27 @@
 <title>Bridges Park</title>
 
 <style>
-  /* ============================================================
-     Bridges Park – Disc Golf (Single-file, mobile-first)
-     - Course generator (constraints + unique throws)
-     - Sticky header with progress bar under headers
-     - Light/Dark toggle (image: moon.png / sun.png)
-     - Logo swap by theme
-     - Compact segmented control: "-" then -2..+3 (defaults to "-"/0)
-     - Share link preserves course layout
-     - Clear scores
-     ============================================================ */
-
   :root{
     --bg:#070a0f;
     --text:#e5e7eb;
     --muted:#9aa3b2;
 
-    --card:rgba(17,21,27,.80);
+    --card:rgba(17,21,27,.82);
     --border:rgba(255,255,255,.12);
     --shadow:0 16px 34px rgba(0,0,0,.28);
     --shadow2:0 10px 20px rgba(0,0,0,.22);
 
-    /* Logo-friendly green */
     --accent:#9ED37A;
     --accentSoft:rgba(158,211,122,.18);
     --accentBorder:rgba(158,211,122,.40);
 
-    --controlBg:rgba(27,34,48,.70);
-    --controlBg2:rgba(27,34,48,.55);
+    --controlBg:rgba(27,34,48,.72);
+    --controlBg2:rgba(27,34,48,.56);
 
     --thead:rgba(23,28,36,.78);
     --rowBg:rgba(17,21,27,.72);
     --rowBorder:rgba(255,255,255,.12);
-    --totalRow:rgba(27,35,65,.58);
+    --totalRow:rgba(27,35,65,.60);
 
     --progressTrack:rgba(255,255,255,.12);
     --progressFill:var(--accent);
@@ -53,24 +41,25 @@
 
   html[data-theme="light"]{
     color-scheme:light;
+
     --bg:#f6f7fb;
     --text:#0f172a;
     --muted:#64748b;
 
-    --card:rgba(255,255,255,.86);
+    --card:rgba(255,255,255,.88);
     --border:rgba(15,23,42,.12);
 
     --accent:#8FBC6C;
     --accentSoft:rgba(143,188,108,.16);
     --accentBorder:rgba(143,188,108,.34);
 
-    --controlBg:rgba(255,255,255,.82);
-    --controlBg2:rgba(255,255,255,.64);
+    --controlBg:rgba(255,255,255,.84);
+    --controlBg2:rgba(255,255,255,.66);
 
-    --thead:rgba(255,255,255,.72);
-    --rowBg:rgba(255,255,255,.66);
+    --thead:rgba(255,255,255,.76);
+    --rowBg:rgba(255,255,255,.68);
     --rowBorder:rgba(15,23,42,.12);
-    --totalRow:rgba(143,188,108,.18);
+    --totalRow:rgba(143,188,108,.20);
 
     --progressTrack:rgba(15,23,42,.10);
 
@@ -79,18 +68,19 @@
 
     --toastBg: rgba(15,23,42,0.92);
   }
+
   html[data-theme="dark"]{ color-scheme:dark; }
 
   html, body{ height:100%; }
   html, body{ background:var(--bg); }
   *{ box-sizing:border-box; }
 
-  /* Premium background (iOS-safe, overdraw top) */
+  /* Premium background (with top overdraw so it never cuts off above title) */
   html::before{
     content:"";
     position:fixed;
     left:0; right:0;
-    top:-60px; bottom:0;
+    top:-70px; bottom:0;
     z-index:-1;
     background:
       radial-gradient(900px 520px at 12% -10%, rgba(158,211,122,.28), transparent 60%),
@@ -139,7 +129,7 @@
     display:block;
     border:none !important;
     outline:none !important;
-    box-shadow:none !important;
+    box-shadow:none !important;   /* remove border-look */
     background:transparent;
     border-radius:14px;
     flex:0 0 auto;
@@ -158,8 +148,9 @@
     letter-spacing:-.1px;
     white-space:nowrap;
     overflow:hidden;
-    text-overflow:clip; /* no ellipsis */
+    text-overflow:clip; /* remove ellipsis */
   }
+
   .themeToggleBtn{
     width:52px; height:52px;
     padding:0;
@@ -168,12 +159,9 @@
     justify-content:center;
     cursor:pointer;
   }
-  .themeToggleBtn img{
-    width:24px; height:24px;
-    display:block;
-  }
+  .themeToggleBtn img{ width:24px; height:24px; display:block; }
 
-  /* ===== Top info ===== */
+  /* ===== Info ===== */
   .infoGrid{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -255,10 +243,11 @@
     padding:15px 12px;
   }
 
-  /* ===== Names (outside scorecard) ===== */
+  /* ===== Names ===== */
   .nameBlock{ margin-top:12px; padding:12px; }
   .row{ display:flex; gap:12px; flex-wrap:wrap; }
   .grow{ flex:1 1 160px; }
+
   input[type=text]{
     width:100%;
     padding:15px 14px;
@@ -295,7 +284,7 @@
     backdrop-filter: blur(12px);
   }
 
-  /* Steal width from Throw, widen P1/P2 */
+  /* Key widths: steal from Throw, widen P1/P2 */
   .colHeader{
     display:grid;
     grid-template-columns:10% 34% 10% 23% 23%;
@@ -309,7 +298,7 @@
   }
   .colHeader > div{ text-align:center; }
 
-  /* Progress under headers */
+  /* Progress sits under headers and scrolls with sticky header */
   .progressWrap{
     display:flex;
     align-items:center;
@@ -355,11 +344,11 @@
     padding:0;
   }
 
-  colgroup col:nth-child(1){ width:10%; }  /* # */
-  colgroup col:nth-child(2){ width:34%; }  /* Throw */
-  colgroup col:nth-child(3){ width:10%; }  /* Par */
-  colgroup col:nth-child(4){ width:23%; }  /* P1 */
-  colgroup col:nth-child(5){ width:23%; }  /* P2 */
+  colgroup col:nth-child(1){ width:10%; }
+  colgroup col:nth-child(2){ width:34%; }
+  colgroup col:nth-child(3){ width:10%; }
+  colgroup col:nth-child(4){ width:23%; }
+  colgroup col:nth-child(5){ width:23%; }
 
   th, td{
     padding:14px 10px;
@@ -367,23 +356,28 @@
     white-space:nowrap;
     overflow:hidden; /* keep inside capsule */
   }
-  tbody tr.holeRow td{
+
+  tbody tr.holeRow td,
+  tbody tr.sumRow td,
+  tbody tr.sumRow th{
     background:var(--rowBg);
     border-top:1px solid var(--rowBorder);
     border-bottom:1px solid var(--rowBorder);
   }
-  tbody tr.holeRow td:first-child{
+
+  tbody tr.holeRow td:first-child,
+  tbody tr.sumRow th:first-child{
     border-left:1px solid var(--rowBorder);
     border-top-left-radius:22px;
     border-bottom-left-radius:22px;
   }
-  tbody tr.holeRow td:last-child{
+  tbody tr.holeRow td:last-child,
+  tbody tr.sumRow td:last-child{
     border-right:1px solid var(--rowBorder);
     border-top-right-radius:22px;
     border-bottom-right-radius:22px;
   }
 
-  /* Active row */
   tbody tr.holeRow.active td{
     background:var(--accentSoft);
   }
@@ -391,7 +385,7 @@
     box-shadow: inset 6px 0 0 var(--accent);
   }
 
-  /* Throw column: two pips centered and compact */
+  /* Throw pills centered */
   .twoPip{
     display:inline-flex;
     align-items:center;
@@ -405,7 +399,7 @@
     font-size:12px;
   }
 
-  /* Flag pills */
+  /* Flag pills: equal sizing */
   .goalTag{
     position:relative;
     height:20px;
@@ -439,62 +433,34 @@
   .goal-green{ background:#16a34a; color:#fff; }
   .goal-yellow{ background:#ffd400; color:#111; border-color: rgba(0,0,0,.10); }
 
-  /* Compact segmented control (-2..+3) + "-" */
-  .seg{
-    display:flex;
-    width:100%;
-    gap:0;
-    border:1px solid var(--border);
-    border-radius:14px;
-    overflow:hidden;
-    background:rgba(255,255,255,.05);
-  }
-  .seg button{
-    border:none;
-    border-radius:0;
-    margin:0;
-    padding:10px 0;
-    font-size:12px;
-    font-weight:950;
-    background:transparent;
-    box-shadow:none;
-    flex:1 1 auto;
-    min-width:0;
-    color:var(--text);
-  }
-  .seg button:not(:last-child){
-    border-right:1px solid rgba(255,255,255,.08);
-  }
-  html[data-theme="light"] .seg button:not(:last-child){
-    border-right:1px solid rgba(15,23,42,.10);
-  }
-  .seg button:active{ transform:none; }
-
-  .seg button.sel{
-    background:
-      linear-gradient(180deg,rgba(255,255,255,.18),transparent),
-      rgba(158,211,122,.16);
-  }
-  html[data-theme="light"] .seg button.sel{
-    background:
-      linear-gradient(180deg,rgba(255,255,255,.40),transparent),
-      rgba(143,188,108,.18);
-  }
-
-  /* color the whole segmented control based on hole result */
-  .seg.under{ background:var(--underBg); }
-  .seg.even{ background:var(--evenBg); }
-  .seg.over{ background:var(--overBg); }
-
-  /* tighter padding for P1/P2 cells */
+  /* Dropdowns: sized to stay inside capsule on iPhone */
   tbody tr.holeRow td:nth-child(4),
   tbody tr.holeRow td:nth-child(5){
     padding-left:6px;
     padding-right:6px;
-    overflow:visible; /* allow seg shadow-free edges */
+    overflow:visible; /* allow control to render cleanly */
   }
 
-  /* Summary rows */
+  select.scoreSel{
+    width:100%;
+    max-width:58px;
+    min-width:48px;
+    padding:10px 6px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.06);
+    color:var(--text);
+    font-weight:950;
+    text-align:center;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+
+  .score-under{ background:var(--underBg) !important; }
+  .score-even{ background:var(--evenBg) !important; }
+  .score-over{ background:var(--overBg) !important; }
+
+  /* Summary cells */
   .sumCell{
     display:flex;
     flex-direction:column;
@@ -515,6 +481,7 @@
     color:var(--muted);
     font-weight:900;
   }
+
   .left{ text-align:left; }
 
   tfoot tr.totalRow th,
@@ -544,9 +511,6 @@
     opacity:1;
     transform:translateX(-50%) translateY(-2px);
   }
-
-  /* small vertical breathing room */
-  .spacer{ height:10px; }
 </style>
 </head>
 
@@ -584,7 +548,7 @@
   </div>
 </div>
 
-<!-- Legend -->
+<!-- Legend (stays outside the scorecard card) -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
@@ -621,7 +585,7 @@
 
       <div class="progressWrap">
         <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-        <div id="progressText" class="progressText">0 / 18</div>
+        <div id="progressText" class="progressText">1 / 18</div>
       </div>
     </div>
   </div>
@@ -678,670 +642,6 @@
 
 <div id="toast" class="toast">Saved</div>
 
-<script>
-/* ===========================
-   Theme toggle + logo swap
-   =========================== */
-(function(){
-  const root = document.documentElement;
-  const btn  = document.getElementById("themeToggle");
-  const icon = document.getElementById("themeIcon");
-  const logoLight = document.getElementById("logoLight");
-  const logoDark  = document.getElementById("logoDark");
-
-  function prefersDark(){
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  function getSaved(){
-    const t = localStorage.getItem("bp_theme");
-    return (t === "dark" || t === "light") ? t : null;
-  }
-  function apply(theme){
-    root.setAttribute("data-theme", theme);
-    const isDark = theme === "dark";
-    if (icon) icon.src = isDark ? "sun.png" : "moon.png"; // shows what you'll switch TO
-    if (logoLight && logoDark){
-      logoLight.style.display = isDark ? "none" : "block";
-      logoDark.style.display  = isDark ? "block" : "none";
-    }
-  }
-
-  apply(getSaved() || (prefersDark() ? "dark" : "light"));
-
-  if (window.matchMedia){
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => { if (!getSaved()) apply(prefersDark() ? "dark" : "light"); };
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else if (mq.addListener) mq.addListener(handler);
-  }
-
-  if (btn){
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-      const current = root.getAttribute("data-theme") || (prefersDark() ? "dark" : "light");
-      const next = current === "dark" ? "light" : "dark";
-      localStorage.setItem("bp_theme", next);
-      apply(next);
-
-      haptic();
-    }, true);
-  }
-})();
-
-/* ===========================
-   Utilities
-   =========================== */
-function haptic(){
-  try{
-    if (navigator.vibrate) navigator.vibrate(10);
-  }catch(_){}
-}
-function toast(msg){
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"), 950);
-}
-function clamp(n,min,max){ return Math.max(min, Math.min(max, n)); }
-
-/* ===========================
-   Course rules + generator
-   =========================== */
-const GOALS = ["white","orange","blue","pink","red","green","yellow"];
-const START = "tee";
-const FIXED_GREEN_HOLES = new Set([9,18]);
-
-// Valid next targets based on "from" goal.
-// NOTE: pink<->green removed (invalid) as requested.
-function allowedNext(from){
-  const all = new Set(GOALS);
-
-  // cannot go to self ever
-  all.delete(from);
-
-  if (from === "white"){
-    return [...all];
-  }
-  if (from === "orange"){
-    all.delete("pink");
-    all.delete("blue");
-    return [...all];
-  }
-  if (from === "blue"){
-    all.delete("orange");
-    all.delete("red");
-    return [...all];
-  }
-  if (from === "pink"){
-    all.delete("orange");
-    all.delete("red");
-    all.delete("green"); // removed option
-    return [...all];
-  }
-  if (from === "red"){
-    all.delete("blue");
-    all.delete("pink");
-    return [...all];
-  }
-  if (from === "green"){
-    all.delete("yellow");
-    all.delete("pink"); // removed option
-    return [...all];
-  }
-  if (from === "yellow"){
-    all.delete("green");
-    return [...all];
-  }
-  if (from === START){
-    // start can be random but cannot be green
-    all.delete("green");
-    return [...all];
-  }
-  return [...all];
-}
-
-// Par rules
-const par3Pairs = new Set([
-  keyPair("white","yellow"),
-  keyPair("white","green"),
-  keyPair("yellow","red"),
-  keyPair("yellow","pink"),
-  keyPair("green","red"),
-  keyPair("red","orange"),
-  keyPair("red","blue"),
-  keyPair("blue","pink") // added as requested earlier
-]);
-const par5Pairs = new Set([
-  keyPair("white","blue"),
-  keyPair("white","orange")
-]);
-
-function keyPair(a,b){
-  return a < b ? `${a}|${b}` : `${b}|${a}`;
-}
-function holePar(from,to){
-  // Tee to white par 3
-  if (from === START && to === "white") return 3;
-
-  const k = keyPair(from,to);
-  if (par3Pairs.has(k)) return 3;
-  if (par5Pairs.has(k)) return 5;
-  return 4;
-}
-
-// Build 18 targets (the "to" goal for each hole)
-function generateCourse(maxAttempts=2000){
-  for (let attempt=0; attempt<maxAttempts; attempt++){
-    const counts = Object.fromEntries(GOALS.map(g=>[g,0]));
-    const usedEdges = new Set(); // "from>to"
-    const targets = [];
-
-    // Backtracking
-    const ok = backtrack(1, START, counts, usedEdges, targets);
-    if (ok) return targets;
-  }
-  return null;
-}
-
-function backtrack(holeNum, from, counts, usedEdges, targets){
-  if (holeNum === 19){
-    // end: each goal visited at least 2 times
-    for (const g of GOALS){
-      if ((counts[g]||0) < 2) return false;
-    }
-    return true;
-  }
-
-  const mustGreen = FIXED_GREEN_HOLES.has(holeNum);
-  let options;
-
-  if (mustGreen){
-    options = ["green"];
-  }else{
-    options = allowedNext(from);
-  }
-
-  // randomize options
-  shuffleInPlace(options);
-
-  for (const to of options){
-    // enforce fixed green holes
-    if (mustGreen && to !== "green") continue;
-
-    // no consecutive same (already prevented by allowedNext removing self)
-    if (to === from) continue;
-
-    // unique throw edge
-    const edgeKey = `${from}>${to}`;
-    if (usedEdges.has(edgeKey)) continue;
-
-    // hole 9 and 18 must be green; but also ensure green is reachable from hole8/17
-    // (this is naturally checked when we get to those holes)
-
-    // take
-    usedEdges.add(edgeKey);
-    targets.push(to);
-    counts[to] = (counts[to]||0) + 1;
-
-    // prune: if we are late and a goal can't reach 2 anymore, fail early
-    const holesLeft = 18 - holeNum;
-    const minNeeded = goalsMissingToReach2(counts);
-    if (minNeeded <= holesLeft){
-      // also pre-check: if next hole is fixed green, ensure current "to" can go to green
-      const nextHole = holeNum + 1;
-      if (nextHole <= 18 && FIXED_GREEN_HOLES.has(nextHole)){
-        const canToGreen = allowedNext(to).includes("green") && !usedEdges.has(`${to}>green`);
-        if (canToGreen){
-          if (backtrack(holeNum+1, to, counts, usedEdges, targets)) return true;
-        }
-      } else {
-        if (backtrack(holeNum+1, to, counts, usedEdges, targets)) return true;
-      }
-    }
-
-    // undo
-    counts[to]--;
-    targets.pop();
-    usedEdges.delete(edgeKey);
-  }
-
-  return false;
-}
-
-function goalsMissingToReach2(counts){
-  let missing = 0;
-  for (const g of GOALS){
-    const c = counts[g]||0;
-    if (c < 2) missing += (2 - c);
-  }
-  return missing;
-}
-
-function shuffleInPlace(arr){
-  for (let i=arr.length-1; i>0; i--){
-    const j = Math.floor(Math.random() * (i+1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-}
-
-/* ===========================
-   Score model (diff vs par)
-   =========================== */
-const DIFF_OPTIONS = [null, -2, -1, 0, 1, 2, 3]; // null => "-" display, counts as 0
-let courseTargets = null;
-
-// per-hole diffs: arrays length 18, each element null or number
-let p1Diffs = Array(18).fill(null);
-let p2Diffs = Array(18).fill(null);
-
-let activeHoleIndex = 0; // 0-based
-
-/* ===========================
-   Rendering
-   =========================== */
-const mainBody = document.getElementById("mainBody");
-
-function goalClass(goal){
-  return `goalTag goal-${goal}`;
-}
-
-function renderCourse(){
-  if (!courseTargets){
-    mainBody.innerHTML = "";
-    return;
-  }
-
-  mainBody.innerHTML = "";
-
-  // Compute pars + show header totals
-  const pars = [];
-  let frontPar = 0, backPar = 0;
-
-  for (let i=0; i<18; i++){
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-    const p = holePar(from, to);
-    pars.push(p);
-    if (i < 9) frontPar += p; else backPar += p;
-  }
-  const totalPar = frontPar + backPar;
-
-  document.getElementById("parFrontTop").textContent = frontPar;
-  document.getElementById("parBackTop").textContent  = backPar;
-  document.getElementById("parTotalTop").textContent = totalPar;
-  document.getElementById("parBackCell").textContent = backPar;
-  document.getElementById("parTotalCell").textContent = totalPar;
-
-  // Player headers from names
-  syncPlayerHeaders();
-
-  // Build rows
-  for (let i=0; i<18; i++){
-    const holeNum = i+1;
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-    const par = pars[i];
-
-    const tr = document.createElement("tr");
-    tr.className = "holeRow" + (i === activeHoleIndex ? " active" : "");
-    tr.dataset.holeIndex = String(i);
-
-    const tdNum = document.createElement("td");
-    tdNum.textContent = String(holeNum);
-
-    const tdThrow = document.createElement("td");
-    tdThrow.innerHTML = `
-      <div class="twoPip">
-        <span class="${goalClass(from)}">${from}</span>
-        <span class="arrow">→</span>
-        <span class="${goalClass(to)}">${to}</span>
-      </div>
-    `;
-
-    const tdPar = document.createElement("td");
-    tdPar.textContent = String(par);
-
-    const tdP1 = document.createElement("td");
-    const tdP2 = document.createElement("td");
-
-    tdP1.appendChild(makeSegControl(i, 1));
-    tdP2.appendChild(makeSegControl(i, 2));
-
-    tr.appendChild(tdNum);
-    tr.appendChild(tdThrow);
-    tr.appendChild(tdPar);
-    tr.appendChild(tdP1);
-    tr.appendChild(tdP2);
-
-    // row click: set active hole and auto scroll
-    tr.addEventListener("click", (e) => {
-      // don't double-trigger when clicking inside buttons
-      if (e.target && e.target.tagName === "BUTTON") return;
-      setActiveHole(i, true);
-    });
-
-    mainBody.appendChild(tr);
-  }
-
-  updateAllUI();
-}
-
-function makeSegControl(holeIndex, player){
-  const seg = document.createElement("div");
-  seg.className = "seg";
-  seg.dataset.holeIndex = String(holeIndex);
-  seg.dataset.player = String(player);
-
-  const labels = ["-", "-2", "-1", "0", "+1", "+2", "+3"];
-
-  for (let k=0; k<DIFF_OPTIONS.length; k++){
-    const v = DIFF_OPTIONS[k];
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = labels[k];
-    b.dataset.value = (v === null) ? "null" : String(v);
-
-    b.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      const current = getDiff(holeIndex, player);
-      // If tap same selection (including "-"), toggle back to "-" (null)
-      let next;
-      if (v === null){
-        next = null;
-      } else {
-        next = (current === v) ? null : v;
-      }
-      setDiff(holeIndex, player, next);
-
-      // keep the "auto scroll when a new hole is selected"
-      setActiveHole(holeIndex, true);
-
-      haptic();
-    });
-
-    seg.appendChild(b);
-  }
-
-  return seg;
-}
-
-function syncPlayerHeaders(){
-  const n1 = (document.getElementById("n1").value || "").trim();
-  const n2 = (document.getElementById("n2").value || "").trim();
-
-  const p1Label = n1 ? n1 : "P1";
-  const p2Label = n2 ? n2 : "P2";
-
-  document.getElementById("p1HeadSticky").textContent = p1Label;
-  document.getElementById("p2HeadSticky").textContent = p2Label;
-}
-
-document.getElementById("n1").addEventListener("input", syncPlayerHeaders);
-document.getElementById("n2").addEventListener("input", syncPlayerHeaders);
-
-function setActiveHole(i, scroll){
-  activeHoleIndex = clamp(i, 0, 17);
-  // update active row class
-  document.querySelectorAll("tbody tr.holeRow").forEach((tr, idx) => {
-    tr.classList.toggle("active", idx === activeHoleIndex);
-  });
-  updateProgress();
-
-  if (scroll){
-    const tr = document.querySelector(`tbody tr.holeRow[data-hole-index="${activeHoleIndex}"]`);
-    if (tr){
-      tr.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-    }
-  }
-}
-
-function getDiff(holeIndex, player){
-  return player === 1 ? p1Diffs[holeIndex] : p2Diffs[holeIndex];
-}
-function setDiff(holeIndex, player, value){
-  if (player === 1) p1Diffs[holeIndex] = value;
-  else p2Diffs[holeIndex] = value;
-  updateAllUI();
-}
-
-function updateAllUI(){
-  // Update selected buttons + color classes per hole
-  for (let i=0; i<18; i++){
-    for (const player of [1,2]){
-      const seg = document.querySelector(`.seg[data-hole-index="${i}"][data-player="${player}"]`);
-      if (!seg) continue;
-
-      // clear selection styles
-      seg.querySelectorAll("button").forEach(btn => btn.classList.remove("sel"));
-
-      // select current
-      const diff = getDiff(i, player);
-      const valueKey = (diff === null) ? "null" : String(diff);
-      const btn = seg.querySelector(`button[data-value="${valueKey}"]`);
-      if (btn) btn.classList.add("sel");
-
-      // color seg by diff category (null counts as 0/even)
-      seg.classList.remove("under","even","over");
-      const eff = (diff === null) ? 0 : diff;
-      seg.classList.add(eff < 0 ? "under" : eff > 0 ? "over" : "even");
-    }
-  }
-
-  updateTotalsAndColors();
-  updateProgress();
-}
-
-function updateTotalsAndColors(){
-  if (!courseTargets) return;
-
-  // pars
-  const pars = [];
-  let frontPar=0, backPar=0;
-  for (let i=0; i<18; i++){
-    const from = (i===0) ? START : courseTargets[i-1];
-    const to = courseTargets[i];
-    const p = holePar(from,to);
-    pars.push(p);
-    if (i<9) frontPar += p; else backPar += p;
-  }
-  const totalPar = frontPar + backPar;
-
-  // sums
-  const s = {
-    p1:{ frontDiff:0, backDiff:0, totalDiff:0, frontStrokes:0, backStrokes:0, totalStrokes:0 },
-    p2:{ frontDiff:0, backDiff:0, totalDiff:0, frontStrokes:0, backStrokes:0, totalStrokes:0 }
-  };
-
-  for (let i=0; i<18; i++){
-    const par = pars[i];
-    const d1 = (p1Diffs[i]===null) ? 0 : p1Diffs[i];
-    const d2 = (p2Diffs[i]===null) ? 0 : p2Diffs[i];
-    const s1 = par + d1;
-    const s2 = par + d2;
-
-    if (i<9){
-      s.p1.frontDiff += d1; s.p1.frontStrokes += s1;
-      s.p2.frontDiff += d2; s.p2.frontStrokes += s2;
-    } else {
-      s.p1.backDiff += d1; s.p1.backStrokes += s1;
-      s.p2.backDiff += d2; s.p2.backStrokes += s2;
-    }
-  }
-
-  s.p1.totalDiff = s.p1.frontDiff + s.p1.backDiff;
-  s.p2.totalDiff = s.p2.frontDiff + s.p2.backDiff;
-  s.p1.totalStrokes = s.p1.frontStrokes + s.p1.backStrokes;
-  s.p2.totalStrokes = s.p2.frontStrokes + s.p2.backStrokes;
-
-  // Back row shows back9 diff and strokes
-  setSum("bd1","b1", s.p1.backDiff, s.p1.backStrokes, backPar);
-  setSum("bd2","b2", s.p2.backDiff, s.p2.backStrokes, backPar);
-
-  // Total row shows total diff and strokes
-  setSum("d1","t1", s.p1.totalDiff, s.p1.totalStrokes, totalPar, true);
-  setSum("d2","t2", s.p2.totalDiff, s.p2.totalStrokes, totalPar, true);
-}
-
-function setSum(diffId, strokesId, diff, strokes, par, colorizeFinal=false){
-  const dEl = document.getElementById(diffId);
-  const tEl = document.getElementById(strokesId);
-
-  // Larger number: diff vs par (use 0 not "E")
-  dEl.textContent = diff === 0 ? "0" : (diff > 0 ? `+${diff}` : `${diff}`);
-
-  // Smaller number: total strokes
-  tEl.textContent = String(strokes);
-
-  // Color final diff pill by under/even/over
-  if (colorizeFinal){
-    dEl.style.background = diff < 0 ? "var(--underBg)" : diff > 0 ? "var(--overBg)" : "var(--evenBg)";
-  } else {
-    dEl.style.background = "transparent";
-  }
-}
-
-function updateProgress(){
-  // “progress” = active hole position
-  const fill = document.getElementById("progressFill");
-  const text = document.getElementById("progressText");
-  const cur = activeHoleIndex + 1;
-  fill.style.width = `${(cur/18)*100}%`;
-  text.textContent = `${cur} / 18`;
-}
-
-/* ===========================
-   Share link (course only)
-   =========================== */
-function encodeCourse(targets){
-  // store just targets, comma-separated
-  return targets.join(",");
-}
-function decodeCourse(s){
-  const parts = (s||"").split(",").map(x=>x.trim()).filter(Boolean);
-  if (parts.length !== 18) return null;
-  for (const p of parts){
-    if (!GOALS.includes(p)) return null;
-  }
-  // Validate fixed green holes
-  if (parts[8] !== "green" || parts[17] !== "green") return null;
-  // Validate constraints quickly (unique edges + adjacency)
-  const used = new Set();
-  let from = START;
-  for (let i=0; i<18; i++){
-    const to = parts[i];
-    if (!allowedNext(from).includes(to)) return null;
-    const ek = `${from}>${to}`;
-    if (used.has(ek)) return null;
-    used.add(ek);
-    from = to;
-  }
-  // Goal counts >=2
-  const counts = Object.fromEntries(GOALS.map(g=>[g,0]));
-  for (const t of parts) counts[t]++;
-  for (const g of GOALS) if (counts[g] < 2) return null;
-  return parts;
-}
-function currentShareURL(){
-  const url = new URL(window.location.href);
-  url.searchParams.set("course", encodeCourse(courseTargets));
-  // optional: keep clean hash
-  url.hash = "";
-  return url.toString();
-}
-
-/* ===========================
-   Buttons
-   =========================== */
-document.getElementById("btnGen").addEventListener("click", () => {
-  const targets = generateCourse(2500);
-  if (!targets){
-    toast("Could not generate (try again)");
-    return;
-  }
-  courseTargets = targets;
-
-  // reset scores but keep names
-  p1Diffs = Array(18).fill(null);
-  p2Diffs = Array(18).fill(null);
-
-  // active hole back to 1
-  activeHoleIndex = 0;
-
-  // render
-  renderCourse();
-
-  // Save course in localStorage
-  localStorage.setItem("bp_last_course", encodeCourse(courseTargets));
-  toast("New course generated");
-  haptic();
-});
-
-document.getElementById("btnClear").addEventListener("click", () => {
-  p1Diffs = Array(18).fill(null);
-  p2Diffs = Array(18).fill(null);
-  updateAllUI();
-  toast("Scores cleared");
-  haptic();
-});
-
-document.getElementById("btnCopyLink").addEventListener("click", async () => {
-  if (!courseTargets){
-    toast("Generate a course first");
-    return;
-  }
-  const link = currentShareURL();
-  try{
-    await navigator.clipboard.writeText(link);
-    toast("Share link copied");
-  }catch(_){
-    // fallback
-    const ta = document.createElement("textarea");
-    ta.value = link;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    toast("Share link copied");
-  }
-  haptic();
-});
-
-/* ===========================
-   Init (load from URL or storage)
-   =========================== */
-(function init(){
-  // load theme pref
-  const savedTheme = localStorage.getItem("bp_theme");
-  if (savedTheme === "dark" || savedTheme === "light"){
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  }
-
-  // load course from URL param, else localStorage, else generate
-  const url = new URL(window.location.href);
-  const c = url.searchParams.get("course");
-  let decoded = c ? decodeCourse(c) : null;
-
-  if (!decoded){
-    const last = localStorage.getItem("bp_last_course");
-    decoded = last ? decodeCourse(last) : null;
-  }
-
-  if (!decoded){
-    decoded = generateCourse(2500);
-  }
-
-  courseTargets = decoded;
-  renderCourse();
-
-  // Start with active hole 1; no auto-scroll on init
-  setActiveHole(0, false);
-})();
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
