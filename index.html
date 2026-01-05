@@ -22,11 +22,22 @@
       --scoreEven:#f3f4f6;
       --scoreOver:#fee2e2;
 
-      /* stronger total tint */
       --totalRow:#eef2ff;
 
       --activeRow:#eef2ff;
       --activeBorder:#6366f1;
+
+      /* Card row styling */
+      --rowBg:#ffffff;
+      --rowBorder:#e7e7e7;
+
+      /* Progress bar */
+      --progressTrack:#e9e9ef;
+      --progressFill:#6366f1;
+
+      /* Toast */
+      --toastBg: rgba(20,20,22,0.92);
+      --toastText: #fff;
     }
 
     /* System dark fallback */
@@ -50,6 +61,12 @@
 
         --activeRow:#1a2240;
         --activeBorder:#8b93ff;
+
+        --rowBg:#11151b;
+        --rowBorder:#2a2f38;
+
+        --progressTrack:#202634;
+        --progressFill:#8b93ff;
       }
     }
 
@@ -73,6 +90,12 @@
 
       --activeRow:#eef2ff;
       --activeBorder:#6366f1;
+
+      --rowBg:#ffffff;
+      --rowBorder:#e7e7e7;
+
+      --progressTrack:#e9e9ef;
+      --progressFill:#6366f1;
     }
 
     /* Forced dark override */
@@ -95,6 +118,12 @@
 
       --activeRow:#1a2240;
       --activeBorder:#8b93ff;
+
+      --rowBg:#11151b;
+      --rowBorder:#2a2f38;
+
+      --progressTrack:#202634;
+      --progressFill:#8b93ff;
     }
 
     body{
@@ -105,6 +134,10 @@
       color:var(--text);
     }
     .muted{color:var(--muted);font-size:12px}
+
+    /* (1) Button press animation */
+    button { transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease; }
+    button:active { transform: scale(0.98); }
 
     .header{
       display:flex;
@@ -142,10 +175,7 @@
       padding:0;
       flex:0 0 auto;
     }
-    .themeToggleBtn img{
-      width:22px;height:22px;
-      display:block;
-    }
+    .themeToggleBtn img{ width:22px;height:22px; display:block; }
 
     .infoGrid{
       display:grid;
@@ -181,6 +211,34 @@
     .dot-under{background:var(--scoreUnder)}
     .dot-even{background:var(--scoreEven)}
     .dot-over{background:var(--scoreOver)}
+
+    /* (9) Progress bar */
+    .progressWrap{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .progressTrack{
+      flex:1 1 auto;
+      height:10px;
+      border-radius:999px;
+      background:var(--progressTrack);
+      overflow:hidden;
+      border:1px solid var(--border);
+    }
+    .progressFill{
+      height:100%;
+      width:0%;
+      background:var(--progressFill);
+      transition: width 0.25s ease;
+    }
+    .progressText{
+      font-size:12px;
+      color:var(--muted);
+      min-width:84px;
+      text-align:right;
+    }
 
     button{
       font-size:16px;
@@ -241,22 +299,71 @@
 
     table{
       width:100%;
-      border-collapse:collapse;
       margin-top:10px;
+
+      /* (7) Card-like rows: separate + spacing */
+      border-collapse:separate;
+      border-spacing:0 10px;
+
       table-layout:fixed;
     }
-    th,td{
+
+    /* (5) Sticky header */
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:5;
+      background:var(--thead);
       border-bottom:1px solid var(--tableLine);
-      padding:9px 6px;
+    }
+
+    th,td{
+      padding:10px 8px;
       text-align:center;
       vertical-align:middle;
+
       overflow:hidden;
-      /* ✅ removed ellipsis so iPhone Safari stops showing dots */
-      text-overflow:clip;
+      text-overflow:clip; /* ✅ no ellipsis dots */
       white-space:nowrap;
     }
-    th{background:var(--thead)}
+
     .left{text-align:left}
+
+    /* (7) Make each hole row look like a card */
+    tbody tr.holeRow td{
+      background:var(--rowBg);
+      border-top:1px solid var(--rowBorder);
+      border-bottom:1px solid var(--rowBorder);
+    }
+    tbody tr.holeRow td:first-child{
+      border-left:1px solid var(--rowBorder);
+      border-top-left-radius:14px;
+      border-bottom-left-radius:14px;
+    }
+    tbody tr.holeRow td:last-child{
+      border-right:1px solid var(--rowBorder);
+      border-top-right-radius:14px;
+      border-bottom-right-radius:14px;
+    }
+
+    /* (2) Smooth active hole transition */
+    tr.holeRow{ transition: background-color 0.2s ease, box-shadow 0.2s ease; }
+    tr.holeRow.active td{
+      background:var(--activeRow);
+    }
+    tr.holeRow.active td:first-child{
+      box-shadow: inset 4px 0 0 0 var(--activeBorder);
+    }
+
+    /* (8) Completed pulse */
+    @keyframes pulseDone {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.01); }
+      100% { transform: scale(1); }
+    }
+    tr.holeRow.pulse td{
+      animation: pulseDone 0.22s ease;
+    }
 
     .goalTag{
       display:inline-flex;
@@ -303,6 +410,9 @@
       border:1px solid var(--border);
       border-radius:10px;
       min-width:58px;
+
+      /* (3) Smooth score color transitions */
+      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
     }
 
     .score-under{background:var(--scoreUnder)}
@@ -334,14 +444,41 @@
       color:var(--muted);
     }
 
+    /* Summary rows (Front/Back/Total) */
+    tbody tr.sumRow th,
+    tbody tr.sumRow td{
+      background:transparent;
+      border:none;
+      padding:6px 8px;
+    }
+
     tfoot tr.totalRow th,
     tfoot tr.totalRow td{
       background:var(--totalRow);
+      border-top:1px solid var(--rowBorder);
+      border-bottom:1px solid var(--rowBorder);
     }
 
-    tr.holeRow.active{
-      background:var(--activeRow);
-      box-shadow: inset 3px 0 0 0 var(--activeBorder);
+    /* Toast (4) */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:var(--toastBg);
+      color:var(--toastText);
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:14px;
+      max-width:92vw;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+      z-index:9999;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(-2px);
     }
   </style>
 </head>
@@ -363,7 +500,6 @@
       </div>
     </div>
 
-    <!-- ✅ Theme toggle -->
     <button id="themeToggle" class="themeToggleBtn" aria-label="Toggle dark mode">
       <img id="themeIcon" src="moon.png" alt="Theme icon">
     </button>
@@ -384,6 +520,12 @@
     <div class="swatch"><span class="dot dot-under"></span> Under par</div>
     <div class="swatch"><span class="dot dot-even"></span> Even par</div>
     <div class="swatch"><span class="dot dot-over"></span> Over par</div>
+  </div>
+
+  <!-- (9) Progress -->
+  <div class="progressWrap">
+    <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+    <div id="progressText" class="progressText">0 / 18</div>
   </div>
 
   <button id="btnGen">Generate New Course</button>
@@ -460,10 +602,25 @@
     </table>
   </div>
 
+  <!-- (4) Toast -->
+  <div id="toast" class="toast">Saved</div>
+
 <script>
 (function(){
+  // ---------- Toast ----------
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){
+      toastEl.classList.remove("show");
+    }, 1400);
+  }
+
   // ---------- Theme toggle (sun/moon) ----------
-  var THEME_KEY = "bridgespark:theme"; // "light" | "dark" | "system"
+  var THEME_KEY = "bridgespark:theme";
   var html = document.documentElement;
   var themeBtn = document.getElementById("themeToggle");
   var themeIcon = document.getElementById("themeIcon");
@@ -473,16 +630,11 @@
   }
 
   function applyTheme(theme){
-    // theme: "light" | "dark" | "system"
     html.setAttribute("data-theme", theme);
 
-    // icon shows what you can switch TO:
-    // if currently dark => show sun (tap to go light)
-    // if currently light => show moon (tap to go dark)
     var effectiveDark = (theme === "dark") ? true : (theme === "light" ? false : systemIsDark());
     themeIcon.src = effectiveDark ? "sun.png" : "moon.png";
 
-    // Logos follow effective theme
     document.getElementById("logoLight").style.display = effectiveDark ? "none" : "block";
     document.getElementById("logoDark").style.display  = effectiveDark ? "block" : "none";
   }
@@ -494,21 +646,19 @@
     }catch(e){}
     return "system";
   }
-
   function saveTheme(t){
     try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
   }
 
-  // Toggle behavior: light <-> dark (we’ll keep it simple)
   themeBtn.addEventListener("click", function(){
     var cur = html.getAttribute("data-theme") || "system";
     var effectiveDark = (cur === "dark") ? true : (cur === "light" ? false : systemIsDark());
     var next = effectiveDark ? "light" : "dark";
     saveTheme(next);
     applyTheme(next);
+    showToast(next === "dark" ? "Dark mode" : "Light mode");
   });
 
-  // If user chooses system, update on system change
   try{
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
       if ((html.getAttribute("data-theme") || "system") === "system"){
@@ -517,7 +667,6 @@
     });
   }catch(e){}
 
-  // Apply initial theme
   applyTheme(loadTheme());
 
   // ---------- Course generator + scorecard ----------
@@ -541,7 +690,6 @@
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
-
   [
     ["white","yellow"],
     ["white","green"],
@@ -552,7 +700,6 @@
     ["red","blue"],
     ["blue","pink"]
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
-
   [
     ["white","blue"],
     ["white","orange"]
@@ -759,7 +906,7 @@
     var link = window.location.href;
     try{
       await navigator.clipboard.writeText(link);
-      alert("Share link copied!");
+      showToast("Share link copied");
     }catch(e){
       prompt("Copy this link:", link);
     }
@@ -770,7 +917,7 @@
   var activeHole = 1;
 
   function storageKeyForCourse(courseStr){
-    return "bridgespark:v2:" + courseStr;
+    return "bridgespark:v3:" + courseStr;
   }
 
   var mainBody = document.getElementById("mainBody");
@@ -781,6 +928,10 @@
   var n2 = document.getElementById("n2");
   var p1Head = document.getElementById("p1Head");
   var p2Head = document.getElementById("p2Head");
+
+  // Progress elements
+  var progressFill = document.getElementById("progressFill");
+  var progressText = document.getElementById("progressText");
 
   function getSelectEl(hole, player){
     return mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+player+'"]');
@@ -864,9 +1015,16 @@
     sel.addEventListener("change", function(){
       colorDelta(sel);
       recalcTotals();
+      updateProgress();
       saveState();
-      if (bothSelected(hole)) setActiveHole(Math.min(HOLES, hole+1), true);
-      else setActiveHole(hole, false);
+
+      // (8) if both selected => pulse row and auto-advance
+      if (bothSelected(hole)){
+        pulseHoleRow(hole);
+        setActiveHole(Math.min(HOLES, hole+1), true);
+      } else {
+        setActiveHole(hole, false);
+      }
     });
 
     colorDelta(sel);
@@ -887,11 +1045,22 @@
     return (getSelectValue(hole,1) !== "" && getSelectValue(hole,2) !== "");
   }
 
+  function holeRowEl(hole){
+    return mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
+  }
+
+  function pulseHoleRow(hole){
+    var row = holeRowEl(hole);
+    if (!row) return;
+    row.classList.add("pulse");
+    setTimeout(function(){ row.classList.remove("pulse"); }, 260);
+  }
+
   function setActiveHole(hole, shouldScroll){
     activeHole = hole;
     var rows = mainBody.querySelectorAll("tr.holeRow");
     for (var i=0;i<rows.length;i++) rows[i].classList.remove("active");
-    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
+    var row = holeRowEl(hole);
     if (row){
       row.classList.add("active");
       if (shouldScroll){
@@ -915,9 +1084,12 @@
     }
     recolorAllSelects();
     recalcTotals();
+    updateProgress();
     setActiveHole(1, true);
+
     if (alsoClearStorage) clearSavedStateForCurrentCourse();
     saveState();
+    showToast("Scores cleared");
   }
 
   function recolorAllSelects(){
@@ -966,8 +1138,19 @@
     }
   }
 
+  function updateProgress(){
+    var completed = 0;
+    for (var h=1; h<=HOLES; h++){
+      if (bothSelected(h)) completed++;
+    }
+    var pct = Math.round((completed / HOLES) * 100);
+    progressFill.style.width = pct + "%";
+    progressText.textContent = completed + " / " + HOLES;
+  }
+
   function buildFront9Row(frontPar){
     var tr = document.createElement("tr");
+    tr.className = "sumRow";
     tr.innerHTML = `
       <th colspan="2" class="left">Front 9</th>
       <th>${frontPar}</th>
@@ -1054,6 +1237,7 @@
     document.getElementById("parTotalCell").textContent = parTotal;
 
     recalcTotals();
+    updateProgress();
 
     var st = loadState();
     if (st){
@@ -1069,6 +1253,7 @@
         }
         recolorAllSelects();
         recalcTotals();
+        updateProgress();
       }
       setActiveHole(Math.max(1, Math.min(HOLES, st.activeHole || 1)), false);
     } else {
@@ -1082,15 +1267,33 @@
       var ok = confirm("Generate a new course? This will reset scores for this round.");
       if (!ok) return;
     }
+
     syncPlayerHeaders();
+
     var r = generateCourse();
     if (!r){
-      alert("Could not generate a valid course. Try again.");
+      showToast("Could not generate course. Try again.");
       return;
     }
+
     setUrlForCourse(r.seq);
     renderAll(r.seq);
-    clearScores(true);
+
+    // Clear the saved state for the newly generated course key
+    clearSavedStateForCurrentCourse();
+
+    // Reset scores without toasting twice
+    for (var h=1; h<=HOLES; h++){
+      setSelectValue(h, 1, "");
+      setSelectValue(h, 2, "");
+    }
+    recolorAllSelects();
+    recalcTotals();
+    updateProgress();
+    setActiveHole(1, false);
+    saveState();
+
+    showToast("New course generated");
   }
 
   btnGen.addEventListener("click", generateAndRender);
@@ -1105,10 +1308,12 @@
     if (seq){
       renderAll(seq);
       setUrlForCourse(seq);
+      showToast("Course loaded");
     } else {
       generateAndRender();
     }
   }
+
   init();
 
 })();
