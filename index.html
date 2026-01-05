@@ -6,19 +6,19 @@
   <title>Bridges Park</title>
   <style>
     body{font-family:-apple-system,system-ui,sans-serif;margin:16px;line-height:1.35}
-    button{font-size:16px;padding:10px 14px;margin:6px 0 0 0}
+    button{font-size:16px;padding:10px 14px;width:100%;}
     input[type=text]{font-size:16px;padding:8px;width:100%;box-sizing:border-box}
     select{font-size:16px;padding:6px 8px}
     table{width:100%;border-collapse:collapse;margin-top:12px}
     th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center;vertical-align:middle}
     th{background:#f5f5f5}
     .right{text-align:right}
-    .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:12px;margin-top:12px;max-width:900px}
     .pill{background:#eee;border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
     .muted{color:#666;font-size:13px}
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .grow{flex:1 1 180px}
-    .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:900px}
     .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .brand h1{margin:0;font-size:28px}
     .subtitle{margin:2px 0 0 0}
@@ -28,6 +28,7 @@
       color:#777;font-size:12px;flex:0 0 auto;
       background:#fafafa;
     }
+    .topWrap{max-width:900px}
     .infoGrid{
       display:grid;
       grid-template-columns:repeat(2,minmax(140px,1fr));
@@ -50,12 +51,18 @@
     .goal-red{background:#e11d48;color:#fff}
     .goal-green{background:#16a34a;color:#fff}
     .goal-yellow{background:#ffd400;color:#111}
+    .goal-tee{background:#111;color:#fff}
     .goalTag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px}
 
     /* Per-hole score coloring */
     .score-under{background:#d1fae5}
     .score-even{background:#f3f4f6}
     .score-over{background:#fee2e2}
+
+    /* Pill coloring for totals */
+    .pill-under{background:#d1fae5}
+    .pill-even{background:#f3f4f6}
+    .pill-over{background:#fee2e2}
 
     /* Small legend */
     .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
@@ -71,12 +78,13 @@
       .goalTag{border:1px solid #ddd}
       .logoBox{border-style:solid}
       body{margin:10px}
+      button{display:none}
     }
   </style>
 </head>
 <body>
 
-<div>
+<div class="topWrap">
   <div class="header">
     <div class="brand">
       <div class="logoBox" title="Optional: replace this box with your logo (image) later">
@@ -86,10 +94,6 @@
         <h1>Bridges Park</h1>
         <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
       </div>
-    </div>
-
-    <div style="margin-left:auto;min-width:220px;text-align:right;">
-      <button id="btnGen">Generate New Course</button>
     </div>
   </div>
 
@@ -108,6 +112,10 @@
     <div class="swatch"><span class="dot dot-under"></span> Under par</div>
     <div class="swatch"><span class="dot dot-even"></span> Even par</div>
     <div class="swatch"><span class="dot dot-over"></span> Over par</div>
+  </div>
+
+  <div style="margin-top:10px;">
+    <button id="btnGen">Generate New Course</button>
   </div>
 </div>
 
@@ -153,28 +161,12 @@
         <th><span id="t1">0</span> <span id="d1" class="pill">E</span></th>
         <th><span id="t2">0</span> <span id="d2" class="pill">E</span></th>
       </tr>
-      <tr>
-        <th colspan="3" class="right">Front 9 Par</th>
-        <th id="parFront" class="right"></th>
-        <th colspan="2"></th>
-      </tr>
-      <tr>
-        <th colspan="3" class="right">Back 9 Par</th>
-        <th id="parBack" class="right"></th>
-        <th colspan="2"></th>
-      </tr>
-      <tr>
-        <th colspan="3" class="right">Total Par</th>
-        <th id="parTotal" class="right"></th>
-        <th colspan="2"></th>
-      </tr>
     </tfoot>
   </table>
 </div>
 
 <script>
 (function(){
-  // If generation ever fails, show a simple alert (no status text on page)
   window.addEventListener("error", function(ev){
     alert("Error: " + (ev && ev.message ? ev.message : "Unknown error"));
   });
@@ -184,8 +176,6 @@
   var MINREQ = 2;
   var FIXED = { 9: "green", 18: "green" };
 
-  // Directional restrictions (prev -> next disallowed)
-  // Updated: disallow pink<->green both ways
   var DIS = {
     "white":  [],
     "orange": ["pink","blue"],
@@ -196,10 +186,8 @@
     "yellow": ["green"]
   };
 
-  // Par rules: Hole 1 (tee -> goal) Par 3 to yellow/pink/white; else Par 4.
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
-  // Pair-based par rules for holes 2-18 (both directions)
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
   var PAR3 = {};
   var PAR5 = {};
@@ -212,7 +200,7 @@
     ["green","red"],
     ["red","orange"],
     ["red","blue"],
-    ["blue","pink"] // Par 3 both directions
+    ["blue","pink"]
   ].forEach(function(p){ PAR3[pairKey(p[0],p[1])] = true; });
 
   [
@@ -228,7 +216,7 @@
     return true;
   }
 
-  function edgeKey(from,to){ return from + "->" + to; } // unique throws are directional
+  function edgeKey(from,to){ return from + "->" + to; }
 
   function shuffle(arr){
     for (var i=arr.length-1;i>0;i--){
@@ -412,6 +400,14 @@
   n1.addEventListener("input", syncPlayerHeaders);
   n2.addEventListener("input", syncPlayerHeaders);
 
+  function updatePillColor(diffEl){
+    diffEl.classList.remove("pill-under","pill-even","pill-over");
+    var txt = diffEl.textContent;
+    if (txt === "E") diffEl.classList.add("pill-even");
+    else if (txt[0] === "+") diffEl.classList.add("pill-over");
+    else diffEl.classList.add("pill-under");
+  }
+
   function makeSelect(hole, player, parVal){
     var sel = document.createElement("select");
     sel.setAttribute("data-hole", ""+hole);
@@ -464,6 +460,10 @@
     return td;
   }
 
+  function tdFrom(from){
+    return tdGoal(from === "tee" ? "tee" : from);
+  }
+
   function setTopParSummary(front, back, total){
     document.getElementById("parFrontTop").textContent = front;
     document.getElementById("parBackTop").textContent  = back;
@@ -473,7 +473,6 @@
   function renderAll(seq){
     mainBody.innerHTML = "";
 
-    var pars = [];
     var parFront = 0, parBack = 0, parTotal = 0;
 
     for (var i=0;i<seq.length;i++){
@@ -481,15 +480,14 @@
       var to = seq[i];
       var from = (i===0) ? "tee" : seq[i-1];
       var p = parFor(from,to,hole);
-      pars.push(p);
 
       parTotal += p;
       if (hole<=9) parFront += p; else parBack += p;
 
       var tr = document.createElement("tr");
       tr.appendChild(tdText(""+hole));
-      tr.appendChild(from === "tee" ? tdText("tee") : tdGoal(from));
-      tr.appendChild(tdGoal(to)); // no checkmark
+      tr.appendChild(tdFrom(from));
+      tr.appendChild(tdGoal(to));
       tr.appendChild(tdText(""+p));
 
       var td1 = document.createElement("td");
@@ -503,9 +501,6 @@
       mainBody.appendChild(tr);
     }
 
-    document.getElementById("parFront").textContent = ""+parFront;
-    document.getElementById("parBack").textContent  = ""+parBack;
-    document.getElementById("parTotal").textContent = ""+parTotal;
     setTopParSummary(parFront, parBack, parTotal);
 
     window.__parFront = parFront;
@@ -539,9 +534,17 @@
       document.getElementById("b"+pl).textContent = ""+b;
       document.getElementById("t"+pl).textContent = ""+t;
 
-      document.getElementById("fd"+pl).textContent = formatDiff(f - parFront);
-      document.getElementById("bd"+pl).textContent = formatDiff(b - parBack);
-      document.getElementById("d"+pl).textContent  = formatDiff(t - parTotal);
+      var fd = document.getElementById("fd"+pl);
+      var bd = document.getElementById("bd"+pl);
+      var d  = document.getElementById("d"+pl);
+
+      fd.textContent = formatDiff(f - parFront);
+      bd.textContent = formatDiff(b - parBack);
+      d.textContent  = formatDiff(t - parTotal);
+
+      updatePillColor(fd);
+      updatePillColor(bd);
+      updatePillColor(d);
     }
   }
 
@@ -567,7 +570,6 @@
 
   document.getElementById("btnGen").addEventListener("click", generateAndRender);
 
-  // Init on load
   syncPlayerHeaders();
   generateAndRender();
 })();
