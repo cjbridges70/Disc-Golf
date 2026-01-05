@@ -20,6 +20,8 @@
       --scoreUnder:#d1fae5;
       --scoreEven:#f3f4f6;
       --scoreOver:#fee2e2;
+
+      --totalRow:#f7f7f9;
     }
 
     @media (prefers-color-scheme: dark){
@@ -37,6 +39,8 @@
         --scoreUnder:#0f3b2b;
         --scoreEven:#202634;
         --scoreOver:#3b1416;
+
+        --totalRow:#151b25;
       }
     }
 
@@ -110,6 +114,17 @@
       border-radius:12px;
       margin-top:10px;
     }
+    .btnRow{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+      margin-top:10px;
+    }
+    .btnSecondary{
+      font-size:14px;
+      padding:10px 12px;
+      background:transparent;
+    }
 
     .card{
       border:1px solid var(--border);
@@ -176,17 +191,17 @@
     .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
     .goal-tee{background:#111;color:#fff;border:1px solid #111}
 
-    /* Tee row styling inside "To" cell */
-    .teeToWrap{
+    /* Two pips + arrow layout */
+    .twoPip{
       display:inline-flex;
       align-items:center;
       gap:6px;
       max-width:100%;
     }
-    .teeArrow{
+    .arrow{
       font-size:12px;
       color:var(--muted);
-      font-weight:700;
+      font-weight:800;
       flex:0 0 auto;
     }
 
@@ -227,6 +242,12 @@
     .sumThrows{
       font-size:11px;
       color:var(--muted);
+    }
+
+    /* Total row tint */
+    tfoot tr.totalRow th,
+    tfoot tr.totalRow td{
+      background:var(--totalRow);
     }
 
     @media print{
@@ -271,7 +292,10 @@
     <div class="swatch"><span class="dot dot-over"></span> Over par</div>
   </div>
 
-  <button id="btnGen">Generate New Course</button>
+  <div class="btnRow">
+    <button id="btnGen">Generate New Course</button>
+    <button id="btnCopyLink" class="btnSecondary">Copy Share Link</button>
+  </div>
 
   <div class="card">
     <h2 style="margin:0 0 6px 0;">Course + Scorecard</h2>
@@ -291,10 +315,10 @@
       <thead>
         <tr>
           <th style="width:10%;">#</th>
-          <th style="width:38%;">To</th>
+          <th style="width:44%;">Throw</th>
           <th style="width:10%;">Par</th>
-          <th style="width:21%;" id="p1Head">Player 1</th>
-          <th style="width:21%;" id="p2Head">Player 2</th>
+          <th style="width:18%;" id="p1Head">P1</th>
+          <th style="width:18%;" id="p2Head">P2</th>
         </tr>
       </thead>
 
@@ -317,7 +341,7 @@
             </div>
           </th>
         </tr>
-        <tr>
+        <tr class="totalRow">
           <th colspan="2" class="left">Total</th>
           <th id="parTotalCell">–</th>
           <th>
@@ -358,9 +382,9 @@
     "white":  [],
     "orange": ["pink","blue"],
     "blue":   ["orange","red"],
-    "pink":   ["orange","red","green"], // remove pink->green and green->pink
+    "pink":   ["orange","red","green"], // remove pink->green
     "red":    ["blue","pink"],
-    "green":  ["yellow","pink"],
+    "green":  ["yellow","pink"],        // remove green->pink
     "yellow": ["green"]
   };
 
@@ -466,7 +490,6 @@
     return s;
   }
 
-  // Generate a valid course with unique throws (edges)
   function generateCourse(){
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
@@ -553,16 +576,70 @@
     return null;
   }
 
+  // --- Share link encoding ---
+  function encodeCourse(seq){
+    // "white,orange,..." -> URL-safe
+    return encodeURIComponent(seq.join(","));
+  }
+  function decodeCourse(param){
+    try{
+      var raw = decodeURIComponent(param || "");
+      if (!raw) return null;
+      var parts = raw.split(",").map(function(s){ return s.trim().toLowerCase(); }).filter(Boolean);
+      if (parts.length !== HOLES) return null;
+      // validate
+      for (var i=0;i<parts.length;i++){
+        if (GOALS.indexOf(parts[i]) === -1) return null;
+      }
+      // validate fixed holes
+      if (parts[8] !== "green") return null;   // hole 9 index 8
+      if (parts[17] !== "green") return null;  // hole 18 index 17
+      // validate no consecutive equal
+      for (var j=1;j<parts.length;j++){
+        if (parts[j] === parts[j-1]) return null;
+      }
+      // validate disallowed transitions (including tee -> hole1 not green)
+      if (parts[0] === "green") return null;
+      for (var h=2; h<=HOLES; h++){
+        var prev = parts[h-2];
+        var next = parts[h-1];
+        if (!allowed(prev, next)) return null;
+      }
+      // validate tee->hole1 edge uniqueness/constraints isn't necessary for viewing
+      return parts;
+    }catch(e){
+      return null;
+    }
+  }
+
+  function setUrlForCourse(seq){
+    var url = new URL(window.location.href);
+    url.searchParams.set("c", seq.join(","));
+    history.replaceState(null, "", url.toString());
+  }
+
+  async function copyShareLink(){
+    var link = window.location.href;
+    try{
+      await navigator.clipboard.writeText(link);
+      alert("Share link copied!");
+    }catch(e){
+      // fallback
+      prompt("Copy this link:", link);
+    }
+  }
+
   // UI
   var mainBody = document.getElementById("mainBody");
   var btnGen = document.getElementById("btnGen");
+  var btnCopy = document.getElementById("btnCopyLink");
   var n1 = document.getElementById("n1");
   var n2 = document.getElementById("n2");
   var p1Head = document.getElementById("p1Head");
   var p2Head = document.getElementById("p2Head");
 
   function playerName(idx){
-    return (idx===1 ? (n1.value||"Player 1") : (n2.value||"Player 2")).trim();
+    return (idx===1 ? (n1.value||"P1") : (n2.value||"P2")).trim();
   }
   function syncPlayerHeaders(){
     p1Head.textContent = playerName(1);
@@ -673,24 +750,18 @@
       tdH.textContent = ""+hole;
       tr.appendChild(tdH);
 
-      // To cell (includes TEE → on hole 1)
-      var tdTo = document.createElement("td");
-      if (hole === 1){
-        var wrap = document.createElement("span");
-        wrap.className = "teeToWrap";
-        wrap.appendChild(goalSpan("tee"));
-
-        var arrow = document.createElement("span");
-        arrow.className = "teeArrow";
-        arrow.textContent = "→";
-        wrap.appendChild(arrow);
-
-        wrap.appendChild(goalSpan(to));
-        tdTo.appendChild(wrap);
-      } else {
-        tdTo.appendChild(goalSpan(to));
-      }
-      tr.appendChild(tdTo);
+      // Throw cell: FROM → TO
+      var tdThrow = document.createElement("td");
+      var wrap = document.createElement("span");
+      wrap.className = "twoPip";
+      wrap.appendChild(goalSpan(from));
+      var arrow = document.createElement("span");
+      arrow.className = "arrow";
+      arrow.textContent = "→";
+      wrap.appendChild(arrow);
+      wrap.appendChild(goalSpan(to));
+      tdThrow.appendChild(wrap);
+      tr.appendChild(tdThrow);
 
       // Par
       var tdP = document.createElement("td");
@@ -714,10 +785,6 @@
     }
 
     setParSummary(parFront, parBack, parTotal);
-
-    window.__parFront = parFront;
-    window.__parBack = parBack;
-    window.__parTotal = parTotal;
 
     recalcTotals();
   }
@@ -743,12 +810,10 @@
         if (hole<=9) frontThrows += throws; else backThrows += throws;
       }
 
-      // small numbers = throws totals
       document.getElementById("f"+pl).textContent = ""+frontThrows;
       document.getElementById("b"+pl).textContent = ""+backThrows;
       document.getElementById("t"+pl).textContent = ""+totalThrows;
 
-      // big numbers = delta totals
       var fd = document.getElementById("fd"+pl);
       var bd = document.getElementById("bd"+pl);
       var dEl = document.getElementById("d"+pl);
@@ -772,13 +837,26 @@
       alert("Could not generate a valid course. Try again.");
       return;
     }
+    setUrlForCourse(r.seq);
     renderAll(r.seq);
   }
 
   btnGen.addEventListener("click", generateAndRender);
+  btnCopy.addEventListener("click", copyShareLink);
 
-  syncPlayerHeaders();
-  generateAndRender();
+  // Load from share link if present
+  function init(){
+    syncPlayerHeaders();
+    var url = new URL(window.location.href);
+    var c = url.searchParams.get("c");
+    var seq = decodeCourse(c);
+    if (seq){
+      renderAll(seq);
+    } else {
+      generateAndRender();
+    }
+  }
+  init();
 })();
 </script>
 
