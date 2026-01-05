@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="system">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Bridges Park</title>
 
   <style>
+    /* Theme tokens (default = light) */
     :root{
       --bg:#ffffff;
       --text:#111111;
@@ -28,6 +29,7 @@
       --activeBorder:#6366f1;
     }
 
+    /* System dark fallback */
     @media (prefers-color-scheme: dark){
       :root{
         --bg:#0b0d10;
@@ -44,12 +46,55 @@
         --scoreEven:#202634;
         --scoreOver:#3b1416;
 
-        /* stronger total tint (dark) */
         --totalRow:#1b2341;
 
         --activeRow:#1a2240;
         --activeBorder:#8b93ff;
       }
+    }
+
+    /* Forced light override */
+    html[data-theme="light"]{
+      --bg:#ffffff;
+      --text:#111111;
+      --muted:#666666;
+      --card:#ffffff;
+      --border:#dddddd;
+      --thead:#f5f5f5;
+      --tableLine:#dddddd;
+      --btnBg:#efefef;
+      --btnText:#111111;
+
+      --scoreUnder:#d1fae5;
+      --scoreEven:#f3f4f6;
+      --scoreOver:#fee2e2;
+
+      --totalRow:#eef2ff;
+
+      --activeRow:#eef2ff;
+      --activeBorder:#6366f1;
+    }
+
+    /* Forced dark override */
+    html[data-theme="dark"]{
+      --bg:#0b0d10;
+      --text:#e8e8e8;
+      --muted:#a7a7a7;
+      --card:#11151b;
+      --border:#2a2f38;
+      --thead:#171c24;
+      --tableLine:#2a2f38;
+      --btnBg:#1b2230;
+      --btnText:#e8e8e8;
+
+      --scoreUnder:#0f3b2b;
+      --scoreEven:#202634;
+      --scoreOver:#3b1416;
+
+      --totalRow:#1b2341;
+
+      --activeRow:#1a2240;
+      --activeBorder:#8b93ff;
     }
 
     body{
@@ -60,13 +105,19 @@
       color:var(--text);
     }
     .muted{color:var(--muted);font-size:12px}
-    .spacer{height:10px}
 
     .header{
       display:flex;
       gap:12px;
       align-items:center;
-      flex-wrap:wrap;
+      justify-content:space-between;
+    }
+    .headerLeft{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex:1 1 auto;
+      min-width:0;
     }
     .brand h1{margin:0;font-size:26px}
     .subtitle{margin-top:3px}
@@ -75,6 +126,24 @@
       width:58px;height:58px;border-radius:14px;object-fit:contain;
       border:none !important; outline:none !important; box-shadow:none !important;
       background:transparent;
+      display:block;
+      flex:0 0 auto;
+    }
+
+    /* Theme toggle icon button */
+    .themeToggleBtn{
+      width:44px;height:44px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:var(--card);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      flex:0 0 auto;
+    }
+    .themeToggleBtn img{
+      width:22px;height:22px;
       display:block;
     }
 
@@ -124,7 +193,6 @@
       margin-top:10px;
     }
 
-    /* Buttons layout: Generate full width, then 2-up row */
     .btnRowTwo{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -146,7 +214,6 @@
       background:var(--card);
     }
 
-    /* Names OUTSIDE the scorecard */
     .nameBlock{
       border:1px solid var(--border);
       border-radius:12px;
@@ -180,16 +247,17 @@
     }
     th,td{
       border-bottom:1px solid var(--tableLine);
-      padding:9px 6px;              /* more vertical breathing room */
+      padding:9px 6px;
       text-align:center;
       vertical-align:middle;
       overflow:hidden;
+      /* ✅ removed ellipsis so iPhone Safari stops showing dots */
+      text-overflow:clip;
       white-space:nowrap;
     }
     th{background:var(--thead)}
     .left{text-align:left}
 
-    /* Smaller equal-size goal pills */
     .goalTag{
       display:inline-flex;
       align-items:center;
@@ -214,7 +282,6 @@
     .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
     .goal-tee{background:#111;color:#fff;border:1px solid #111}
 
-    /* Two pips + arrow layout */
     .twoPip{
       display:inline-flex;
       align-items:center;
@@ -267,13 +334,11 @@
       color:var(--muted);
     }
 
-    /* Total row tint */
     tfoot tr.totalRow th,
     tfoot tr.totalRow td{
       background:var(--totalRow);
     }
 
-    /* Active hole highlight */
     tr.holeRow.active{
       background:var(--activeRow);
       box-shadow: inset 3px 0 0 0 var(--activeBorder);
@@ -284,17 +349,24 @@
 <body>
 
   <div class="header">
-    <img id="logoLight" class="logoImg"
-         src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png"
-         alt="Bridges Park logo">
-    <img id="logoDark" class="logoImg"
-         src="B19327BB-FD35-4A0C-8F34-56CC91793687.png"
-         alt="Bridges Park logo (dark)"
-         style="display:none;">
-    <div class="brand">
-      <h1>Bridges Park</h1>
-      <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
+    <div class="headerLeft">
+      <img id="logoLight" class="logoImg"
+           src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png"
+           alt="Bridges Park logo">
+      <img id="logoDark" class="logoImg"
+           src="B19327BB-FD35-4A0C-8F34-56CC91793687.png"
+           alt="Bridges Park logo (dark)"
+           style="display:none;">
+      <div class="brand">
+        <h1>Bridges Park</h1>
+        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
+      </div>
     </div>
+
+    <!-- ✅ Theme toggle -->
+    <button id="themeToggle" class="themeToggleBtn" aria-label="Toggle dark mode">
+      <img id="themeIcon" src="moon.png" alt="Theme icon">
+    </button>
   </div>
 
   <div class="infoGrid">
@@ -390,16 +462,65 @@
 
 <script>
 (function(){
-  // ---------- Logo auto swap ----------
-  function syncLogo(){
-    var systemDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.getElementById("logoLight").style.display = systemDark ? "none" : "block";
-    document.getElementById("logoDark").style.display  = systemDark ? "block" : "none";
-  }
-  syncLogo();
-  try{ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncLogo); }catch(e){}
+  // ---------- Theme toggle (sun/moon) ----------
+  var THEME_KEY = "bridgespark:theme"; // "light" | "dark" | "system"
+  var html = document.documentElement;
+  var themeBtn = document.getElementById("themeToggle");
+  var themeIcon = document.getElementById("themeIcon");
 
-  // ---------- Course constraints ----------
+  function systemIsDark(){
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function applyTheme(theme){
+    // theme: "light" | "dark" | "system"
+    html.setAttribute("data-theme", theme);
+
+    // icon shows what you can switch TO:
+    // if currently dark => show sun (tap to go light)
+    // if currently light => show moon (tap to go dark)
+    var effectiveDark = (theme === "dark") ? true : (theme === "light" ? false : systemIsDark());
+    themeIcon.src = effectiveDark ? "sun.png" : "moon.png";
+
+    // Logos follow effective theme
+    document.getElementById("logoLight").style.display = effectiveDark ? "none" : "block";
+    document.getElementById("logoDark").style.display  = effectiveDark ? "block" : "none";
+  }
+
+  function loadTheme(){
+    try{
+      var t = localStorage.getItem(THEME_KEY);
+      if (t === "light" || t === "dark" || t === "system") return t;
+    }catch(e){}
+    return "system";
+  }
+
+  function saveTheme(t){
+    try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+  }
+
+  // Toggle behavior: light <-> dark (we’ll keep it simple)
+  themeBtn.addEventListener("click", function(){
+    var cur = html.getAttribute("data-theme") || "system";
+    var effectiveDark = (cur === "dark") ? true : (cur === "light" ? false : systemIsDark());
+    var next = effectiveDark ? "light" : "dark";
+    saveTheme(next);
+    applyTheme(next);
+  });
+
+  // If user chooses system, update on system change
+  try{
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function(){
+      if ((html.getAttribute("data-theme") || "system") === "system"){
+        applyTheme("system");
+      }
+    });
+  }catch(e){}
+
+  // Apply initial theme
+  applyTheme(loadTheme());
+
+  // ---------- Course generator + scorecard ----------
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
   var HOLES = 18;
   var MINREQ = 2;
@@ -415,7 +536,6 @@
     "yellow": ["green"]
   };
 
-  // Par rules
   var HOLE1_PAR3_TO = { "yellow": true, "pink": true, "white": true };
 
   function pairKey(a,b){ return (a < b) ? (a+"|"+b) : (b+"|"+a); }
@@ -517,7 +637,6 @@
     return s;
   }
 
-  // Generate a valid course with unique throws (edges)
   function generateCourse(){
     var course = [];
     for (var i=0;i<=HOLES;i++) course[i]=null;
@@ -604,7 +723,6 @@
     return null;
   }
 
-  // ---------- Share link encoding ----------
   function decodeCourse(param){
     try{
       if (!param) return null;
@@ -647,13 +765,22 @@
     }
   }
 
-  // ---------- Persist (localStorage) ----------
+  // Persist (localStorage)
   var currentSeq = null;
   var activeHole = 1;
 
   function storageKeyForCourse(courseStr){
     return "bridgespark:v2:" + courseStr;
   }
+
+  var mainBody = document.getElementById("mainBody");
+  var btnGen = document.getElementById("btnGen");
+  var btnClear = document.getElementById("btnClear");
+  var btnCopy = document.getElementById("btnCopyLink");
+  var n1 = document.getElementById("n1");
+  var n2 = document.getElementById("n2");
+  var p1Head = document.getElementById("p1Head");
+  var p2Head = document.getElementById("p2Head");
 
   function getSelectEl(hole, player){
     return mainBody.querySelector('select[data-hole="'+hole+'"][data-player="'+player+'"]');
@@ -670,27 +797,13 @@
 
   function saveState(){
     if (!currentSeq || currentSeq.length !== HOLES) return;
-    var courseStr = currentSeq.join(",");
-    var key = storageKeyForCourse(courseStr);
-
+    var key = storageKeyForCourse(currentSeq.join(","));
     var scores = {};
     for (var hole=1; hole<=HOLES; hole++){
-      scores[hole] = {
-        p1: getSelectValue(hole,1),
-        p2: getSelectValue(hole,2)
-      };
+      scores[hole] = { p1: getSelectValue(hole,1), p2: getSelectValue(hole,2) };
     }
-
-    var state = {
-      n1: (n1.value || ""),
-      n2: (n2.value || ""),
-      activeHole: activeHole || 1,
-      scores: scores
-    };
-
-    try{
-      localStorage.setItem(key, JSON.stringify(state));
-    }catch(e){}
+    var state = { n1: (n1.value||""), n2: (n2.value||""), activeHole: activeHole||1, scores: scores };
+    try{ localStorage.setItem(key, JSON.stringify(state)); }catch(e){}
   }
 
   function loadState(){
@@ -700,9 +813,7 @@
       var raw = localStorage.getItem(key);
       if (!raw) return null;
       return JSON.parse(raw);
-    }catch(e){
-      return null;
-    }
+    }catch(e){ return null; }
   }
 
   function clearSavedStateForCurrentCourse(){
@@ -710,59 +821,6 @@
     var key = storageKeyForCourse(currentSeq.join(","));
     try{ localStorage.removeItem(key); }catch(e){}
   }
-
-  function recolorAllSelects(){
-    var sels = mainBody.querySelectorAll("select");
-    for (var i=0;i<sels.length;i++) colorDelta(sels[i]);
-  }
-
-  function bothSelected(hole){
-    return (getSelectValue(hole,1) !== "" && getSelectValue(hole,2) !== "");
-  }
-
-  function setActiveHole(hole, shouldScroll){
-    activeHole = hole;
-    var rows = mainBody.querySelectorAll("tr.holeRow");
-    for (var i=0;i<rows.length;i++) rows[i].classList.remove("active");
-    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
-    if (row){
-      row.classList.add("active");
-      if (shouldScroll){
-        try{ row.scrollIntoView({behavior:"smooth", block:"center"}); }catch(e){ row.scrollIntoView(); }
-      }
-    }
-    saveState();
-  }
-
-  function anyScoreEntered(){
-    for (var h=1; h<=HOLES; h++){
-      if (getSelectValue(h,1) !== "" || getSelectValue(h,2) !== "") return true;
-    }
-    return false;
-  }
-
-  function clearScores(alsoClearStorage){
-    for (var h=1; h<=HOLES; h++){
-      setSelectValue(h, 1, "");
-      setSelectValue(h, 2, "");
-    }
-    recolorAllSelects();
-    recalcTotals();
-    setActiveHole(1, true);
-
-    if (alsoClearStorage) clearSavedStateForCurrentCourse();
-    saveState();
-  }
-
-  // ---------- UI ----------
-  var mainBody = document.getElementById("mainBody");
-  var btnGen = document.getElementById("btnGen");
-  var btnClear = document.getElementById("btnClear");
-  var btnCopy = document.getElementById("btnCopyLink");
-  var n1 = document.getElementById("n1");
-  var n2 = document.getElementById("n2");
-  var p1Head = document.getElementById("p1Head");
-  var p2Head = document.getElementById("p2Head");
 
   function playerName(idx){
     return (idx===1 ? (n1.value||"P1") : (n2.value||"P2")).trim();
@@ -807,12 +865,8 @@
       colorDelta(sel);
       recalcTotals();
       saveState();
-
-      if (bothSelected(hole)){
-        setActiveHole(Math.min(HOLES, hole+1), true);
-      } else {
-        setActiveHole(hole, false);
-      }
+      if (bothSelected(hole)) setActiveHole(Math.min(HOLES, hole+1), true);
+      else setActiveHole(hole, false);
     });
 
     colorDelta(sel);
@@ -822,14 +876,53 @@
   function colorDelta(sel){
     sel.classList.remove("score-under","score-even","score-over");
     var raw = sel.value;
-    if (raw === ""){
-      sel.classList.add("score-even");
-      return;
-    }
+    if (raw === ""){ sel.classList.add("score-even"); return; }
     var d = parseInt(raw,10);
     if (d < 0) sel.classList.add("score-under");
     else if (d > 0) sel.classList.add("score-over");
     else sel.classList.add("score-even");
+  }
+
+  function bothSelected(hole){
+    return (getSelectValue(hole,1) !== "" && getSelectValue(hole,2) !== "");
+  }
+
+  function setActiveHole(hole, shouldScroll){
+    activeHole = hole;
+    var rows = mainBody.querySelectorAll("tr.holeRow");
+    for (var i=0;i<rows.length;i++) rows[i].classList.remove("active");
+    var row = mainBody.querySelector('tr.holeRow[data-hole="'+hole+'"]');
+    if (row){
+      row.classList.add("active");
+      if (shouldScroll){
+        try{ row.scrollIntoView({behavior:"smooth", block:"center"}); }catch(e){ row.scrollIntoView(); }
+      }
+    }
+    saveState();
+  }
+
+  function anyScoreEntered(){
+    for (var h=1; h<=HOLES; h++){
+      if (getSelectValue(h,1) !== "" || getSelectValue(h,2) !== "") return true;
+    }
+    return false;
+  }
+
+  function clearScores(alsoClearStorage){
+    for (var h=1; h<=HOLES; h++){
+      setSelectValue(h, 1, "");
+      setSelectValue(h, 2, "");
+    }
+    recolorAllSelects();
+    recalcTotals();
+    setActiveHole(1, true);
+    if (alsoClearStorage) clearSavedStateForCurrentCourse();
+    saveState();
+  }
+
+  function recolorAllSelects(){
+    var sels = mainBody.querySelectorAll("select");
+    for (var i=0;i<sels.length;i++) colorDelta(sels[i]);
   }
 
   function recalcTotals(){
@@ -919,12 +1012,10 @@
         setActiveHole(h, true);
       });
 
-      // Hole #
       var tdH = document.createElement("td");
       tdH.textContent = ""+hole;
       tr.appendChild(tdH);
 
-      // Throw cell: FROM → TO
       var tdThrow = document.createElement("td");
       var wrap = document.createElement("span");
       wrap.className = "twoPip";
@@ -937,12 +1028,10 @@
       tdThrow.appendChild(wrap);
       tr.appendChild(tdThrow);
 
-      // Par
       var tdP = document.createElement("td");
       tdP.textContent = ""+p;
       tr.appendChild(tdP);
 
-      // Player selects
       var td1 = document.createElement("td");
       td1.appendChild(makeDeltaSelect(hole, 1, p));
       tr.appendChild(td1);
@@ -958,7 +1047,6 @@
       }
     }
 
-    // top + footer pars
     document.getElementById("parFrontTop").textContent = parFront;
     document.getElementById("parBackTop").textContent  = parBack;
     document.getElementById("parTotalTop").textContent = parTotal;
@@ -989,56 +1077,12 @@
     }
   }
 
-  function setUrlForCourse(seq){
-    var url = new URL(window.location.href);
-    url.searchParams.set("c", encodeURIComponent(seq.join(",")));
-    history.replaceState(null, "", url.toString());
-  }
-
-  async function copyShareLink(){
-    var link = window.location.href;
-    try{
-      await navigator.clipboard.writeText(link);
-      alert("Share link copied!");
-    }catch(e){
-      prompt("Copy this link:", link);
-    }
-  }
-
-  function decodeCourse(param){
-    try{
-      if (!param) return null;
-      var raw = decodeURIComponent(param);
-      var parts = raw.split(",").map(function(s){ return s.trim().toLowerCase(); }).filter(Boolean);
-      if (parts.length !== HOLES) return null;
-
-      for (var i=0;i<parts.length;i++){
-        if (GOALS.indexOf(parts[i]) === -1) return null;
-      }
-      if (parts[8] !== "green") return null;
-      if (parts[17] !== "green") return null;
-      if (parts[0] === "green") return null;
-
-      for (var h=2; h<=HOLES; h++){
-        var prev = parts[h-2];
-        var next = parts[h-1];
-        if (prev === next) return null;
-        if (!allowed(prev, next)) return null;
-      }
-      return parts;
-    }catch(e){
-      return null;
-    }
-  }
-
   function generateAndRender(){
     if (anyScoreEntered()){
       var ok = confirm("Generate a new course? This will reset scores for this round.");
       if (!ok) return;
     }
-
     syncPlayerHeaders();
-
     var r = generateCourse();
     if (!r){
       alert("Could not generate a valid course. Try again.");
@@ -1049,12 +1093,10 @@
     clearScores(true);
   }
 
-  // Buttons
   btnGen.addEventListener("click", generateAndRender);
   btnClear.addEventListener("click", function(){ clearScores(true); });
   btnCopy.addEventListener("click", copyShareLink);
 
-  // init
   function init(){
     syncPlayerHeaders();
     var url = new URL(window.location.href);
