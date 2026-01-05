@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Disc Golf Course Randomizer + Scorecard</title>
+  <title>Bridges Park</title>
   <style>
     body{font-family:-apple-system,system-ui,sans-serif;margin:16px;line-height:1.35}
     button{font-size:16px;padding:10px 14px;margin:6px 6px 0 0}
@@ -20,6 +20,28 @@
     .bad{color:#c33;font-weight:800}
     .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     .grow{flex:1 1 180px}
+    .header{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand h1{margin:0;font-size:28px}
+    .subtitle{margin:2px 0 0 0}
+    .logoBox{
+      width:64px;height:64px;border-radius:14px;
+      border:1px dashed #bbb;display:flex;align-items:center;justify-content:center;
+      color:#777;font-size:12px;flex:0 0 auto;
+      background:#fafafa;
+    }
+    .infoGrid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(140px,1fr));
+      gap:8px;
+      margin-top:10px;
+    }
+    .infoCard{
+      border:1px solid #eee;border-radius:12px;padding:10px;background:#fff;
+      text-align:left;
+    }
+    .infoLabel{font-size:12px;color:#666;margin:0}
+    .infoValue{font-size:16px;font-weight:700;margin:2px 0 0 0}
 
     /* Goal "flag" colors */
     .goal{font-weight:700;text-transform:capitalize}
@@ -37,30 +59,68 @@
     .score-even{background:#f3f4f6}   /* neutral */
     .score-over{background:#fee2e2}   /* red-ish */
 
+    /* Small legend */
+    .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#444}
+    .dot{width:12px;height:12px;border-radius:4px;border:1px solid #ddd}
+    .dot-under{background:#d1fae5}
+    .dot-even{background:#f3f4f6}
+    .dot-over{background:#fee2e2}
+
     @media print{
       .no-print{display:none}
       select{border:none;-webkit-appearance:none;appearance:none;background:transparent}
       input[type=text]{border:none}
       .goalTag{border:1px solid #ddd}
+      .logoBox{border-style:solid}
+      body{margin:10px}
     }
   </style>
 </head>
 <body>
 
 <div class="no-print">
-  <h1>Disc Golf Course Randomizer</h1>
-  <div class="muted">
-    Rules: start not green • hole 9 & 18 = green • no consecutive repeats • directional rules • each goal ≥2 • no repeated throws (same from→to once).
-    <br>
-    Updates: tee→white is Par 3 • pink↔green disallowed.
+  <div class="header">
+    <div class="brand">
+      <div class="logoBox" title="Optional: replace this box with your logo (image) later">
+        LOGO
+      </div>
+      <div>
+        <h1>Bridges Park</h1>
+        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
+      </div>
+    </div>
+
+    <div style="margin-left:auto;min-width:220px;">
+      <div class="row" style="justify-content:flex-end;">
+        <button id="btnGen">Generate Course</button>
+        <button id="btnCopy">Copy Course + Scores</button>
+        <button id="btnReset">Reset Scores</button>
+        <button onclick="window.print()">Print / PDF</button>
+      </div>
+      <div id="status" class="muted" style="margin-top:6px;text-align:right;"></div>
+    </div>
   </div>
 
-  <div class="row" style="margin-top:10px;">
-    <button id="btnGen">Generate Course</button>
-    <button id="btnCopy">Copy Course + Scores</button>
-    <button id="btnReset">Reset Scores</button>
-    <button onclick="window.print()">Print / PDF</button>
-    <div id="status" class="muted" style="margin-left:auto;"></div>
+  <div class="infoGrid" aria-label="Course summary">
+    <div class="infoCard">
+      <p class="infoLabel">Holes</p>
+      <p class="infoValue">18</p>
+    </div>
+    <div class="infoCard">
+      <p class="infoLabel">Par (Front / Back / Total)</p>
+      <p class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></p>
+    </div>
+    <div class="infoCard">
+      <p class="infoLabel">Notes</p>
+      <p class="infoValue" style="font-size:14px;font-weight:600">Hole 9 & 18 finish green ✅</p>
+    </div>
+  </div>
+
+  <div class="legend" aria-label="Score color legend">
+    <div class="swatch"><span class="dot dot-under"></span> Under par</div>
+    <div class="swatch"><span class="dot dot-even"></span> Even par</div>
+    <div class="swatch"><span class="dot dot-over"></span> Over par</div>
   </div>
 </div>
 
@@ -421,6 +481,15 @@
     return td;
   }
 
+  function setTopParSummary(front, back, total){
+    var pf = document.getElementById("parFrontTop");
+    var pb = document.getElementById("parBackTop");
+    var pt = document.getElementById("parTotalTop");
+    if (pf) pf.textContent = front;
+    if (pb) pb.textContent = back;
+    if (pt) pt.textContent = total;
+  }
+
   function renderAll(seq){
     mainBody.innerHTML = "";
 
@@ -465,6 +534,7 @@
     document.getElementById("parFront").textContent = ""+parFront;
     document.getElementById("parBack").textContent  = ""+parBack;
     document.getElementById("parTotal").textContent = ""+parTotal;
+    setTopParSummary(parFront, parBack, parTotal);
 
     window.__seq = seq;
     window.__pars = pars;
@@ -521,7 +591,11 @@
     var name2 = playerName(2);
 
     var lines = [];
-    lines.push("Disc Golf Course (18 holes)");
+    lines.push("Bridges Park — Disc Golf");
+    lines.push("18-hole course");
+    lines.push("Par (Front/Back/Total): " + window.__parFront + "/" + window.__parBack + "/" + window.__parTotal);
+    lines.push("");
+
     for (var i=0;i<window.__seq.length;i++){
       var hole=i+1;
       var from=(i===0)?"tee":window.__seq[i-1];
@@ -536,12 +610,8 @@
         + " | " + name2 + ": " + (s2 || "-")
       );
     }
-    lines.push("Front 9 Par: "+window.__parFront);
-    lines.push("Back 9 Par: "+window.__parBack);
-    lines.push("Total Par: "+window.__parTotal);
     lines.push("");
-
-    lines.push("Scores:");
+    lines.push("Totals:");
     lines.push(name1 + ": Front " + document.getElementById("f1").textContent + " (" + document.getElementById("fd1").textContent + "), Back " + document.getElementById("b1").textContent + " (" + document.getElementById("bd1").textContent + "), Total " + document.getElementById("t1").textContent + " (" + document.getElementById("d1").textContent + ")");
     lines.push(name2 + ": Front " + document.getElementById("f2").textContent + " (" + document.getElementById("fd2").textContent + "), Back " + document.getElementById("b2").textContent + " (" + document.getElementById("bd2").textContent + "), Total " + document.getElementById("t2").textContent + " (" + document.getElementById("d2").textContent + ")");
 
@@ -574,6 +644,7 @@
   document.getElementById("btnCopy").addEventListener("click", copyAll);
   document.getElementById("btnReset").addEventListener("click", resetScores);
 
+  // Init
   syncPlayerHeaders();
   doGenerate();
 })();
