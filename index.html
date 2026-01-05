@@ -8,10 +8,16 @@
 <style>
 /* ======================================================
    PREMIUM MOBILE UI – COMPATIBLE WITH CURRENT app.js
-   (preserves ALL expected ids + DOM structure)
+   FULL COPY/PASTE (includes ALL fixes since last file)
+   Fixes:
+   - Theme toggle works (sun/moon + logo swap)
+   - Sticky header sticks (remove overflow:hidden parent)
+   - Background not cut off above header (html/body bg + overdraw)
+   - More interesting premium background
+   - Active row striping fixed (row capsule via tr::before)
+   - Selects not clipped + fixed width
    ====================================================== */
 
-/* Default = dark-ish base (we toggle by setting html[data-theme]) */
 :root{
   --bg:#070a0f;
   --text:#e5e7eb;
@@ -81,17 +87,25 @@ html[data-theme="dark"]{ color-scheme:dark; }
 
 html,body{ height:100%; }
 
+/* IMPORTANT: ensures background fills safe-area region */
+html, body { background: var(--bg); }
+
 *{ box-sizing:border-box; }
 
-/* Full-viewport background (prevents cut-off above title) */
+/* Premium interesting background (overdraws above top to avoid cut-off) */
 html::before{
   content:"";
   position:fixed;
-  inset:0;
+  left:0; right:0;
+  top:-60px; bottom:0; /* overdraw fixes iOS top cut */
   z-index:-1;
   background:
-    radial-gradient(900px 520px at 10% -10%, rgba(158,211,122,.25), transparent 60%),
-    radial-gradient(720px 420px at 95% 10%, rgba(125,186,121,.20), transparent 65%),
+    radial-gradient(900px 520px at 12% -10%, rgba(158,211,122,.28), transparent 60%),
+    radial-gradient(760px 520px at 92% 18%, rgba(90,130,255,.16), transparent 62%),
+    radial-gradient(700px 500px at 40% 105%, rgba(244,63,94,.10), transparent 60%),
+    radial-gradient(1200px 700px at 50% 40%, rgba(255,255,255,.06), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,.22), transparent 35%, rgba(0,0,0,.20)),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px),
     var(--bg);
 }
 
@@ -275,8 +289,8 @@ input[type=text]{
 /* ================= SCORECARD ================= */
 .card{
   margin-top:14px;
-  padding:0;        /* sticky header flush */
-  overflow:hidden;  /* clean rounded corners */
+  padding:0;
+  overflow:visible; /* CRITICAL: sticky works only if parents don't clip */
 }
 
 /* sticky header */
@@ -286,7 +300,8 @@ input[type=text]{
   z-index:60;
   padding:12px;
   background:var(--card);
-  border-bottom:1px solid var(--border);
+  border:1px solid var(--border);
+  border-radius:18px;
   box-shadow:var(--shadow2);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -341,7 +356,7 @@ table{
   border-collapse:separate;
   border-spacing:0 12px;
   table-layout:fixed;
-  padding:0 12px 12px;
+  padding:12px 0 12px; /* keep breathing room under sticky */
 }
 
 /* column lock (alignment) */
@@ -355,34 +370,53 @@ th,td{
   padding:14px 10px;
   text-align:center;
   white-space:nowrap;
-
-  /* IMPORTANT: don't clip selects */
-  overflow:visible;
+  overflow:visible; /* IMPORTANT: don't clip selects */
 }
 
-/* hole capsules */
+/* ===== Row capsule (fixes striping) ===== */
+tbody tr.holeRow{ position:relative; }
+
+tbody tr.holeRow::before{
+  content:"";
+  position:absolute;
+  left:0; right:0;
+  top:0; bottom:0;
+  background: var(--rowBg);
+  border:1px solid var(--rowBorder);
+  border-radius:22px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset;
+  z-index:0;
+}
+
+/* put cell content above capsule */
 tbody tr.holeRow td{
-  background:var(--rowBg);
-  border-top:1px solid var(--rowBorder);
-  border-bottom:1px solid var(--rowBorder);
-}
-tbody tr.holeRow td:first-child{
-  border-left:1px solid var(--rowBorder);
-  border-radius:22px 0 0 22px;
-}
-tbody tr.holeRow td:last-child{
-  border-right:1px solid var(--rowBorder);
-  border-radius:0 22px 22px 0;
+  position:relative;
+  z-index:1;
+  background: transparent;
+  border: none;
 }
 
-/* stronger active row green */
-tr.holeRow.active td{
+/* Active row highlight clean (no vertical bands) */
+tbody tr.holeRow.active::before{
   background:
-    linear-gradient(90deg, var(--accentSoft), rgba(255,255,255,0) 55%),
+    linear-gradient(90deg, var(--accentSoft), rgba(255,255,255,0) 60%),
     var(--rowBg);
+  border-color: rgba(158,211,122,0.25);
 }
-tr.holeRow.active td:first-child{
-  box-shadow: inset 5px 0 0 var(--activeBorder);
+
+/* Strong left accent bar */
+tbody tr.holeRow.active::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:6px;
+  border-top-left-radius:22px;
+  border-bottom-left-radius:22px;
+  background: var(--activeBorder);
+  z-index:1;
+  opacity:0.95;
 }
 
 /* throw pills */
@@ -422,7 +456,7 @@ tr.holeRow.active td:first-child{
   pointer-events:none;
 }
 
-.goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); }
+.goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); text-transform:lowercase; }
 .goal-white{ background:#fff; color:#111; border-color: rgba(0,0,0,.10); }
 .goal-blue{ background:#1f6feb; color:#fff; }
 .goal-orange{ background:#ff8a00; color:#111; border-color: rgba(0,0,0,.10); }
@@ -431,10 +465,10 @@ tr.holeRow.active td:first-child{
 .goal-green{ background:#16a34a; color:#fff; }
 .goal-yellow{ background:#ffd400; color:#111; border-color: rgba(0,0,0,.10); }
 
-/* score selects */
+/* score selects (fixed width looks better + avoids clipping) */
 select{
-  width:100%;
-  max-width:92px;
+  width:72px;
+  max-width:72px;
   padding:10px;
   border-radius:16px;
   border:1px solid var(--border);
@@ -478,6 +512,7 @@ tfoot tr.totalRow td{
   background:var(--totalRow);
   border-top:1px solid var(--rowBorder);
   border-bottom:1px solid var(--rowBorder);
+  border-radius:0; /* keep clean */
 }
 
 /* toast */
@@ -516,7 +551,7 @@ tfoot tr.totalRow td{
     </div>
   </div>
 
-  <button id="themeToggle" class="themeToggleBtn control" aria-label="Toggle theme">
+  <button id="themeToggle" class="themeToggleBtn control" type="button" aria-label="Toggle theme">
     <img id="themeIcon" src="moon.png" alt="Theme icon">
   </button>
 </div>
@@ -537,7 +572,7 @@ tfoot tr.totalRow td{
   </div>
 </div>
 
-<!-- LEGEND (outside card) -->
+<!-- LEGEND (outside scorecard) -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
@@ -545,11 +580,11 @@ tfoot tr.totalRow td{
 </div>
 
 <!-- BUTTONS -->
-<button id="btnGen" class="control">Generate New Course</button>
+<button id="btnGen" class="control" type="button">Generate New Course</button>
 
 <div class="btnRowTwo">
-  <button id="btnClear" class="btnSecondary control">Clear Scores</button>
-  <button id="btnCopyLink" class="btnSecondary control">Copy Share Link</button>
+  <button id="btnClear" class="btnSecondary control" type="button">Clear Scores</button>
+  <button id="btnCopyLink" class="btnSecondary control" type="button">Copy Share Link</button>
 </div>
 
 <!-- NAMES -->
@@ -561,13 +596,12 @@ tfoot tr.totalRow td{
 </div>
 
 <!-- SCORECARD -->
-<div class="card control">
+<div class="card">
   <div class="scoreSticky">
     <div class="colHeader" aria-hidden="true">
       <div>#</div>
       <div>Throw</div>
       <div>Par</div>
-      <!-- app.js may overwrite these -->
       <div id="p1HeadSticky">P1</div>
       <div id="p2HeadSticky">P2</div>
     </div>
@@ -580,18 +614,13 @@ tfoot tr.totalRow td{
 
   <table>
     <colgroup><col><col><col><col><col></colgroup>
-
-    <!-- keep for semantics; hidden -->
     <thead style="display:none;">
-      <tr>
-        <th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th>
-      </tr>
+      <tr><th>#</th><th>Throw</th><th>Par</th><th>P1</th><th>P2</th></tr>
     </thead>
 
     <tbody id="mainBody"></tbody>
 
     <tfoot>
-      <!-- app.js expects this row and ids -->
       <tr id="backRow">
         <th colspan="2" class="left">Back 9</th>
         <th id="parBackCell">–</th>
@@ -631,7 +660,7 @@ tfoot tr.totalRow td{
 
 <div id="toast" class="toast">Saved</div>
 
-<!-- THEME TOGGLE (works even if app.js doesn’t handle theme) -->
+<!-- THEME TOGGLE (capture + stop conflicts) -->
 <script>
 (function(){
   const root = document.documentElement;
@@ -643,7 +672,7 @@ tfoot tr.totalRow td{
   function prefersDark(){
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
   }
-  function savedTheme(){
+  function getSaved(){
     const t = localStorage.getItem("bp_theme");
     return (t === "dark" || t === "light") ? t : null;
   }
@@ -657,29 +686,34 @@ tfoot tr.totalRow td{
     }
   }
 
-  const init = savedTheme() || (prefersDark() ? "dark" : "light");
-  apply(init);
+  // init
+  apply(getSaved() || (prefersDark() ? "dark" : "light"));
 
-  // If user hasn't chosen a theme, follow system changes
+  // follow system if user hasn't chosen
   if (window.matchMedia){
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = () => { if (!savedTheme()) apply(prefersDark() ? "dark" : "light"); };
+    const handler = () => { if (!getSaved()) apply(prefersDark() ? "dark" : "light"); };
     if (mq.addEventListener) mq.addEventListener("change", handler);
     else if (mq.addListener) mq.addListener(handler);
   }
 
+  // capture click early + stop conflicts
   if (btn){
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
       const current = root.getAttribute("data-theme") || (prefersDark() ? "dark" : "light");
       const next = current === "dark" ? "light" : "dark";
       localStorage.setItem("bp_theme", next);
       apply(next);
-    });
+    }, true);
   }
 })();
 </script>
 
 <!-- iOS cache buster -->
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
