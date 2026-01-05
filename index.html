@@ -5,179 +5,304 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Disc Golf Course Randomizer</title>
   <style>
-    body {
-      font-family: -apple-system, system-ui, Segoe UI, Roboto, sans-serif;
-      margin: 16px;
-    }
-    button {
-      font-size: 16px;
-      padding: 10px 14px;
-      margin-right: 6px;
-      margin-bottom: 6px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 6px;
-      text-align: left;
-    }
-    th { background: #f5f5f5; }
-    .ok { color: #0a7; font-weight: bold; }
-    .bad { color: #c33; font-weight: bold; }
+    body { font-family: -apple-system, system-ui, Segoe UI, Roboto, sans-serif; margin: 16px; line-height: 1.35; }
+    button { font-size: 16px; padding: 10px 14px; margin: 6px 6px 0 0; }
     .muted { color: #666; font-size: 13px; }
-
-    @media print {
-      .no-print { display: none; }
-      body { margin: 10mm; }
-    }
+    .ok { color: #0a7; font-weight: 700; }
+    .bad { color: #c33; font-weight: 800; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border-bottom: 1px solid #ddd; padding: 7px 6px; text-align: left; }
+    th { background: #f5f5f5; }
+    code { background: #f3f3f3; padding: 2px 6px; border-radius: 8px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 12px; margin-top: 12px; }
+    @media print { .no-print { display:none; } body { margin: 10mm; } }
   </style>
 </head>
 <body>
 
 <div class="no-print">
   <h1>Disc Golf Course Randomizer</h1>
-  <p class="muted">
-    Rules enforced: 18 holes • hole 9 & 18 = green • start not green • no repeats • directional rules • each goal ≥ 2
-  </p>
+  <div class="muted">
+    Enforces: start not green • hole 9 & 18 = green • no consecutive repeats • directional rules • each goal ≥ 2.
+  </div>
 
-  <button id="gen">Generate Course</button>
-  <button id="copy">Copy Course</button>
-  <button onclick="window.print()">Print / Save PDF</button>
-  <div id="status" class="muted"></div>
+  <div>
+    <button id="gen">Generate Course</button>
+    <button id="copy">Copy Course</button>
+    <button id="print">Print / Save as PDF</button>
+    <button id="loadExample">Load Your Example</button>
+  </div>
+
+  <div id="status" class="muted" style="margin-top:8px;"></div>
+
+  <div class="card muted">
+    Tip: If you just updated <code>index.html</code> on GitHub Pages and still see errors,
+    iPhone Safari may be caching. Open in a Private tab or add <code>?v=2</code> to the end of the URL.
+  </div>
 </div>
 
 <table>
-  <thead>
-    <tr><th>Hole</th><th>Goal</th></tr>
-  </thead>
+  <thead><tr><th>Hole</th><th>Goal</th></tr></thead>
   <tbody id="course"></tbody>
 </table>
 
 <script>
 (function () {
-
   var GOALS = ["white","orange","blue","pink","red","green","yellow"];
-  var FIXED = {9:"green",18:"green"};
-  var MIN = 2;
+  var MINREQ = 2;
+  var HOLES = 18;
+  var FIXED = { 9: "green", 18: "green" };
 
-  var BLOCK = {
-    white:[],
-    orange:["pink","blue"],
-    blue:["orange","red"],
-    pink:["orange","red"],
-    red:["blue","pink"],
-    green:["yellow"],
-    yellow:["green"]
+  // prev -> next disallowed
+  var DIS = {
+    "white":  [],
+    "orange": ["pink","blue"],
+    "blue":   ["orange","red"],
+    "pink":   ["orange","red"],
+    "red":    ["blue","pink"],
+    "green":  ["yellow"],
+    "yellow": ["green"]
   };
 
-  function bad(prev,next){
-    if(!prev) return false;
-    if(prev===next) return true;
-    return BLOCK[prev].indexOf(next)!==-1;
+  // Your example (already satisfies all constraints)
+  var EXAMPLE = ["red","orange","yellow","blue","white","pink","yellow","orange","green","blue","pink","white","orange","red","yellow","white","blue","green"];
+
+  function el(id){ return document.getElementById(id); }
+
+  function contains(arr, v){
+    for (var i=0;i<arr.length;i++) if (arr[i]===v) return true;
+    return false;
   }
 
-  function shuffle(a){
-    for(var i=a.length-1;i>0;i--){
+  function shuffle(arr){
+    for (var i=arr.length-1;i>0;i--){
       var j=Math.floor(Math.random()*(i+1));
-      var t=a[i]; a[i]=a[j]; a[j]=t;
+      var t=arr[i]; arr[i]=arr[j]; arr[j]=t;
     }
-    return a;
+    return arr;
+  }
+
+  function allowed(prev, next){
+    if (!prev) return true;
+    if (prev === next) return false; // no consecutive repeats
+    var bad = DIS[prev] || [];
+    return !contains(bad, next);
+  }
+
+  function initCounts(){
+    var c = {};
+    for (var i=0;i<GOALS.length;i++) c[GOALS[i]] = 0;
+    return c;
+  }
+
+  function futureFixedCount(goal, fromPos){
+    var f = 0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (FIXED[h] === goal) f++;
+    }
+    return f;
+  }
+
+  function remainingUnfixedSlots(fromPos, course){
+    var slots = 0;
+    for (var h=fromPos; h<=HOLES; h++){
+      if (!FIXED[h] && course[h] === null) slots++;
+    }
+    return slots;
+  }
+
+  function minNeeded(fromPos, course, used){
+    var need = 0;
+    for (var i=0;i<GOALS.length;i++){
+      var g = GOALS[i];
+      var futureFixed = futureFixedCount(g, fromPos);
+      var missing = MINREQ - (used[g] + futureFixed);
+      if (missing > 0) need += missing;
+    }
+    return need;
+  }
+
+  function feasible(fromPos, course, used){
+    return minNeeded(fromPos, course, used) <= remainingUnfixedSlots(fromPos, course);
+  }
+
+  function candidateScore(goal, used, fromPos){
+    var futureFixed = futureFixedCount(goal, fromPos);
+    var willHave = used[goal] + futureFixed;
+    if (willHave < MINREQ) return -100 + used[goal];
+    return used[goal];
   }
 
   function generate(){
-    var course = new Array(19).fill(null);
-    var used = {};
-    GOALS.forEach(g=>used[g]=0);
-    for(var h in FIXED) course[h]=FIXED[h];
+    var course = [];
+    for (var i=0;i<=HOLES;i++) course[i] = null;
 
-    function futureNeed(pos){
-      var need=0;
-      GOALS.forEach(function(g){
-        var future=0;
-        for(var k=pos;k<=18;k++) if(FIXED[k]===g) future++;
-        var missing=MIN-(used[g]+future);
-        if(missing>0) need+=missing;
-      });
-      var slots=0;
-      for(var k2=pos;k2<=18;k2++) if(!course[k2]) slots++;
-      return need<=slots;
+    for (var h in FIXED){
+      if (FIXED.hasOwnProperty(h)){
+        course[parseInt(h,10)] = FIXED[h];
+      }
     }
 
+    var used = initCounts();
+
     function bt(pos){
-      if(pos>18){
-        return GOALS.every(g=>used[g]>=MIN);
+      if (pos > HOLES){
+        for (var i=0;i<GOALS.length;i++){
+          if (used[GOALS[i]] < MINREQ) return false;
+        }
+        return true;
       }
 
-      if(course[pos]){
-        if(pos===1 && course[pos]==="green") return false;
-        if(bad(course[pos-1],course[pos])) return false;
-        used[course[pos]]++;
-        if(!futureNeed(pos+1)){ used[course[pos]]--; return false; }
-        if(bt(pos+1)) return true;
-        used[course[pos]]--;
+      if (course[pos] !== null){
+        var v = course[pos];
+        if (pos === 1 && v === "green") return false;
+        var prev = (pos>1) ? course[pos-1] : null;
+        if (!allowed(prev, v)) return false;
+
+        used[v] += 1;
+        if (!feasible(pos+1, course, used)) { used[v] -= 1; return false; }
+
+        if (bt(pos+1)) return true;
+
+        used[v] -= 1;
         return false;
       }
 
-      var cand=[];
-      GOALS.forEach(function(g){
-        if(pos===1 && g==="green") return;
-        if(!bad(course[pos-1],g)) cand.push(g);
-      });
-      shuffle(cand);
+      var prev2 = (pos>1) ? course[pos-1] : null;
 
-      for(var i=0;i<cand.length;i++){
-        var g=cand[i];
-        if(course[pos+1] && bad(g,course[pos+1])) continue;
-        course[pos]=g; used[g]++;
-        if(futureNeed(pos+1) && bt(pos+1)) return true;
-        used[g]--; course[pos]=null;
+      var cands = [];
+      for (var i2=0;i2<GOALS.length;i2++){
+        var g2 = GOALS[i2];
+        if (pos === 1 && g2 === "green") continue;
+        if (!allowed(prev2, g2)) continue;
+        if (course[pos+1] !== null && !allowed(g2, course[pos+1])) continue;
+        cands.push(g2);
+      }
+
+      shuffle(cands);
+      cands.sort(function(a,b){
+        return candidateScore(a, used, pos+1) - candidateScore(b, used, pos+1);
+      });
+
+      for (var ci=0; ci<cands.length; ci++){
+        var pick = cands[ci];
+        course[pos] = pick;
+        used[pick] += 1;
+
+        if (feasible(pos+1, course, used) && bt(pos+1)) return true;
+
+        used[pick] -= 1;
+        course[pos] = null;
       }
       return false;
     }
 
-    for(var tries=0;tries<200;tries++){
-      for(var i2=1;i2<=18;i2++) if(!FIXED[i2]) course[i2]=null;
-      GOALS.forEach(g=>used[g]=0);
-      if(bt(1)) return course.slice(1);
+    for (var attempt=1; attempt<=2000; attempt++){
+      for (var p=1; p<=HOLES; p++){
+        if (!FIXED[p]) course[p] = null;
+      }
+      used = initCounts();
+
+      if (bt(1)){
+        var seq = [];
+        for (var k=1; k<=HOLES; k++) seq.push(course[k]);
+        var counts = initCounts();
+        for (var k2=0; k2<seq.length; k2++) counts[seq[k2]] += 1;
+        return { seq: seq, counts: counts, attempt: attempt };
+      }
     }
     return null;
   }
 
-  function render(seq){
-    var tbody=document.getElementById("course");
-    tbody.innerHTML="";
-    if(!seq){
-      document.getElementById("status").innerHTML='<span class="bad">Could not generate course</span>';
-      return;
+  function validateSeq(seq){
+    if (!seq || seq.length !== HOLES) return "Sequence length is not 18.";
+    if (seq[0] === "green") return "Hole 1 cannot be green.";
+    if (seq[8] !== "green") return "Hole 9 must be green.";
+    if (seq[17] !== "green") return "Hole 18 must be green.";
+
+    var c = initCounts();
+    for (var i=0;i<seq.length;i++) c[seq[i]] += 1;
+    for (var g=0; g<GOALS.length; g++){
+      if (c[GOALS[g]] < MINREQ) return "Goal '" + GOALS[g] + "' appears only " + c[GOALS[g]] + " time(s).";
     }
-    document.getElementById("status").innerHTML='<span class="ok">Generated!</span>';
-    seq.forEach(function(g,i){
-      var tr=document.createElement("tr");
-      tr.innerHTML="<td>"+(i+1)+"</td><td>"+g+((i+1===9||i+1===18)?" ✅":"")+"</td>";
-      tbody.appendChild(tr);
-    });
-    window.lastSeq=seq;
+
+    for (var i2=0; i2<HOLES-1; i2++){
+      if (!allowed(seq[i2], seq[i2+1])) return "Illegal transition: " + seq[i2] + " → " + seq[i2+1] + " (holes " + (i2+1) + "→" + (i2+2) + ").";
+    }
+    return null;
   }
 
-  document.getElementById("gen").onclick=function(){
-    render(generate());
-  };
+  function renderSeq(seq, counts, statusHtml){
+    var tbody = el("course");
+    tbody.innerHTML = "";
+    for (var i=0;i<seq.length;i++){
+      var hole = i+1;
+      var g = seq[i];
+      var mark = (hole===9 || hole===18) ? " ✅" : "";
+      var tr = document.createElement("tr");
+      tr.innerHTML = "<td>"+hole+"</td><td>"+g+mark+"</td>";
+      tbody.appendChild(tr);
+    }
 
-  document.getElementById("copy").onclick=function(){
-    if(!window.lastSeq) return;
-    var t=[];
-    window.lastSeq.forEach((g,i)=>t.push("Hole "+(i+1)+": "+g));
-    var txt=t.join("\\n");
-    if(navigator.clipboard) navigator.clipboard.writeText(txt);
-    else window.prompt("Copy:",txt);
-  };
+    var parts = [];
+    var sorted = GOALS.slice().sort();
+    for (var k=0;k<sorted.length;k++){
+      parts.push("<code>" + sorted[k] + "</code>:" + counts[sorted[k]]);
+    }
+    el("status").innerHTML = statusHtml + "<br><span class='muted'>Counts: " + parts.join(" &nbsp; ") + "</span>";
+    window.__last = seq;
+  }
 
-  render(generate());
+  function generateAndRender(){
+    try {
+      var r = generate();
+      if (!r){
+        el("status").innerHTML = "<span class='bad'>Could not generate a valid course.</span> (But your example proves at least one exists.)";
+        window.__last = null;
+        return;
+      }
+      renderSeq(r.seq, r.counts, "<span class='ok'>Generated!</span> (attempt " + r.attempt + ")");
+    } catch (e) {
+      el("status").innerHTML = "<span class='bad'>Error:</span> " + (e && e.message ? e.message : String(e));
+    }
+  }
 
+  function loadExample(){
+    var err = validateSeq(EXAMPLE);
+    if (err){
+      el("status").innerHTML = "<span class='bad'>Your example failed validation:</span> " + err;
+      return;
+    }
+    var counts = initCounts();
+    for (var i=0;i<EXAMPLE.length;i++) counts[EXAMPLE[i]] += 1;
+    renderSeq(EXAMPLE, counts, "<span class='ok'>Loaded your example (valid).</span>");
+  }
+
+  function copyCourse(){
+    if (!window.__last) return;
+    var lines = [];
+    for (var i=0;i<window.__last.length;i++){
+      lines.push("Hole " + (i+1) + ": " + window.__last[i]);
+    }
+    var txt = lines.join("\\n");
+
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        el("status").innerHTML = "<span class='ok'>Copied.</span>";
+      }).catch(function(){
+        window.prompt("Copy this:", txt);
+      });
+    } else {
+      window.prompt("Copy this:", txt);
+    }
+  }
+
+  el("gen").addEventListener("click", generateAndRender);
+  el("copy").addEventListener("click", copyCourse);
+  el("print").addEventListener("click", function(){ window.print(); });
+  el("loadExample").addEventListener("click", loadExample);
+
+  generateAndRender();
 })();
 </script>
 
