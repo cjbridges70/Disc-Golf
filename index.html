@@ -75,13 +75,27 @@
   html, body{ background:var(--bg); }
   *{ box-sizing:border-box; }
 
-  /* Premium background (with top overdraw so it never cuts off above title) */
-  html::before{
+  body{
+    margin:0;
+    position:relative;        /* important for iOS background fix */
+    background:transparent;   /* background comes from body::before */
+    padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom)) 16px;
+    font-family:-apple-system,system-ui,sans-serif;
+    color:var(--text);
+    line-height:1.25;
+  }
+
+  /* Premium background (iOS Safari-safe; prevents "dark slab" sliding) */
+  body::before{
     content:"";
     position:fixed;
-    left:0; right:0;
-    top:-70px; bottom:0;
+    inset:-120px 0 0 0; /* extra above so it never "cuts off" */
     z-index:-1;
+    pointer-events:none;
+
+    transform: translate3d(0,0,0);
+    will-change: transform;
+
     background:
       radial-gradient(900px 520px at 12% -10%, rgba(158,211,122,.28), transparent 60%),
       radial-gradient(760px 520px at 92% 18%, rgba(90,130,255,.16), transparent 62%),
@@ -90,14 +104,6 @@
       linear-gradient(180deg, rgba(0,0,0,.22), transparent 35%, rgba(0,0,0,.20)),
       repeating-linear-gradient(135deg, rgba(255,255,255,.02) 0 2px, transparent 2px 6px),
       var(--bg);
-  }
-
-  body{
-    margin:0;
-    padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom)) 16px;
-    font-family:-apple-system,system-ui,sans-serif;
-    color:var(--text);
-    line-height:1.25;
   }
 
   .control{
@@ -129,7 +135,7 @@
     display:block;
     border:none !important;
     outline:none !important;
-    box-shadow:none !important;   /* remove border-look */
+    box-shadow:none !important;
     background:transparent;
     border-radius:14px;
     flex:0 0 auto;
@@ -148,7 +154,7 @@
     letter-spacing:-.1px;
     white-space:nowrap;
     overflow:hidden;
-    text-overflow:clip; /* remove ellipsis */
+    text-overflow:clip; /* no ellipsis */
   }
 
   .themeToggleBtn{
@@ -261,10 +267,8 @@
   }
 
   /* ===== Scorecard ===== */
-  .cardOuter{
-    margin-top:14px;
-    overflow:visible; /* sticky-safe */
-  }
+  .cardOuter{ margin-top:14px; overflow:visible; }
+
   .scoreSticky{
     position:sticky;
     top:8px;
@@ -284,10 +288,10 @@
     backdrop-filter: blur(12px);
   }
 
-  /* Key widths: steal from Throw, widen P1/P2 */
+  /* Slightly more room for P1/P2 */
   .colHeader{
     display:grid;
-    grid-template-columns:10% 34% 10% 23% 23%;
+    grid-template-columns:10% 32% 10% 24% 24%;
     align-items:center;
     padding:14px 10px;
     background:var(--thead);
@@ -332,9 +336,7 @@
     overflow:hidden;
     border-radius:18px;
   }
-  .tablePad{
-    padding:0 12px 12px;
-  }
+  .tablePad{ padding:0 12px 12px; }
 
   table{
     width:100%;
@@ -345,16 +347,16 @@
   }
 
   colgroup col:nth-child(1){ width:10%; }
-  colgroup col:nth-child(2){ width:34%; }
+  colgroup col:nth-child(2){ width:32%; }
   colgroup col:nth-child(3){ width:10%; }
-  colgroup col:nth-child(4){ width:23%; }
-  colgroup col:nth-child(5){ width:23%; }
+  colgroup col:nth-child(4){ width:24%; }
+  colgroup col:nth-child(5){ width:24%; }
 
   th, td{
     padding:14px 10px;
     text-align:center;
     white-space:nowrap;
-    overflow:hidden; /* keep inside capsule */
+    overflow:hidden;
   }
 
   tbody tr.holeRow td,
@@ -378,14 +380,9 @@
     border-bottom-right-radius:22px;
   }
 
-  tbody tr.holeRow.active td{
-    background:var(--accentSoft);
-  }
-  tbody tr.holeRow.active td:first-child{
-    box-shadow: inset 6px 0 0 var(--accent);
-  }
+  tbody tr.holeRow.active td{ background:var(--accentSoft); }
+  tbody tr.holeRow.active td:first-child{ box-shadow: inset 6px 0 0 var(--accent); }
 
-  /* Throw pills centered */
   .twoPip{
     display:inline-flex;
     align-items:center;
@@ -399,7 +396,6 @@
     font-size:12px;
   }
 
-  /* Flag pills: equal sizing */
   .goalTag{
     position:relative;
     height:20px;
@@ -433,34 +429,38 @@
   .goal-green{ background:#16a34a; color:#fff; }
   .goal-yellow{ background:#ffd400; color:#111; border-color: rgba(0,0,0,.10); }
 
-  /* Dropdowns: sized to stay inside capsule on iPhone */
+  /* Score dropdowns (bigger + easier to tap) */
   tbody tr.holeRow td:nth-child(4),
   tbody tr.holeRow td:nth-child(5){
     padding-left:6px;
     padding-right:6px;
-    overflow:visible; /* allow control to render cleanly */
+    overflow:visible; /* allow native control */
   }
 
   select.scoreSel{
     width:100%;
-    max-width:58px;
-    min-width:48px;
-    padding:10px 6px;
-    border-radius:14px;
+    max-width:74px;
+    min-width:64px;
+    height:40px;
+    padding:10px 10px;
+    border-radius:16px;
+
     border:1px solid var(--border);
-    background:rgba(255,255,255,.06);
+    background:rgba(255,255,255,.08);
     color:var(--text);
+
+    font-size:16px;
     font-weight:950;
     text-align:center;
-    -webkit-appearance:none;
-    appearance:none;
+
+    -webkit-appearance:auto;
+    appearance:auto;
   }
 
   .score-under{ background:var(--underBg) !important; }
   .score-even{ background:var(--evenBg) !important; }
   .score-over{ background:var(--overBg) !important; }
 
-  /* Summary cells */
   .sumCell{
     display:flex;
     flex-direction:column;
@@ -548,7 +548,7 @@
   </div>
 </div>
 
-<!-- Legend (stays outside the scorecard card) -->
+<!-- Legend -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
