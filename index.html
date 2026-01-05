@@ -85,7 +85,6 @@
     line-height:1.25;
   }
 
-  /* Premium background (iOS Safari-safe; prevents “dark slab” shifting) */
   body::before{
     content:"";
     position:fixed;
@@ -152,7 +151,7 @@
     letter-spacing:-.1px;
     white-space:nowrap;
     overflow:hidden;
-    text-overflow:clip; /* no ellipsis */
+    text-overflow:clip;
   }
 
   .themeToggleBtn{
@@ -286,7 +285,6 @@
     backdrop-filter: blur(12px);
   }
 
-  /* Columns: give Throw enough width so pills don't get clipped */
   .colHeader{
     display:grid;
     grid-template-columns:10% 32% 10% 24% 24%;
@@ -300,7 +298,6 @@
   }
   .colHeader > div{ text-align:center; }
 
-  /* Progress under headers */
   .progressWrap{
     display:flex;
     align-items:center;
@@ -354,17 +351,24 @@
     padding:14px 10px;
     text-align:center;
     white-space:nowrap;
-    overflow:hidden; /* default */
+    overflow:hidden;
   }
 
-  /* ✅ FIX: allow flag pills to render fully (no clipping) */
-  tbody tr.holeRow td:nth-child(2){
-    overflow:visible;             /* stop cutting off pill edges */
-    padding-left:6px;
-    padding-right:6px;
+  /* ✅ Bold hole numbers */
+  tbody tr.holeRow td:nth-child(1){
+    font-weight:950;
   }
-  tbody tr.holeRow td:nth-child(2) .twoPip{
-    gap:10px;
+
+  /* ✅ more space between Par and flags:
+     give Throw cell a touch more internal breathing room and widen the gap */
+  tbody tr.holeRow td:nth-child(2){
+    overflow:visible;
+    padding-left:6px;
+    padding-right:14px;   /* extra right space before Par */
+  }
+
+  tbody tr.holeRow td:nth-child(3){
+    padding-left:12px;    /* extra left space after Throw */
   }
 
   tbody tr.holeRow td,
@@ -395,6 +399,7 @@
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    gap:12px;     /* a bit more breathing room between pills + arrow */
     width:100%;
   }
   .arrow{
@@ -417,6 +422,7 @@
     justify-content:center;
     border:1px solid rgba(255,255,255,.14);
     box-shadow: 0 1px 0 rgba(255,255,255,.10) inset, 0 10px 18px rgba(0,0,0,.10);
+    text-transform:capitalize; /* ✅ Capitalize color names */
   }
   .goalTag::after{
     content:"";
@@ -428,7 +434,7 @@
     pointer-events:none;
   }
 
-  .goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); text-transform:lowercase; }
+  .goal-tee{ background:#0b0d10; color:#fff; border-color: rgba(255,255,255,.14); text-transform:capitalize; }
   .goal-white{ background:#fff; color:#111; border-color: rgba(0,0,0,.10); }
   .goal-blue{ background:#1f6feb; color:#fff; }
   .goal-orange{ background:#ff8a00; color:#111; border-color: rgba(0,0,0,.10); }
@@ -469,7 +475,7 @@
   .score-even{ background:var(--evenBg) !important; }
   .score-over{ background:var(--overBg) !important; }
 
-  /* Summary cells */
+  /* Summary */
   .sumCell{
     display:flex;
     flex-direction:column;
@@ -490,10 +496,8 @@
     color:var(--muted);
     font-weight:900;
   }
-
   .left{ text-align:left; }
 
-  /* ✅ Make Back 9 match Front 9 styling; Total stays special */
   tr.sumRowFooter th,
   tr.sumRowFooter td{
     background:var(--rowBg);
@@ -543,7 +547,6 @@
 
 <body>
 
-<!-- Header -->
 <div class="header">
   <div class="headerLeft">
     <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo" />
@@ -559,7 +562,6 @@
   </button>
 </div>
 
-<!-- Info -->
 <div class="infoGrid">
   <div class="infoCard control">
     <div class="infoLabel">Holes</div>
@@ -575,14 +577,12 @@
   </div>
 </div>
 
-<!-- Legend -->
 <div class="legend">
   <div class="swatch"><span class="dot dot-under"></span> Under</div>
   <div class="swatch"><span class="dot dot-even"></span> Even</div>
   <div class="swatch"><span class="dot dot-over"></span> Over</div>
 </div>
 
-<!-- Buttons -->
 <button id="btnGen" class="control" type="button">Generate New Course</button>
 
 <div class="btnRowTwo">
@@ -590,7 +590,6 @@
   <button id="btnCopyLink" class="btnSecondary control" type="button">Copy Share Link</button>
 </div>
 
-<!-- Names -->
 <div class="nameBlock control">
   <div class="row">
     <div class="grow"><input id="n1" type="text" placeholder="Player 1 name" /></div>
@@ -598,7 +597,6 @@
   </div>
 </div>
 
-<!-- Scorecard -->
 <div class="cardOuter">
   <div class="scoreSticky">
     <div class="scoreStickyInner">
@@ -628,7 +626,6 @@
         <tbody id="mainBody"></tbody>
 
         <tfoot>
-          <!-- ✅ Back 9 now matches Front 9 “card” styling -->
           <tr id="backRow" class="sumRowFooter">
             <th colspan="2" class="left">Back 9</th>
             <th id="parBackCell">–</th>
