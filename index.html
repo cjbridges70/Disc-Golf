@@ -1,571 +1,422 @@
 <!doctype html>
 <html lang="en" data-theme="system">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Bridges Park</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bridges Park</title>
 
-  <style>
-    :root{
-      --bg:#ffffff;
-      --text:#111111;
-      --muted:#666666;
-      --card:#ffffff;
-      --border:#dddddd;
-      --thead:#f5f5f5;
-      --tableLine:#dddddd;
-      --btnBg:#efefef;
-      --btnText:#111111;
+<style>
+/* ================== THEME VARIABLES ================== */
+:root{
+  --bg:#ffffff;
+  --text:#111;
+  --muted:#666;
+  --card:#ffffff;
+  --border:#dddddd;
+  --thead:#f5f5f5;
+  --row:#ffffff;
+  --rowBorder:#e5e5e5;
+  --btn:#efefef;
 
-      --scoreUnder:#d1fae5;
-      --scoreEven:#f3f4f6;
-      --scoreOver:#fee2e2;
+  --under:#d1fae5;
+  --even:#f3f4f6;
+  --over:#fee2e2;
 
-      --totalRow:#eef2ff;
+  --accent:#9db775;
+  --accentSoft:#eaf2de;
 
-      --accent:#9db775;
-      --accentSoft:#eaf2de;
+  --totalRow:#eef2ff;
 
-      --activeRow: var(--accentSoft);
-      --activeBorder: var(--accent);
+  --progressTrack:#e5e7eb;
+  --progressFill:var(--accent);
+}
 
-      --rowBg:#ffffff;
-      --rowBorder:#e7e7e7;
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b0d10;
+    --text:#e8e8e8;
+    --muted:#a7a7a7;
+    --card:#11151b;
+    --border:#2a2f38;
+    --thead:#171c24;
+    --row:#11151b;
+    --rowBorder:#2a2f38;
+    --btn:#1b2230;
 
-      --progressTrack:#e9e9ef;
-      --progressFill: var(--accent);
+    --under:#0f3b2b;
+    --even:#202634;
+    --over:#3b1416;
 
-      --toastBg: rgba(20,20,22,0.92);
-      --toastText: #fff;
-    }
+    --accent:#a8c986;
+    --accentSoft:#172114;
 
-    @media (prefers-color-scheme: dark){
-      :root{
-        --bg:#0b0d10;
-        --text:#e8e8e8;
-        --muted:#a7a7a7;
-        --card:#11151b;
-        --border:#2a2f38;
-        --thead:#171c24;
-        --tableLine:#2a2f38;
-        --btnBg:#1b2230;
-        --btnText:#e8e8e8;
+    --totalRow:#1b2341;
 
-        --scoreUnder:#0f3b2b;
-        --scoreEven:#202634;
-        --scoreOver:#3b1416;
+    --progressTrack:#202634;
+  }
+}
 
-        --totalRow:#1b2341;
+html[data-theme="light"]{ color-scheme: light; }
+html[data-theme="dark"]{ color-scheme: dark; }
 
-        --accent:#a8c986;
-        --accentSoft:#172114;
+body{
+  margin:16px;
+  font-family:-apple-system, system-ui, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-        --activeRow: rgba(168,201,134,0.18);
-        --activeBorder: var(--accent);
+/* ================== HEADER ================== */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
 
-        --rowBg:#11151b;
-        --rowBorder:#2a2f38;
+.headerLeft{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
 
-        --progressTrack:#202634;
-        --progressFill: var(--accent);
-      }
-    }
+.logoImg{
+  width:56px;
+  height:56px;
+  border:none;
+  background:none;
+}
 
-    html[data-theme="light"]{
-      --bg:#ffffff; --text:#111111; --muted:#666666; --card:#ffffff;
-      --border:#dddddd; --thead:#f5f5f5; --tableLine:#dddddd;
-      --btnBg:#efefef; --btnText:#111111;
-      --scoreUnder:#d1fae5; --scoreEven:#f3f4f6; --scoreOver:#fee2e2;
-      --totalRow:#eef2ff;
-      --accent:#9db775; --accentSoft:#eaf2de;
-      --activeRow: var(--accentSoft);
-      --activeBorder: var(--accent);
-      --rowBg:#ffffff; --rowBorder:#e7e7e7;
-      --progressTrack:#e9e9ef; --progressFill: var(--accent);
-    }
+h1{
+  margin:0;
+  font-size:26px;
+}
+.subtitle{
+  font-size:12px;
+  color:var(--muted);
+}
 
-    html[data-theme="dark"]{
-      --bg:#0b0d10; --text:#e8e8e8; --muted:#a7a7a7; --card:#11151b;
-      --border:#2a2f38; --thead:#171c24; --tableLine:#2a2f38;
-      --btnBg:#1b2230; --btnText:#e8e8e8;
-      --scoreUnder:#0f3b2b; --scoreEven:#202634; --scoreOver:#3b1416;
-      --totalRow:#1b2341;
-      --accent:#a8c986; --accentSoft:#172114;
-      --activeRow: rgba(168,201,134,0.18);
-      --activeBorder: var(--accent);
-      --rowBg:#11151b; --rowBorder:#2a2f38;
-      --progressTrack:#202634; --progressFill: var(--accent);
-    }
+.themeToggle{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.themeToggle img{
+  width:22px;
+  height:22px;
+}
 
-    body{
-      font-family:-apple-system,system-ui,sans-serif;
-      margin:16px;
-      line-height:1.3;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .muted{color:var(--muted);font-size:12px}
+/* ================== INFO CARDS ================== */
+.infoGrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+.infoCard{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+}
+.infoLabel{ font-size:12px; color:var(--muted); }
+.infoValue{ font-size:16px; font-weight:800; }
 
-    button { transition: transform 0.08s ease, background-color 0.15s ease, border-color 0.15s ease; }
-    button:active { transform: scale(0.98); }
+/* ================== LEGEND ================== */
+.legend{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+  font-size:12px;
+}
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:4px;
+  display:inline-block;
+  border:1px solid var(--border);
+}
+.dot-under{ background:var(--under); }
+.dot-even{ background:var(--even); }
+.dot-over{ background:var(--over); }
 
-    .header{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .headerLeft{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex:1 1 auto;
-      min-width:0;
-    }
-    .brand h1{margin:0;font-size:26px}
-    .subtitle{margin-top:3px}
+/* ================== BUTTONS ================== */
+button{
+  width:100%;
+  padding:12px;
+  font-size:16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--btn);
+  margin-top:10px;
+  transition:transform .08s ease;
+}
+button:active{ transform:scale(.98); }
 
-    .logoImg{
-      width:58px;height:58px;border-radius:14px;object-fit:contain;
-      border:none !important; outline:none !important; box-shadow:none !important;
-      background:transparent;
-      display:block;
-      flex:0 0 auto;
-    }
+.btnRow{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
 
-    .themeToggleBtn{
-      width:44px;height:44px;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:var(--card);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0;
-      flex:0 0 auto;
-    }
-    .themeToggleBtn img{ width:22px;height:22px; display:block; }
+/* ================== PLAYER NAMES ================== */
+.nameBlock{
+  margin-top:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px;
+}
+.nameBlock input{
+  width:100%;
+  padding:10px;
+  font-size:16px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+}
 
-    .infoGrid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-    .infoCard{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      background:var(--card);
-      text-align:left;
-    }
-    .infoLabel{font-size:12px;color:var(--muted);margin:0}
-    .infoValue{font-size:16px;font-weight:800;margin:3px 0 0 0}
+/* ================== SCORECARD ================== */
+.card{
+  margin-top:14px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card);
+  padding:12px;
+}
 
-    .legend{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .swatch{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-    .dot{
-      width:12px;height:12px;
-      box-sizing:border-box;
-      border-radius:4px;
-      border:1px solid var(--border);
-      display:inline-block;
-      flex:0 0 12px;
-    }
-    .dot-under{background:var(--scoreUnder)}
-    .dot-even{background:var(--scoreEven)}
-    .dot-over{background:var(--scoreOver)}
+.scoreSticky{
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:var(--card);
+  margin:-12px -12px 10px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  border-radius:12px 12px 0 0;
+}
 
-    button{
-      font-size:16px;
-      padding:12px 14px;
-      width:100%;
-      background:var(--btnBg);
-      color:var(--btnText);
-      border:1px solid var(--border);
-      border-radius:12px;
-      margin-top:10px;
-    }
+.progressTrack{
+  height:10px;
+  background:var(--progressTrack);
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid var(--border);
+}
+.progressFill{
+  height:100%;
+  width:0%;
+  background:var(--progressFill);
+  transition:width .25s ease;
+}
+.progressRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+.progressText{
+  font-size:12px;
+  color:var(--muted);
+  min-width:70px;
+  text-align:right;
+}
 
-    .btnRowTwo{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-    .btnSecondary{
-      font-size:14px;
-      padding:11px 12px;
-      background:transparent;
-      margin-top:0;
-    }
+/* ===== COLUMN HEADER (LOCKED WIDTHS) ===== */
+.colHeader{
+  display:grid;
+  grid-template-columns:10% 44% 10% 18% 18%;
+  padding:10px 8px;
+  background:var(--thead);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-weight:800;
+  text-align:center;
+}
 
-    .card{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      margin-top:14px;
-      background:var(--card);
-    }
+/* ================== TABLE ================== */
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 10px;
+}
 
-    .nameBlock{
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:10px;
-      margin-top:12px;
-      background:var(--card);
-    }
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .grow{flex:1 1 160px}
-    input[type=text]{
-      font-size:16px;
-      padding:10px;
-      width:100%;
-      box-sizing:border-box;
-      background:transparent;
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-    }
+colgroup col:nth-child(1){ width:10%; }
+colgroup col:nth-child(2){ width:44%; }
+colgroup col:nth-child(3){ width:10%; }
+colgroup col:nth-child(4){ width:18%; }
+colgroup col:nth-child(5){ width:18%; }
 
-    table{
-      width:100%;
-      margin-top:10px;
-      border-collapse:separate;
-      border-spacing:0 10px;
-      table-layout:fixed;
-    }
+td, th{
+  padding:10px 8px;
+  text-align:center;
+  white-space:nowrap;
+}
 
-    th,td{
-      padding:10px 8px;
-      text-align:center;
-      vertical-align:middle;
-      overflow:hidden;
-      text-overflow:clip;
-      white-space:nowrap;
-    }
-    .left{text-align:left}
+tbody tr td{
+  background:var(--row);
+  border-top:1px solid var(--rowBorder);
+  border-bottom:1px solid var(--rowBorder);
+}
+tbody tr td:first-child{
+  border-left:1px solid var(--rowBorder);
+  border-radius:14px 0 0 14px;
+}
+tbody tr td:last-child{
+  border-right:1px solid var(--rowBorder);
+  border-radius:0 14px 14px 0;
+}
 
-    /* Sticky header INSIDE scorecard: progress + column headers */
-    .scoreSticky{
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      margin: -12px -12px 10px -12px;
-      padding: 10px 12px 10px 12px;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      box-shadow: 0 10px 18px rgba(0,0,0,0.10);
-    }
+/* ================== GOAL PIPS ================== */
+.goalTag{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:46px;
+  height:16px;
+  padding:0 6px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+}
+.goal-tee{ background:#111; color:#fff; }
+.goal-white{ background:#fff; color:#111; border:1px solid #ddd; }
+.goal-orange{ background:#ff8a00; }
+.goal-blue{ background:#1f6feb; color:#fff; }
+.goal-pink{ background:#ff5aa5; }
+.goal-red{ background:#e11d48; color:#fff; }
+.goal-green{ background:#16a34a; color:#fff; }
+.goal-yellow{ background:#ffd400; }
 
-    .progressWrap{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin:0 0 10px 0;
-    }
-    .progressTrack{
-      flex:1 1 auto;
-      height:10px;
-      border-radius:999px;
-      background:var(--progressTrack);
-      overflow:hidden;
-      border:1px solid var(--border);
-    }
-    .progressFill{
-      height:100%;
-      width:0%;
-      background:var(--progressFill);
-      transition: width 0.25s ease;
-    }
-    .progressText{
-      font-size:12px;
-      color:var(--muted);
-      min-width:84px;
-      text-align:right;
-    }
+.throwWrap{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.arrow{ font-size:12px; color:var(--muted); }
 
-    .colHeader{
-      display:grid;
-      grid-template-columns:10% 44% 10% 18% 18%;
-      align-items:center;
-      background: var(--thead);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:8px 8px;
-      font-weight:800;
-    }
-    .colHeader > div{
-      text-align:center;
-      overflow:hidden;
-      text-overflow:clip;
-      white-space:nowrap;
-    }
+/* ================== SELECT ================== */
+select{
+  font-size:15px;
+  padding:7px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+}
+.score-under{ background:var(--under); }
+.score-even{ background:var(--even); }
+.score-over{ background:var(--over); }
 
-    tbody tr.holeRow td{
-      background:var(--rowBg);
-      border-top:1px solid var(--rowBorder);
-      border-bottom:1px solid var(--rowBorder);
-    }
-    tbody tr.holeRow td:first-child{
-      border-left:1px solid var(--rowBorder);
-      border-top-left-radius:14px;
-      border-bottom-left-radius:14px;
-    }
-    tbody tr.holeRow td:last-child{
-      border-right:1px solid var(--rowBorder);
-      border-top-right-radius:14px;
-      border-bottom-right-radius:14px;
-    }
+/* ================== TOTAL ROW ================== */
+tfoot td, tfoot th{
+  background:var(--totalRow);
+  font-weight:800;
+}
 
-    tr.holeRow{ transition: background-color 0.2s ease, box-shadow 0.2s ease; }
-    tr.holeRow.active td{ background:var(--activeRow); }
-    tr.holeRow.active td:first-child{
-      box-shadow: inset 4px 0 0 0 var(--activeBorder);
-    }
-
-    @keyframes pulseDone {
-      0%   { transform: scale(1); }
-      35%  { transform: scale(1.01); }
-      100% { transform: scale(1); }
-    }
-    tr.holeRow.pulse td{ animation: pulseDone 0.22s ease; }
-
-    .goalTag{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height:16px;
-      min-width:46px;
-      padding:0 6px;
-      border-radius:999px;
-      font-size:10px;
-      box-sizing:border-box;
-      line-height:1;
-      white-space:nowrap;
-      font-weight:800;
-      text-transform:capitalize;
-    }
-    .goal-white{background:#ffffff;color:#111;border:1px solid #ddd}
-    .goal-orange{background:#ff8a00;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-blue{background:#1f6feb;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-pink{background:#ff5aa5;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-red{background:#e11d48;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-green{background:#16a34a;color:#fff;border:1px solid rgba(255,255,255,0.12)}
-    .goal-yellow{background:#ffd400;color:#111;border:1px solid rgba(0,0,0,0.08)}
-    .goal-tee{background:#111;color:#fff;border:1px solid #111}
-
-    .twoPip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      max-width:100%;
-    }
-    .arrow{
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-      flex:0 0 auto;
-    }
-
-    select{
-      font-size:15px;
-      padding:7px 8px;
-      background:transparent;
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      min-width:58px;
-      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-    }
-    .score-under{background:var(--scoreUnder)}
-    .score-even{background:var(--scoreEven)}
-    .score-over{background:var(--scoreOver)}
-
-    .pill{border-radius:999px;padding:2px 8px;font-size:12px;display:inline-block}
-    .pill-under{background:var(--scoreUnder)}
-    .pill-even{background:var(--scoreEven)}
-    .pill-over{background:var(--scoreOver)}
-
-    .sumCell{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:3px;
-      line-height:1.1;
-    }
-    .sumDiff{
-      font-size:18px;
-      font-weight:900;
-      padding:2px 10px;
-      border-radius:999px;
-      display:inline-block;
-      min-width:42px;
-    }
-    .sumThrows{
-      font-size:11px;
-      color:var(--muted);
-    }
-
-    tfoot tr.totalRow th,
-    tfoot tr.totalRow td{
-      background:var(--totalRow);
-      border-top:1px solid var(--rowBorder);
-      border-bottom:1px solid var(--rowBorder);
-    }
-
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:18px;
-      transform:translateX(-50%);
-      background:var(--toastBg);
-      color:var(--toastText);
-      padding:10px 12px;
-      border-radius:12px;
-      font-size:14px;
-      max-width:92vw;
-      opacity:0;
-      pointer-events:none;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index:9999;
-    }
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(-2px);
-    }
-  </style>
+/* ================== TOAST ================== */
+.toast{
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  background:rgba(20,20,22,.92);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:12px;
+  opacity:0;
+  transition:.2s;
+}
+.toast.show{ opacity:1; }
+</style>
 </head>
 
 <body>
 
-  <div class="header">
-    <div class="headerLeft">
-      <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png" alt="Bridges Park logo">
-      <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" alt="Bridges Park logo (dark)" style="display:none;">
-      <div class="brand">
-        <h1>Bridges Park</h1>
-        <div class="muted subtitle">Disc Golf • Course Generator + Scorecard</div>
-      </div>
-    </div>
-
-    <button id="themeToggle" class="themeToggleBtn" aria-label="Toggle dark mode">
-      <img id="themeIcon" src="moon.png" alt="Theme icon">
-    </button>
-  </div>
-
-  <div class="infoGrid">
-    <div class="infoCard">
-      <p class="infoLabel">Holes</p>
-      <p class="infoValue">18</p>
-    </div>
-    <div class="infoCard">
-      <p class="infoLabel">Par (Front / Back / Total)</p>
-      <p class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></p>
+<!-- HEADER -->
+<div class="header">
+  <div class="headerLeft">
+    <img id="logoLight" class="logoImg" src="C542D141-EA75-4C1C-9345-50C8E08D9EE5.png">
+    <img id="logoDark" class="logoImg" src="B19327BB-FD35-4A0C-8F34-56CC91793687.png" style="display:none;">
+    <div>
+      <h1>Bridges Park</h1>
+      <div class="subtitle">Disc Golf • Course Generator + Scorecard</div>
     </div>
   </div>
+  <button id="themeToggle" class="themeToggle">
+    <img id="themeIcon" src="moon.png">
+  </button>
+</div>
 
-  <div class="legend">
-    <div class="swatch"><span class="dot dot-under"></span> Under</div>
-    <div class="swatch"><span class="dot dot-even"></span> Even</div>
-    <div class="swatch"><span class="dot dot-over"></span> Over</div>
+<!-- INFO -->
+<div class="infoGrid">
+  <div class="infoCard"><div class="infoLabel">Holes</div><div class="infoValue">18</div></div>
+  <div class="infoCard">
+    <div class="infoLabel">Par (F / B / T)</div>
+    <div class="infoValue"><span id="parFrontTop">–</span> / <span id="parBackTop">–</span> / <span id="parTotalTop">–</span></div>
   </div>
+</div>
 
-  <button id="btnGen">Generate New Course</button>
+<!-- LEGEND -->
+<div class="legend">
+  <div><span class="dot dot-under"></span> Under</div>
+  <div><span class="dot dot-even"></span> Even</div>
+  <div><span class="dot dot-over"></span> Over</div>
+</div>
 
-  <div class="btnRowTwo">
-    <button id="btnClear" class="btnSecondary">Clear Scores</button>
-    <button id="btnCopyLink" class="btnSecondary">Copy Share Link</button>
-  </div>
+<button id="btnGen">Generate New Course</button>
 
-  <div class="nameBlock">
-    <div class="row">
-      <div class="grow"><input id="n1" type="text" placeholder="Player 1 name"></div>
-      <div class="grow"><input id="n2" type="text" placeholder="Player 2 name"></div>
+<div class="btnRow">
+  <button id="btnClear">Clear Scores</button>
+  <button id="btnCopyLink">Copy Share Link</button>
+</div>
+
+<div class="nameBlock">
+  <input id="n1" placeholder="Player 1 name">
+  <input id="n2" placeholder="Player 2 name" style="margin-top:8px">
+</div>
+
+<!-- SCORECARD -->
+<div class="card">
+  <div class="scoreSticky">
+    <div class="progressRow">
+      <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
+      <div id="progressText" class="progressText">0 / 18</div>
+    </div>
+    <div class="colHeader">
+      <div>#</div><div>Throw</div><div>Par</div><div>P1</div><div>P2</div>
     </div>
   </div>
 
-  <div class="card">
-    <h2 style="margin:0 0 6px 0;">Scorecard</h2>
+  <table>
+    <colgroup>
+      <col><col><col><col><col>
+    </colgroup>
+    <tbody id="mainBody"></tbody>
+    <tfoot>
+      <tr>
+        <th colspan="2" style="text-align:left">Back 9</th>
+        <th id="parBackCell">–</th>
+        <th id="bd1">0</th>
+        <th id="bd2">0</th>
+      </tr>
+      <tr>
+        <th colspan="2" style="text-align:left">Total</th>
+        <th id="parTotalCell">–</th>
+        <th id="d1">0</th>
+        <th id="d2">0</th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
 
-    <div class="scoreSticky">
-      <div class="progressWrap">
-        <div class="progressTrack"><div id="progressFill" class="progressFill"></div></div>
-        <div id="progressText" class="progressText">0 / 18</div>
-      </div>
-      <div class="colHeader" aria-hidden="true">
-        <div>#</div>
-        <div>Throw</div>
-        <div>Par</div>
-        <div id="p1HeadSticky">P1</div>
-        <div id="p2HeadSticky">P2</div>
-      </div>
-    </div>
+<div id="toast" class="toast">Saved</div>
 
-    <table>
-      <thead style="display:none;">
-        <tr>
-          <th style="width:10%;">#</th>
-          <th style="width:44%;">Throw</th>
-          <th style="width:10%;">Par</th>
-          <th style="width:18%;">P1</th>
-          <th style="width:18%;">P2</th>
-        </tr>
-      </thead>
-
-      <tbody id="mainBody"></tbody>
-
-      <tfoot>
-        <tr id="backRow">
-          <th colspan="2" class="left">Back 9</th>
-          <th id="parBackCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="bd1" class="sumDiff pill pill-even">0</span>
-              <span id="b1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="bd2" class="sumDiff pill pill-even">0</span>
-              <span id="b2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
-        <tr class="totalRow">
-          <th colspan="2" class="left">Total</th>
-          <th id="parTotalCell">–</th>
-          <th>
-            <div class="sumCell">
-              <span id="d1" class="sumDiff pill pill-even">0</span>
-              <span id="t1" class="sumThrows">0</span>
-            </div>
-          </th>
-          <th>
-            <div class="sumCell">
-              <span id="d2" class="sumDiff pill pill-even">0</span>
-              <span id="t2" class="sumThrows">0</span>
-            </div>
-          </th>
-        </tr>
-      </tfoot>
-    </table>
-  </div>
-
-  <div id="toast" class="toast">Saved</div>
-
-  <!-- Cache buster: bump v=1 to v=2 when app.js changes -->
-  <script src="app.js?v=1"></script>
+<script src="app.js?v=1"></script>
 </body>
 </html>
